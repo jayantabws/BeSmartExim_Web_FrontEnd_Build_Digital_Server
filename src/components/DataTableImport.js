@@ -1220,7 +1220,7 @@ export default function DataTableImport(props) {
                                     icon: 'info',
                                 })
                             }}> */}
-                            {/* <Dropdown.Item >
+                             <Dropdown.Item >
                                 <Link to={{
                                     pathname: "/indepthAnalysis",
                                     state: {
@@ -1228,7 +1228,7 @@ export default function DataTableImport(props) {
                                         importerForExport: props.importerForExport, exporterForImport: props.exporterForImport
                                     },
                                 }}> In-depth Analysis </Link>
-                            </Dropdown.Item> */}
+                            </Dropdown.Item> 
                         </DropdownButton></li>
                 </ul>
             </div>
