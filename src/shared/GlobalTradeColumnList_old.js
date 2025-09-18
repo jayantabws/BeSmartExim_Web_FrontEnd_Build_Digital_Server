@@ -1,0 +1,143 @@
+
+export const columnListImportGlobal = [
+    { key: 'ctry_name', label: 'Source Country', width: 150 },
+    // { key: 'id', label: 'Sl', width: 100 },
+	{ key: 'be_date', label: 'Date', width: 100 },
+	{ key: 'hs_code', label: 'HSCODE', width: 100 },
+    { key: 'product_description', label: 'Product Description', width: 500 },
+    { key: 'importer_name', label: 'Importer Name', width: 300 },
+	// { key: 'importer_address', label: 'Importer Address', width: 300 },
+    { key: 'exporter_name', label: 'Exporter Name', width: 300 },
+	// { key: 'exporter_address', label: 'Exporter Address', width: 300 },
+    { key: 'notify_party_name', label: 'Notify Party Name', width: 300 },	
+	// { key: 'notify_party_address', label: 'Notify Party Address', width: 300 },
+    { key: 'origin_country', label: 'Country of Origin', width: 200 },
+    { key: 'std_quantity', label: 'Std Quantity', width: 150 },
+    { key: 'std_unit', label: 'Std Unit', width: 150 },
+	{ key: 'quantity', label: 'Quantity', width: 150 },
+    { key: 'unit', label: 'UNIT', width: 150 },
+    { key: 'std_unit_rate_usd', label: 'Std. Unit Price $', width: 200 },
+    { key: 'unit_price_usd', label: 'Unit Price $', width: 200 },
+	{ key: 'total_value_usd', label: 'Total Value $', width: 200 },
+    { key: 'origin_port', label: 'Origin Port', width: 200 },
+	{ key: 'destination_port', label: 'Destination Port', width: 200 },
+    { key: 'mode_of_transport', label: 'Mode of Transport', width: 200 },
+    { key: 'incoterm', label: 'Incoterm', width: 200 },
+	{ key: 'month', label: 'Month', width: 100 },
+    { key: 'hs_code2', label: 'HS Code2', width: 100 },
+    { key: 'hs_code4', label: 'HS Code4', width: 100 },
+	{ key: 'hs_description', label: 'HS Description', width: 400 },
+    { key: 'gross_weight', label: 'Gross Weight', width: 150 },
+    { key: 'gross_weight_unit', label: 'Gross Weight Unit', width: 150 }, 
+    
+];
+
+
+export const columnListImportDownloadGlobal = [
+    { key: 'ctry_name', label: 'Source Country', width: 150 },
+    { key: 'id', label: 'Sl', width: 100 },
+	{ key: 'be_date', label: 'Date', width: 100 },
+	{ key: 'hs_code', label: 'HSCODE', width: 100 },
+    { key: 'product_description', label: 'Product Description', width: 500 },
+    { key: 'importer_name', label: 'Importer Name', width: 300 },
+	{ key: 'importer_address', label: 'Importer Address', width: 300 },
+    { key: 'exporter_name', label: 'Exporter Name', width: 300 },
+	{ key: 'exporter_address', label: 'Exporter Address', width: 300 },
+    { key: 'notify_party_name', label: 'Notify Party Name', width: 300 },	
+	{ key: 'notify_party_address', label: 'Notify Party Address', width: 300 },
+    { key: 'origin_country', label: 'Country of Origin', width: 200 },
+    { key: 'std_quantity', label: 'Std Quantity', width: 150 },
+    { key: 'std_unit', label: 'Std Unit', width: 150 },
+	{ key: 'quantity', label: 'Quantity', width: 150 },
+    { key: 'unit', label: 'UNIT', width: 150 },
+    { key: 'std_unit_rate_usd', label: 'Std. Unit Price $', width: 200 },
+    { key: 'unit_price_usd', label: 'Unit Price $', width: 200 },
+	{ key: 'total_value_usd', label: 'Total Value $', width: 200 },
+    { key: 'origin_port', label: 'Origin Port', width: 200 },
+	{ key: 'destination_port', label: 'Destination Port', width: 200 },
+    { key: 'mode_of_transport', label: 'Mode of Transport', width: 200 },
+    { key: 'incoterm', label: 'Incoterm', width: 200 },
+	{ key: 'month', label: 'Month', width: 100 },
+    { key: 'hs_code2', label: 'HS Code2', width: 100 },
+    { key: 'hs_code4', label: 'HS Code4', width: 100 },
+	{ key: 'hs_description', label: 'HS Description', width: 400 },
+    { key: 'gross_weight', label: 'Gross Weight', width: 150 },
+    { key: 'gross_weight_unit', label: 'Gross Weight Unit', width: 150 }, 
+];
+
+
+export const columnListExportGlobal = [
+    
+    { key: 'ctry_name', label: 'Source Country', width: 150 },
+    // { key: 'id', label: 'Sl', width: 100 },
+	{ key: 'date', label: 'Date', width: 150 },
+	{ key: 'hs_code', label: 'HSCODE', width: 150 },
+    { key: 'product_description', label: 'Product Description', width: 500 },
+	{ key: 'exporter_name', label: 'Exporter Name', width: 300 },
+	// { key: 'exporter_address', label: 'Exporter Address', width: 300 },
+    { key: 'recepient_name', label: 'Recepient Name', width: 300 },
+	// { key: 'recepient_address', label: 'Recepient Address', width: 300 },
+    { key: 'notify_party_name', label: 'Notify Party Name', width: 300 },
+    // { key: 'notify_party_address', label: 'Notify Party Address', width: 300 },
+    { key: 'destination_country', label: 'Destination Country', width: 150 },
+    { key: 'std_quantity', label: 'Std Quantity', width: 200 },
+    { key: 'std_unit', label: 'Std Unit', width: 200 },
+    { key: 'quantity', label: 'Quantity', width: 150 },
+	{ key: 'unit', label: 'Unit', width: 150 },
+    { key: 'std_unit_rate_usd', label: 'Std. Unit Price $', width: 200 },
+    { key: 'unit_price_usd', label: 'Unit Price $', width: 200 },
+    { key: 'total_value_usd', label: 'Total Value $', width: 200 }, 
+	{ key: 'destination_port', label: 'Destination Port', width: 150 },
+    { key: 'origin_port', label: 'Origin Port', width: 200 },
+    { key: 'mode_of_transport', label: 'Mode of Transport', width: 200 },
+    { key: 'incoterm', label: 'Incoterm', width: 200 },
+    { key: 'month', label: 'Month', width: 200 },
+	{ key: 'hs_code2', label: 'HS Code2', width: 150 },
+    { key: 'hs_code4', label: 'HS Code4', width: 150 },
+    { key: 'hs_description', label: 'HS Description', width: 200 },
+    { key: 'gross_weight', label: 'Gross Weight', width: 200 },
+    { key: 'gross_weight_unit', label: 'Gross Weight Unit', width: 200 },
+
+];
+
+
+export const columnListExportDownloadGlobal = [
+    
+        
+    { key: 'ctry_name', label: 'Source Country', width: 150 },
+    { key: 'id', label: 'Sl', width: 100 },
+	{ key: 'date', label: 'Date', width: 150 },
+	{ key: 'hs_code', label: 'HSCODE', width: 150 },
+    { key: 'product_description', label: 'Product Description', width: 500 },
+	{ key: 'exporter_name', label: 'Exporter Name', width: 300 },
+	{ key: 'exporter_address', label: 'Exporter Address', width: 300 },
+    { key: 'recepient_name', label: 'Recepient Name', width: 300 },
+	{ key: 'recepient_address', label: 'Recepient Address', width: 300 },
+    { key: 'notify_party_name', label: 'Notify Party Name', width: 300 },
+    { key: 'notify_party_address', label: 'Notify Party Address', width: 300 },
+    { key: 'destination_country', label: 'Destination Country', width: 150 },
+    { key: 'std_quantity', label: 'Std Quantity', width: 200 },
+    { key: 'std_unit', label: 'Std Unit', width: 200 },
+    { key: 'quantity', label: 'Quantity', width: 150 },
+	{ key: 'unit', label: 'Unit', width: 150 },
+    { key: 'std_unit_rate_usd', label: 'Std. Unit Price $', width: 200 },
+    { key: 'unit_price_usd', label: 'Unit Price $', width: 200 },
+    { key: 'total_value_usd', label: 'Total Value $', width: 200 }, 
+	{ key: 'destination_port', label: 'Destination Port', width: 150 },
+    { key: 'origin_port', label: 'Origin Port', width: 200 },
+    { key: 'mode_of_transport', label: 'Mode of Transport', width: 200 },
+    { key: 'incoterm', label: 'Incoterm', width: 200 },
+    { key: 'month', label: 'Month', width: 200 },
+	{ key: 'hs_code2', label: 'HS Code2', width: 150 },
+    { key: 'hs_code4', label: 'HS Code4', width: 150 },
+    { key: 'hs_description', label: 'HS Description', width: 200 },
+    { key: 'gross_weight', label: 'Gross Weight', width: 200 },
+    { key: 'gross_weight_unit', label: 'Gross Weight Unit', width: 200 },
+
+];
+
+
+
+
+
+

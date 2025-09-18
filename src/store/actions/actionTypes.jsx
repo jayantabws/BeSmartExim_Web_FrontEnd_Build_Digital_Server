@@ -1,0 +1,21 @@
+// export const AUTH_START = 'AUTH_START';
+// export const AUTH_SUCCESS = 'AUTH_SUCCESS';
+// export const AUTH_FAIL = 'AUTH_FAIL';
+// export const AUTH_LOGOUT = 'AUTH_LOGOUT';
+export const LOADER_START = 'LOADER_START';
+export const LOADER_STOP = 'LOADER_STOP';
+export const SUBSCRIPTION_COUNT_UPDATE = 'DOWNLOAD_COUNT_UPDATE';
+export const DOWNLOAD_ARRAY_UPDATE = 'DOWNLOAD_ARRAY_UPDATE';
+export const COUNTRY_LIST = 'COUNTRY_LIST';
+export const DATA_ACCESS_DATE = 'DATA_ACCESS_DATE';
+export const DOWNLOAD_COUNT_SUBUSER = 'DOWNLOAD_COUNT_SUBUSER';
+export const UPLINE_ID = 'UPLINE_ID';
+export const USER_LOGOUT = 'USER_LOGOUT';
+export const MAX_DOWNLOAD = 'MAX_DOWNLOAD';
+export const SET_SEARCH_QUERY = 'SET_SEARCH_QUERY';
+
+
+
+
+
+

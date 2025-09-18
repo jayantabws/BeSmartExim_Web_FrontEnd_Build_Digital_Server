@@ -1,0 +1,175 @@
+.market-trade input {
+  border: 1px solid #e0e3eb;
+  font-weight: 300;
+}
+.market-trade input:focus {
+  box-shadow: none;
+  border-color: #e0e3eb;
+}
+.market-trade {
+  border: 1px solid #e0e3eb;
+  border-radius: 2px;
+}
+.market-trade .tab-content {
+  height: 358px;
+  overflow-y: auto;
+  padding: 14px;
+}
+
+.market-trade .nav .nav-item .nav-link.active {
+  background: #fff;
+  color: #007bff;
+}
+
+.market-trade .nav .nav-item .nav-link {
+  color: #4a4a4a;
+  padding: 0;
+}
+
+.market-trade .input-group-text {
+  background: #eff2f6;
+  color: #4a4a4a;
+  font-weight: 300;
+}
+
+.market-trade .input-group {
+  margin-bottom: 14px;
+}
+.market-trade .nav-tabs .nav-link.active,
+.market-trade .nav-tabs .nav-link:hover {
+  border-color: transparent;
+  color: #007bff;
+}
+.market-trade .nav-tabs .nav-link {
+  color: #4a4a4a;
+  padding-bottom: 0px;
+  padding-top: 12px;
+}
+.market-trade .nav-tabs {
+  border-bottom: 1px solid transparent;
+}
+.market-trade-list li a {
+  background: #eff2f6;
+  color: #4a4a4a;
+  font-weight: 300;
+  padding: 3px 15px;
+  border-radius: 5px;
+}
+
+.market-trade-list li {
+  display: inline-block;
+  margin-right: 7px;
+  margin-bottom: 7px;
+}
+.market-trade-list li:last-child {
+  margin-right: 0;
+}
+.market-trade-buy .market-trade-list li a:hover {
+  text-decoration: none;
+  background: #26a69a;
+  color: #fff;
+}
+.market-trade-sell .market-trade-list li a:hover {
+  text-decoration: none;
+  background: #ef5350;
+  color: #fff;
+}
+
+.market-trade button.buy,
+.market-trade button.sell {
+  background: #26de81;
+  color: #fff;
+  text-transform: uppercase;
+  padding: 10px;
+  margin-top: 30px;
+  width: 100%;
+  box-shadow: 0px 0px 15px 0px #26de81ad;
+}
+.market-trade button.sell {
+  background: #ff231f;
+  box-shadow: 0px 0px 15px 0px #ff231fad;
+}
+.market-trade p {
+  margin: 20px 0 5px;
+  font-size: 13px;
+  color: #4a4a4a;
+}
+.market-trade p span {
+  float: right;
+}
+
+.market-trade-list {
+  margin-bottom: 23px;
+}
+.market-trade-item {
+  width: 100%;
+}
+
+.market-trade-buy,
+.market-trade-sell {
+  width: 100%;
+}
+
+.market-trade-buy {
+  padding: 0 15px 0 0;
+}
+
+.market-trade-sell {
+  padding: 0 0 0 15px;
+  border-left: 1px solid #e0e3eb;
+}
+
+
+/* ==============================
+   8 = Domains
+   ============================== */
+   .domains { padding:45px 0;}
+   .domains h2 { text-align: center;}
+   .domains p { text-align: center; font-size:13px; }
+
+   .domainsearch { background: #4d4d4d; background: rgba(0, 0, 0, .2); border-radius: 6px; margin-top: 25px; padding: 20px; display: block; }
+.domainsearch .form-control { width: 100%; }
+.domainsearch input[type="text"].form-control { border-bottom-left-radius: 5px; border-bottom-right-radius: 0; border-top-left-radius: 5px; border-top-right-radius: 0; font-size: 18px; height: 55px; padding: 5px 15px; width: 100%; }
+.domainsearch select.form-control { border-radius: 0; font-size: 15px; height: 55px; padding: 5px 15px; width: 100%; }
+.domainsearch button[type="submit"] { background: #007bff; border: 0; border-radius: 0 4px 4px 0; color: #fff; cursor: pointer; float: left; font-size: 16px; font-weight: 900; height: 55px; padding: 8px 6px 6px; text-transform: uppercase; width: 100%; }
+.domainsearch button[type="submit"]:hover { background: #646464; }
+.domainsearch input[type="text"]:focus, .domainsearch select:focus { border: 0; box-shadow: 0 8px 6px -6px #000; }
+.center-block {
+  float: none;
+  display: block;
+  margin-right: auto;
+  margin-left: auto;
+}
+.row.no-gutter { margin:0 auto;}
+.row.no-gutter [class*='col-']:not(:first-child), .row.no-gutter [class*='col-']:not(:last-child) { padding-left: 0; padding-right: 0; }
+.custom-card { margin-top: 56px; border: 0; box-shadow: 0 0px 16px 0 #dcdcdc; margin-bottom: 0; background: #ffc107; }
+.padding15{ padding: 15px; margin-top: 47px; }
+
+.svg-icon.svg-icon-3x i {
+  font-size: 3rem;
+  display: flex;
+}
+.bg-light-warning {
+  background-color: #fff8dd;
+}
+.bg-light-warning i{ color: #ffd73c; }
+.fs-6{ font-weight: 600; font-size: 18px; }
+.rounded-2 {
+  border-radius: 0.475rem;
+}
+.py-8 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+.px-6 {
+  padding-right: 1.5rem;
+  padding-left: 1.5rem;
+}
+.bg-light-danger {
+  background-color: #fff5f8;
+}
+.bg-light-danger i{ color: #dc3545; }
+.bg-light-success {
+  background-color: #e8fff3;
+}
+.bg-light-success i{ color: #28a745; }

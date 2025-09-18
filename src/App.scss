@@ -1,0 +1,73 @@
+// @import 'antd/dist/antd.css';
+@import 'antd/dist/reset.css';
+
+
+@font-face {
+    font-family: "momsTypewriter";
+    src: local("monsTypewriter"),
+        url("./assets/fonts/Moms_typewriter.ttf") format("truetype");
+    font-weight: normal;
+}
+
+.captcha {
+    font-family: "momsTypewriter";
+    background-image: url('./assets/image/captcha.jpg');
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    p {
+        font-size: 1.5rem;
+        font-weight: 500;
+    }
+}
+
+
+/* css class for global loading message to cover screen during axios operations */
+
+.loading-indicator:before {
+    content: 'Loading';
+    background: #000000cc;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.loading-indicator:after {
+    content: '';
+    position: fixed;
+    width: 100%;
+    top: 50%;
+    left: 50%;
+    z-index: 1001;
+    color:white;
+    text-align:center;
+    font-weight:bold;
+    font-size:1.5rem; 
+    border: 7px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 7px solid #6e7275;
+    width: 75px;
+    height: 75px;
+    -webkit-animation: spin 2s linear infinite; /* Safari */
+    animation: spin 2s linear infinite;      
+}
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.prevent-select {
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
+  }

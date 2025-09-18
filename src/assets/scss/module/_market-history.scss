@@ -1,0 +1,82 @@
+.market-history .nav {
+  background: #f5f9fc;
+}
+.market-history .nav-link {
+  color: #4a4a4a;
+  padding: 10px 13px;
+}
+
+.market-history .nav-link.active {
+  color: #007bff;
+  background: transparent;
+}
+
+.market-history thead tr th,
+.market-history tbody tr td {
+  font-weight: 400;
+}
+.market-history tbody {
+  height: 140px;
+  overflow-y: auto;
+  display: block;
+}
+
+.market-history table,
+.market-history tr,
+.market-history td,
+.market-history th {
+  table-layout: fixed;
+}
+.market-history tr {
+  display: inline-table;
+  clear: both;
+  overflow: hidden;
+  width: 100%;
+}
+.market-history {
+  border: 1px solid #e0e3eb;
+  border-radius: 2px;
+}
+.table td{ word-break: break-all; }
+
+.cus-tab tbody {
+  display: block;
+  height: 300px;
+  overflow: auto;
+}
+.cus-tab thead, .cus-tab tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+.cus-tab thead {
+  width: calc( 100% - 1em )/* scrollbar is average 1em/16px width, remove it from thead width */
+}
+.icon-lg {
+  width: 40px;
+  padding: 0;
+  height: 40px;
+  font-size: 20px;
+  line-height: 44px;
+}
+.effect-btn {
+  position: relative;
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+  -ms-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+  border-radius: 30px;
+}
+.effect-btn.btn-primary:hover, .effect-btn.btn-primary:focus, .effect-btn.btn-primary:active:focus, .effect-btn.btn-primary:active {
+  color: var(--primary) !important;
+  background: var(--white) !important;
+}
+
+
+
+
+
+
+
+
