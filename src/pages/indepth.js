@@ -52,9 +52,6 @@ const validateForm = Yup.object().shape({
 });
 
 
-
-
-
 const conditionalRowStyles = [
   {
     when: row => (row.importer_name == "OTHERS" || row.exporter_name == "OTHERS" || row.port_name == "OTHERS" 
@@ -83,15 +80,12 @@ const conditionalRowStyles = [
 ]
 
 
-
-
-
 const Analysis = (props) => {
 
 const search_id = props.location.state ? props.location.state.search_id : null ;
 const importerForExport = props.location.state ? props.location.state.importerForExport : null ;
 const exporterForImport = props.location.state ? props.location.state.exporterForImport : null ;
-  const [active, setActive] = useState("importer");
+
 
 const [tooltipContent, setTooltipContent] = useState("");
 const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 })
@@ -175,14 +169,14 @@ const fetchSearchQuery = () => {
   const [pendingImport, setPendingImport] = useState(true);
   const [pendingExport, setPendingExport] = useState(true);
   const [searchParams, setSearchParams] = useState();
-  const [importerDataList, setImporterDataList] = useState([]); //Usig for data card
+  const [importerDataList, setImporterDataList] = useState([]);
   const [exporterDataList, setExporterDataList] = useState([]);
   const [pendingIndPort, setPendingIndPort] = useState(true);
   const [indianPortDataList, setIndianPortDataList] = useState([]);
   const [pendingForPort, setPendingForPort] = useState(true);
   const [forPortDataList, setForPortDataList] = useState([]);
   const [pendingHSCode, setPendingHSCode] = useState(true);
-  const [hsCodeDataList, setHSCodeDataList] = useState([]); //Usig for data card
+  const [hsCodeDataList, setHSCodeDataList] = useState([]);
   const [pendingCountry, setPendingCountry] = useState(true);
   const [countryDataList, setCountryDataList] = useState([]);
   const [pendingCity, setPendingCity] = useState(true);
@@ -192,7 +186,7 @@ const fetchSearchQuery = () => {
   const [minDate, setMinDate] = useState(new Date());
   const [maxDate, setMaxDate] = useState(new Date());
   const [monthWise, setMonthWiseList] = useState([]);
-//  const [monthWiseDataList, setMonthWiseDataList] = useState([]);
+  const [monthWiseDataList, setMonthWiseDataList] = useState([]);
   const [queryBuilderSearchValue, setQueryBuilderSearchValue] = useState([]);
   const [importerDataLT, setImporterDataLT] = useState([]);
   const [exporterDataLT, setExportertDataLT] = useState([]);
@@ -227,170 +221,7 @@ const fetchSearchQuery = () => {
   const [hsCodeList, setHsCodeList] = useState([]);
   const [hsCodeDataArray, setHsCodeDataArray] = useState([]);
 
-  /*SAMPLE DATA */
 
-  const [showTable, setShowTable] = useState(false);
-
-  // Loading states for each card
-  const [card2Loading, setCard2Loading] = useState(false);
-  const [card3Loading, setCard3Loading] = useState(false);
-  const [card4Loading, setCard4Loading] = useState(false);
-  const [card5Loading, setCard5Loading] = useState(false);
-
-  const [card2Select, setCard2Select] = useState("");
-  const [card3Select, setCard3Select] = useState("");
-  const [card4Select, setCard4Select] = useState("");
-  const [card5Select, setCard5Select] = useState("");
-  
-
-//   const cardData = {
-//   hscode: ["HS1001", "HS1002", "HS1003", "HS1004"],
-//   port: ["Mumbai", "Chennai", "Kolkata", "Delhi"],
-//   country: ["India", "USA", "China", "Brazil"],
-//   importer: ["ABC Corp", "XYZ Ltd", "Global Traders", "ImportX"]
-// };
-
-
-
-/* 18/09/2025 */
-
-// Dummy API data
-/*
-const hsCodeDataList1 = {
-  hscodesList: [
-    { hscode: "1001", shipment_count: 25 },
-    { hscode: "2002", shipment_count: 30 },
-    { hscode: "3003", shipment_count: 15 },
-  ],
-};  */
-// const importerDataList1 = {
-//   importersList: [
-//     { importer_name: "Importer A", shipment_count: 12 },
-//     { importer_name: "Importer B", shipment_count: 20 },
-//   ],
-// };
-// const countryDataList1 = {
-//   countriesList: [
-//     { country_name: "India", shipment_count: 45 },
-//     { country_name: "USA", shipment_count: 18 },
-//     { country_name: "UK", shipment_count: 22 },
-//   ],
-// };
-// const indianPortDataList1 = {
-//   portsList: [
-//     { port_name: "Mumbai", shipment_count: 30 },
-//     { port_name: "Chennai", shipment_count: 20 },
-//   ],
-// };
-
-// Helper: get API data for each card type
-const getCardApiData = (type) => {
-  switch (type) {
-    case "hscode":
-      return hsCodeDataList.hscodesList || [];
-    case "importer":
-      return importerDataList.importersList || [];
-    case "country":
-      return countryDataList.countriesList || [];
-    case "port":
-      return forPortDataList.portsList || [];
-    default:
-      return [];
-  }
-};
-
-// Helper: get label for each card type
-const getCardLabel = (type, item) => {
-  switch (type) {
-    case "hscode":
-      return `${item.hscode} [${item.shipment_count}]`;
-    case "importer":
-      return `${item.importer_name} [${item.shipment_count}]`;
-    case "country":
-      return `${item.country_name} [${item.shipment_count}]`;
-    case "port":
-      return `${item.port_name} [${item.shipment_count}]`;
-    default:
-      return "";
-  }
-};
-
-// Card rendering function
-  const renderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, bodyId, loading) => (
-    <div className="col-lg-2 col-md-3 mb-3">
-      <select
-        className="form-select mb-2 form-control"
-        value={cardSelect}
-        onChange={(e) => {
-          setCardSelect(e.target.value);
-          // Set loading true and fetch data for this card type
-          if (cardIndex === 2) setCard2Loading(true);
-          if (cardIndex === 3) setCard3Loading(true);
-          if (cardIndex === 4) setCard4Loading(true);
-          if (cardIndex === 5) setCard5Loading(true);
-          // Simulate API call (replace with your actual fetch logic)
-          setTimeout(() => {
-            if (cardIndex === 2) setCard2Loading(false);
-            if (cardIndex === 3) setCard3Loading(false);
-            if (cardIndex === 4) setCard4Loading(false);
-            if (cardIndex === 5) setCard5Loading(false);
-          }, 1000);
-        }}
-        id={selectId}
-      >
-        <option value="">Select Variable</option>
-        <option value="hscode">HS Code</option>
-        <option value="port">Port</option>
-        <option value="country">Country</option>
-        <option value="importer">Importer</option>
-      </select>
-      <div className="card shadow-sm border-2">
-        <div
-          className="card-header bg-primary text-white text-center fw-bold"
-          id={`div_title${cardIndex}`}
-        >
-          {cardSelect
-            ? cardSelect.charAt(0).toUpperCase() + cardSelect.slice(1)
-            : cardTitle}
-        </div>
-        <div
-          className="card-body"
-          style={{ height: "300px", overflowY: "auto", padding: "12px" }}
-          id={bodyId}
-        >
-          {loading ? (
-            <div className="" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-              <div className="loader"></div>
-            </div>
-          ) : cardSelect && getCardApiData(cardSelect).length > 0 ? (
-            getCardApiData(cardSelect).map((item, i) => (
-              <div className="form-check mb-2 border-bottom" key={i}>
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id={`card${cardIndex}-${getCardLabel(cardSelect, item)}`}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor={`card${cardIndex}-${getCardLabel(cardSelect, item)}`}
-                  style={{ fontSize: "16px" }}
-                >
-                  {getCardLabel(cardSelect, item)}
-                </label>
-              </div>
-            ))
-          ) : (
-            <div className="text-muted text-center" style={{marginTop: "100px",fontSize: "70px",fontWeight: "bold"}}>+</div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-/*18/09/2025 */
-
-
-
-/*
   const monthWiseColumns = [
     {
       name: "Month Name",
@@ -422,8 +253,6 @@ const getCardLabel = (type, item) => {
       sortable: false
     },
   ];
-    */
-  /*Checking Working 17/09/2025 */
   
   const importerColumns = [
     {
@@ -462,7 +291,7 @@ const getCardLabel = (type, item) => {
       // cell: d => <span>{d.genres.join(", ")}</span>
     }
   ];
-   /*Checking Working 17/09/2025 */
+  
   const exporterColumns = [
     {
       name: "Exporter Name",
@@ -499,7 +328,7 @@ const getCardLabel = (type, item) => {
       sortable: false,
     }
   ];
-  /*Checking Working 17/09/2025 */
+  
   const portColumns = [
     {
       name: "Port Name",
@@ -536,7 +365,6 @@ const getCardLabel = (type, item) => {
       sortable: false,
     }
   ];
-  /*Checking Working 17/09/2025 */
   const hsCodeColumns = [
     {
       name: "HS Code",
@@ -573,7 +401,6 @@ const getCardLabel = (type, item) => {
       sortable: false,
     }
   ];
-  /*Checking Working 17/09/2025 */
   const countryColumns = [
     {
       name: "Country Name",
@@ -610,7 +437,6 @@ const getCardLabel = (type, item) => {
       sortable: false,
     }
   ];
-  /*Checking Working 17/09/2025 */
   const cityColumns = [
     {
       name: "City Name",
@@ -713,7 +539,7 @@ const getCardLabel = (type, item) => {
 
     setSearchParams(params);
     getImporterList(params);
-    //getMonthWiseList(params)
+    getMonthWiseList(params)
     getExporterList(params);
     getIndianPortList(params);
     getForeignPortList(params);
@@ -788,7 +614,7 @@ const getCardLabel = (type, item) => {
         props.loadingStop()
       });
   }
-  /* IMPORTANT  16/09/2025*/
+
   const getHSCode4digitList = (params) => {
     const postData = {
       "searchType": "TRADE",
@@ -889,7 +715,7 @@ const getCardLabel = (type, item) => {
       });
   }
 
-  /* IMPORTANT  16/09/2025*/
+
   const getImporterList = (params) => {
 
     const postData = {
@@ -989,7 +815,7 @@ const getCardLabel = (type, item) => {
         
             data.push(total)
             setImporterDataLT(data)
-        //console.log("importer data list ============= ", data );
+
         setImporterDataList(res.data);
         setPendingImport(false);
       })
@@ -998,7 +824,7 @@ const getCardLabel = (type, item) => {
         setPendingImport(false);
       });
   }
-/*
+
   const getMonthWiseList = (params) => {
     const postData = {
       "searchType": "TRADE",
@@ -1050,7 +876,7 @@ const getCardLabel = (type, item) => {
       .catch(err => {
         // console.log("Err");
       });
-  }  */
+  }
 
   const getTradingCountryList = (params) => {
     props.loadingStart()
@@ -1729,7 +1555,7 @@ const getCardLabel = (type, item) => {
     fetchSearchQuery()
     if (searchParams && searchParams.tradeType) {
       getImporterList(searchParams);
-     // getMonthWiseList(searchParams);
+      getMonthWiseList(searchParams);
       getExporterList(searchParams);
       getIndianPortList(searchParams);
       getForeignPortList(searchParams);
@@ -1743,14 +1569,14 @@ const getCardLabel = (type, item) => {
     }
   }, []);
 
-/*  const monthWiseLabel = () => {
+  const monthWiseLabel = () => {
     let labels = [];
     monthWiseDataList.forEach((item) => {
       labels.push(item.month_name);
     }) 
     return labels;
-  }  */
-  /*const MonthWiseData = () => {
+  }
+  const MonthWiseData = () => {
     let data = [];
     let others = 0;
     monthWiseDataList.forEach((item,index) => {
@@ -1758,9 +1584,9 @@ const getCardLabel = (type, item) => {
     })
     data.push(others)
     return data;
-  }  */
+  }
 
-/*  const importerLabel = () => {
+  const importerLabel = () => {
     let labels = [];
     let tempImporterList = Object.assign(importerDataList)
     tempImporterList.importersList.slice(0,10).forEach((item) => {
@@ -1770,8 +1596,8 @@ const getCardLabel = (type, item) => {
       labels.push("Others")
     }  
     return labels;
-  }  */
-/*  const importerData = () => {
+  }
+  const importerData = () => {
     let data = [];
     let others = 0;
     importerDataList.importersList.forEach((item,index) => {
@@ -1784,9 +1610,9 @@ const getCardLabel = (type, item) => {
     })
     data.push(importerDataList.totalValueUSDTop10)
     return data;
-  }  */
+  }
 
-/*  const importerDataPie = () => {
+  const importerDataPie = () => {
     let data = [];
     let others = 0;
     importerDataList.importersList.forEach((item,index) => {
@@ -1799,10 +1625,10 @@ const getCardLabel = (type, item) => {
     })
     data.push(importerDataList.valueShareTop10)
     return data;
-  }  */
+  }
 
 
-  /*const exporterLabel = () => {
+  const exporterLabel = () => {
 
     let labels = [];
     let tempExporterList = Object.assign(exporterDataList)
@@ -1813,9 +1639,9 @@ const getCardLabel = (type, item) => {
       labels.push("Others")
     }  
     return labels;
-  } */
+  }
 
-  /*const exporterData = () => {
+  const exporterData = () => {
     let data = [];
     let others = 0;
     exporterDataList.exportersList.forEach((item,index) => {
@@ -1828,9 +1654,9 @@ const getCardLabel = (type, item) => {
     })
     data.push(exporterDataList.totalValueUSDTop10)
     return data;
-  }   */
+  }
 
-/*  const exporterDataPie = () => {
+  const exporterDataPie = () => {
     let data = [];
     let others = 0;
     exporterDataList.exportersList.forEach((item,index) => {
@@ -1843,10 +1669,10 @@ const getCardLabel = (type, item) => {
     })
     data.push(exporterDataList.valueShareTop10)
     return data;
-  }  */
+  }
 
 
-/*  const indPortLabel = () => {
+  const indPortLabel = () => {
     let labels = [];
     let tempIndianPortList = Object.assign(indianPortDataList)
     tempIndianPortList.portsList.slice(0,10).forEach((item) => {
@@ -1856,9 +1682,9 @@ const getCardLabel = (type, item) => {
       labels.push("Others")
     }  
     return labels;
-  }  */
+  }
 
-/*  const indPortData = () => {
+  const indPortData = () => {
     let data = [];
     let others = 0;
     indianPortDataList.portsList.forEach((item,index) => {
@@ -1871,9 +1697,9 @@ const getCardLabel = (type, item) => {
     })
     data.push(indianPortDataList.totalValueUSDTop10)
     return data;
-  } */
+  }
 
-/*  const indianPortPie = () => {
+  const indianPortPie = () => {
     let data = [];
     let others = 0;
     indianPortDataList.portsList.forEach((item,index) => {
@@ -1886,9 +1712,9 @@ const getCardLabel = (type, item) => {
     })
     data.push(indianPortDataList.valueShareTop10)
     return data;
-  }  */
+  }
 
-/*  const forPortLabel = () => {
+  const forPortLabel = () => {
     let labels = [];
     let tempForPortList = Object.assign(forPortDataList)
     tempForPortList.portsList.slice(0,10).forEach((item) => {
@@ -1898,9 +1724,9 @@ const getCardLabel = (type, item) => {
       labels.push("Others")
     }   
     return labels;
-  }  */
+  }
 
-/*  const forPortData = () => {
+  const forPortData = () => {
     let data = [];
     let others = 0;
     forPortDataList.portsList.forEach((item,index) => {
@@ -1913,9 +1739,9 @@ const getCardLabel = (type, item) => {
     })
     data.push(forPortDataList.totalValueUSDTop10)
     return data;
-  }  */
+  }
 
-/*  const foreignPortPie = () => {
+  const foreignPortPie = () => {
     let data = [];
     let others = 0;
     forPortDataList.portsList.forEach((item,index) => {
@@ -1928,10 +1754,10 @@ const getCardLabel = (type, item) => {
     })
     data.push(forPortDataList.valueShareTop10)
     return data;
-  }  */
+  }
 
 
-/*  const hsCodeLabel = () => {
+  const hsCodeLabel = () => {
     let labels = [];
     let tempHsCodeList = Object.assign(hsCodeDataList)
     tempHsCodeList.hscodesList.slice(0,10).forEach((item) => {
@@ -1941,9 +1767,9 @@ const getCardLabel = (type, item) => {
       labels.push("Others")
     }  
     return labels;
-  }  */
+  }
 
-/*  const hsCodeData = () => {
+  const hsCodeData = () => {
     let data = [];
     let others = 0;
     hsCodeDataList.hscodesList.forEach((item,index) => {
@@ -1956,8 +1782,8 @@ const getCardLabel = (type, item) => {
     })
     data.push(hsCodeDataList.totalValueUSDTop10)
     return data;
-  }  */
-/*
+  }
+
   const hsCodePie = () => {
     let data = [];
     let others = 0;
@@ -1971,9 +1797,9 @@ const getCardLabel = (type, item) => {
     })
     data.push(hsCodeDataList.valueShareTop10)
     return data;
-  }  */
+  }
 
-/*  const countryLabel = () => {
+  const countryLabel = () => {
     let labels = [];
     let tempCountryList = Object.assign(countryDataList)
     tempCountryList.countriesList.slice(0,10).forEach((item) => {
@@ -1983,9 +1809,9 @@ const getCardLabel = (type, item) => {
       labels.push("Others")
     }  
     return labels;
-  }  */
+  }
 
-/*  const countryData = () => {
+  const countryData = () => {
     let data = [];
     let others = 0;
     countryDataList.countriesList.forEach((item,index) => {
@@ -1998,9 +1824,9 @@ const getCardLabel = (type, item) => {
     })
     data.push(countryDataList.totalValueUSDTop10)
     return data;
-  }   */
+  }
 
-/*  const countryDataPie = () => {
+  const countryDataPie = () => {
     let data = [];
     let others = 0;
     countryDataList.countriesList.forEach((item,index) => {
@@ -2013,10 +1839,10 @@ const getCardLabel = (type, item) => {
     })
     data.push(countryDataList.valueShareTop10)
     return data;
-  }  */
+  }
 
 
-/*  const cityLabel = () => {
+  const cityLabel = () => {
     let labels = [];
     let tempcityList = Object.assign(cityDataList)
     tempcityList.citiesList.slice(0,10).forEach((item) => {
@@ -2026,9 +1852,9 @@ const getCardLabel = (type, item) => {
       labels.push("Others")
     }  
     return labels;
-  }  */
+  }
 
-/*  const cityData = () => {
+  const cityData = () => {
     let data = [];
     let others = 0;
     cityDataList.citiesList.forEach((item,index) => {
@@ -2041,8 +1867,8 @@ const getCardLabel = (type, item) => {
     })
     data.push(cityDataList.totalValueUSDTop10)
     return data;
-  }  */
-/*
+  }
+
   const cityDataPie = () => {
     let data = [];
     let others = 0;
@@ -2056,7 +1882,7 @@ const getCardLabel = (type, item) => {
     })
     data.push(cityDataList.valueShareTop10)
     return data;
-  }  */
+  }
 
   const setMaxMinDate = (text,tradeType) => {
     let tempRow = tradeCountryList.filter((item) => item.shortcode.toLowerCase().includes(text.toLowerCase()))
@@ -2220,9 +2046,121 @@ const getCardLabel = (type, item) => {
     else if(row.hasOwnProperty("port_name") && row.port_name == "OTHERS" && row.country == 'Foreign'){
       handleModal(forPortDataList.portsList,portColumns)
     }
-  }  
+  }
 
- 
+  const resetFilter = (data) => {
+    // setPreviousTotalRecordCount(0)
+    // setIsDownloaded("N")
+    updateFilter(data)
+  }
+
+  const updateFilter = (data) => {
+
+    if (data.portOriginList) {
+      setPortOriginList(data.portOriginList);
+    }
+    if (data.portDestinationList) {
+      setPortDestinationList(data.portDestinationList);
+    }
+    if (data.hsCodeList) {
+      setHsCodeList(data.hsCodeList);
+    }
+    if (data.hsCode4DigitList) {
+      setHsCode4digitList(data.hsCode4DigitList);
+    }
+    if (data.importerList) {
+      setImporterList(data.importerList);
+    }
+    if (data.exporterList) {
+      setExporterList(data.exporterList);
+    }
+    if (data.cityOriginList) {
+      setCityOriginList(data.cityOriginList);
+    }
+    if (data.cityDestinationList) {
+      setCityDestinationList(data.cityDestinationList);
+    }
+    if(data.shipmentModeList){
+      setShipmentModeList(data.shipmentModeList);
+    }
+    if(data.stdUnitList){
+      setStdUnitList(data.stdUnitList);
+    }
+    
+
+    if (searchParams && searchParams.tradeType) {
+      let params = searchParams;
+      params.portOriginList = data.portOriginList;
+      params.portDestinationList = data.portDestinationList;
+      params.hsCodeList = data.hsCodeList;
+      params.importerList = data.importerList;
+      params.exporterList = data.exporterList;
+      params.cityOriginList = data.cityOriginList;
+      params.cityDestinationList = data.cityDestinationList;
+      params.hsCode4DigitList = data.hsCode4DigitList;
+      params.shipmentModeList = data.shipmentModeList;
+      params.stdUnitList = data.stdUnitList;
+      params.searchFlag = false
+
+      if (data.portOriginList) {
+        setPortOriginList(data.portOriginList);
+        params["portOriginList"] = data.portOriginList;
+      }
+      if (data.portDestinationList) {
+        setPortDestinationList(data.portDestinationList);
+        params["portDestinationList"] = data.portDestinationList;
+      }
+      if (data.hsCodeList) {
+        setHsCodeList(data.hsCodeList);
+        params["hsCodeList"] = data.hsCodeList;
+      }
+      if (data.hsCode4DigitList) {
+        setHsCode4digitList(data.hsCode4DigitList);
+        params["hsCode4DigitList"] = data.hsCode4DigitList;
+      }
+      if (data.importerList) {
+        setImporterList(data.importerList);
+        params["importerList"] = data.importerList;
+      }
+      if (data.exporterList) {
+        setExporterList(data.exporterList);
+        params["exporterList"] = data.exporterList;
+      }
+      if (data.cityOriginList) {
+        setCityOriginList(data.cityOriginList);
+        params["cityOriginList"] = data.cityOriginList;
+      }
+      if (data.cityDestinationList) {
+        setCityDestinationList(data.cityDestinationList);
+        params["cityDestinationList"] = data.cityDestinationList;
+      }
+      if (data.shipmentModeList) {
+        setShipmentModeList(data.shipmentModeList);
+        params["shipmentModeList"] = data.shipmentModeList;
+      }
+      if (data.stdUnitList) {
+        setStdUnitList(data.stdUnitList);
+        params["stdUnitList"] = data.stdUnitList;
+      }
+      setSearchParams(params);
+     
+
+      getImporterList(params);
+      getMonthWiseList(params);
+      getExporterList(params);
+      getIndianPortList(params);
+      getForeignPortList(params);
+      getHSCodeList(params);
+      getForeignCountryList(params);
+      getCityList(params);
+      getShipmentModeList(params);
+      getHSCode4digitList(params);
+      getStdUnitList(params);
+
+      
+    }
+    setToggle(false);
+  }
 
   return (
     <>
@@ -2439,239 +2377,754 @@ const getCardLabel = (type, item) => {
           </div>
         </div>
         
-    
-      <div className="row mb-4">
-    <div className="col-12">
-      <h3 className="mb-3">In-Depth Analysis</h3>
-    </div>
-    </div>
-  <div className="row mb-4">
- 
-      {/* Button 1 */}
-      <div className="col-lg-2 col-md-3 mb-3">
-        <button
-          className={`btn w-100 py-3 ${
-            active === "importer" ? "btn-warning" : "btn-primary"
-          }`}
-          onClick={() => setActive("importer")}
-        >
-          Nexus
-        </button>
+        {searchParams && searchParams.tradeType ? (
+          <>
+            <div className="row mb-4">    
+              <div className="col-lg-2 col-md-3 offset-md-1">
+                <div className="card">
+                  <div className="card-body bg-soft-success">
+                    <div className="avatar">
+                      <span className="avatar-title bg-soft-success rounded">
+                        <i className="icon ion-md-filing text-primary font-size-24"></i>
+                      </span>
+                    </div>
+                    <div className="list-in">
+                      <p className="text-muted mt-0 mb-0">Importer</p>
+                      <h4 className="mt-0 mb-0">{importerDataList.importersList && importerDataList.importersList.length}</h4>
+                    </div>
+                  </div>
+                  {pendingImport && (
+                    <div className="loaderBox">
+                      <div className="loader"></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="col-lg-2 col-md-3">
+                <div className="card">
+                  <div className="card-body bg-soft-primary">
+                    <div className="avatar">
+                      <span className="avatar-title bg-soft-primary rounded">
+                        <i className="icon ion-md-business text-primary font-size-24"></i>
+                      </span>
+                    </div>
+                    <div className="list-in">
+                      <p className="text-muted mt-0 mb-0">Exporter</p>
+                      <h4 className="mt-0 mb-0">{exporterDataList.exportersList && exporterDataList.exportersList.length}</h4>
+                    </div>
+                  </div>
+                  {pendingExport && (
+                    <div className="loaderBox">
+                      <div className="loader"></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="col-lg-2 col-md-2">
+                <div className="card">
+                  <div className="card-body bg-soft-primary">
+                    <div className="avatar">
+                      <span className="avatar-title bg-soft-primary rounded">
+                        <i className="icon ion-ios-barcode text-primary font-size-24"></i>
+                      </span>
+                    </div>
+                    <div className="list-in">
+                      <p className="text-muted mt-0 mb-0">&nbsp;&nbsp;&nbsp;HSCODE&nbsp;&nbsp;&nbsp;</p>
+                      <h4 className="mt-0 mb-0">{hsCodeDataList.hscodesList && hsCodeDataList.hscodesList.length}</h4>
+                    </div>
+                  </div>
+                  {pendingHSCode && (
+                    <div className="loaderBox">
+                      <div className="loader"></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="col-lg-2 col-md-3">
+                <div className="card">
+                  <div className="card-body bg-soft-success">
+                    <div className="avatar">
+                      <span className="avatar-title bg-soft-success rounded">
+                        <i className="icon ion-md-flag text-success font-size-24"></i>
+                      </span>
+                    </div>
+                    <div className="list-in">
+                      <p className="text-muted mt-0 mb-0">Foreign Ports</p>
+                      <h4 className="mt-0 mb-0">{forPortDataList.portsList && forPortDataList.portsList.length}</h4>
+                    </div>
+                  </div>
+                  {pendingForPort && (
+                    <div className="loaderBox">
+                      <div className="loader"></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="col-lg-2 col-md-3">
+                <div className="card">
+                  <div className="card-body bg-soft-primary">
+                    <div className="avatar">
+                      <span className="avatar-title bg-soft-primary rounded">
+                        <i className="icon ion-ios-business text-primary font-size-24"></i>
+                      </span>
+                    </div>
+                    <div className="list-in">
+                      <p className="text-muted mt-0 mb-0">Indian Ports</p>
+                      <h4 className="mt-0 mb-0">{indianPortDataList.portsList && indianPortDataList.portsList.length}</h4>
+                    </div>
+                  </div>
+                  {pendingIndPort && (
+                    <div className="loaderBox">
+                      <div className="loader"></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <Draggable>
+                <div class="ad-butt">
+                  <button className="btn btn-primary ad-butt-button" onClick={() => setToggle(!toggle)}><i className="icon ion-md-search text-light font-size-35"></i></button>
+                </div>
+            </Draggable>
+
+            {monthWiseDataList && monthWiseDataList.length > 0 ?
+            <>     
+              <h4>Month Wise Analysis</h4>
+              <div className="row mb-4">
+                <div className="col-md-6">
+                  <DataTable
+                    className="table table-striped table-hover"
+                    columns={monthWiseColumns}
+                    data={monthWiseDataList}
+                    // noHeader
+                    defaultSortField="id"
+                    defaultSortAsc={false}
+                    // pagination
+                    conditionalRowStyles = {conditionalRowStyles}
+                    onRowMouseLeave = {(row, e)=> setTooltipContent("") }
+                    onRowMouseEnter={(row, e) => 
+                      showTooltip(row, e) 
+                    }
+                    onRowClicked = {onDataRowClicked}
+                    dense
+                    highlightOnHover
+                    progressPending={pendingImport}
+                    progressComponent={<Loader />}
+                  />
+                  {tooltipContent && (                  
+                    <span
+                     style={{
+                      position: "fixed",
+                      background: "#000000",
+                      color: "#FFFFFF",
+                      fontSize: "14px",
+                      padding:{
+                        top: "5px",
+                        left: "5px",
+                        right: "5px",
+                        bottom: "5px",
+                      },
+                      top: tooltipPosition.top,
+                      left: tooltipPosition.left,
+                     }}
+                    >
+                       {tooltipContent}
+                    </span>
+
+                  )}
+                </div>
+                <div className="col-md-6">
+                  {!pendingImport ? (
+                    <Tabs defaultIndex={0}>
+                      <TabList>
+                        {/* <Tab>Pie</Tab> */}
+                        <Tab>Bar</Tab>
+                        <Tab>Line</Tab>
+                      </TabList>
+
+                      {/* <TabPanel>
+                        <GraphPI barTitle={'Top 10 importers'} labels={importerLabel()} data={importerDataPie()} />
+                      </TabPanel> */}
+                      <TabPanel>
+                        <GraphBar barTitle={'Month Wise Analysis'} labels={monthWiseLabel()} data={MonthWiseData()} dataLabel="Total value (USD)" colorCode = "245,138,16" xAxixLabel = "Month"/>
+                      </TabPanel>
+                      <TabPanel>
+                        <GraphLine barTitle={'Month Wise Analysis'} labels={monthWiseLabel()} data={MonthWiseData()} colorCode = "245,138,16" xAxixLabel = "Month"/>
+                      </TabPanel>
+                    </Tabs>
+                  ) : (
+                    <div className="loaderBlock">
+                      <div className="loader"></div>
+                    </div>
+                  )}
+                </div>      
+              </div>
+            </> : null }
+            {importerDataList.importersList && importerDataList.importersList.length > 0 ?
+            <>     
+              <h4>Top 10 Importers</h4>
+              <div className="row mb-4">
+                <div className="col-md-6">
+                  {!pendingImport ? (
+                    <Tabs defaultIndex={0}>
+                      <TabList>
+                        <Tab>Pie</Tab>
+                        <Tab>Bar</Tab>
+                        {/* <Tab>Line</Tab> */}
+                      </TabList>
+
+                      <TabPanel>
+                        <GraphPI barTitle={'Top 10 importers'} labels={importerLabel()} data={importerDataPie()} />
+                      </TabPanel>
+                      <TabPanel>
+                        <GraphBar barTitle={'Top 10 importers'} labels={importerLabel()} data={importerData()} dataLabel="Total value (USD)" />
+                      </TabPanel>
+                      {/* <TabPanel>
+                        <GraphLine barTitle={'Top 10 importers'} labels={importerLabel()} data={importerData()} />
+                      </TabPanel> */}
+                    </Tabs>
+                  ) : (
+                    <div className="loaderBlock">
+                      <div className="loader"></div>
+                    </div>
+                  )}
+                </div>
+                <div className="col-md-6">
+                  <DataTable
+                    className="table table-striped table-hover"
+                    columns={importerColumns}
+                    data={importerDataLT}
+                    // noHeader
+                    defaultSortField="id"
+                    defaultSortAsc={false}
+                    // pagination
+                    conditionalRowStyles = {conditionalRowStyles}
+                    onRowClicked = {onDataRowClicked}
+                    dense
+                    highlightOnHover
+                    progressPending={pendingImport}
+                    progressComponent={<Loader />}
+                    onRowMouseLeave = {(row, e)=> setTooltipContent("") }
+                    onRowMouseEnter={(row, e) => 
+                      showTooltip(row, e) 
+                    }
+                  />
+                  {tooltipContent && (                  
+                    <span
+                     style={{
+                      position: "fixed",
+                      background: "#000000",
+                      color: "#FFFFFF",
+                      fontSize: "14px",
+                      padding:{
+                        top: "5px",
+                        left: "5px",
+                        right: "5px",
+                        bottom: "5px",
+                      },
+                      top: tooltipPosition.top,
+                      left: tooltipPosition.left,
+                     }}
+                    >
+                       {tooltipContent}
+                    </span>
+
+                  )}
+                </div>
+              </div>
+            </> : null }
+            {exporterDataList.exportersList && exporterDataList.exportersList.length > 0 ?
+            <>     
+              <h4>Top 10 Exporters</h4>
+              <div className="row mb-4">
+                <div className="col-md-6">
+                  <DataTable
+                    className="table table-striped table-hover"
+                    columns={exporterColumns}
+                    data={exporterDataLT}
+                    // noHeader
+                    defaultSortField="id"
+                    defaultSortAsc={false}
+                    conditionalRowStyles = {conditionalRowStyles}
+                    onRowClicked = {onDataRowClicked}
+                    highlightOnHover
+                    dense
+                    progressPending={pendingExport}
+                    progressComponent={<Loader />}
+                    onRowMouseLeave = {(row, e)=> setTooltipContent("") }
+                    onRowMouseEnter={(row, e) => 
+                      showTooltip(row, e) 
+                    }
+                  />
+                  {tooltipContent && (                  
+                    <span
+                     style={{
+                      position: "fixed",
+                      background: "#000000",
+                      color: "#FFFFFF",
+                      fontSize: "14px",
+                      padding:{
+                        top: "5px",
+                        left: "5px",
+                        right: "5px",
+                        bottom: "5px",
+                      },
+                      top: tooltipPosition.top,
+                      left: tooltipPosition.left,
+                     }}
+                    >
+                       {tooltipContent}
+                    </span>
+
+                  )}
+
+                </div>
+                <div className="col-md-6">
+                  {!pendingExport ? (
+                    <Tabs defaultIndex={1}>
+                      <TabList>
+                        <Tab>Pie</Tab>
+                        <Tab>Bar</Tab>
+                        {/* <Tab>Line</Tab> */}
+                      </TabList>
+
+                      <TabPanel>
+                        <GraphPI barTitle={'Top 10 exporters'} labels={exporterLabel()} data={exporterDataPie()} />
+                      </TabPanel>
+                      <TabPanel>
+                        <GraphBar barTitle={'Top 10 exporters'} labels={exporterLabel()} data={exporterData()} dataLabel="Total value (USD)" />
+                      </TabPanel>
+                      {/* <TabPanel>
+                        <GraphLine barTitle={'Top 10 exporters'} labels={exporterLabel()} data={exporterData()} />
+                      </TabPanel> */}
+                    </Tabs>
+                  ) : (
+                    <div className="loaderBlock">
+                      <div className="loader"></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </> : null }
+
+            {indianPortDataList.portsList && indianPortDataList.portsList.length > 0 ?
+            <> 
+              <h4>Top 10 Indian ports</h4>
+              <div className="row mb-4">
+                <div className="col-md-6">
+                  {!pendingIndPort ? (
+                    <Tabs defaultIndex={2}>
+                      <TabList>
+                        <Tab>Pie</Tab>
+                        <Tab>Bar</Tab>
+                        {/* <Tab>Line</Tab> */}
+                      </TabList>
+
+                      <TabPanel>
+                        <GraphPI barTitle={'Top 10 indian ports'} labels={indPortLabel()} data={indianPortPie()} />
+                      </TabPanel>
+                      <TabPanel>
+                        <GraphBar barTitle={'Top 10 indian ports'} labels={indPortLabel()} data={indPortData()} dataLabel="Total value (USD)"/>
+                      </TabPanel>
+                      {/* <TabPanel>
+                        <GraphLine barTitle={'Top 10 indian ports'} labels={indPortLabel()} data={indPortData()} />
+                      </TabPanel> */}
+                    </Tabs>
+                  ) : (
+                    <div className="loaderBlock">
+                      <div className="loader"></div>
+                    </div>
+                  )}
+                </div>
+                <div className="col-md-6">
+                  <DataTable
+                    className="table table-striped table-hover"
+                    columns={portColumns}
+                    data={indianPortDataLT}
+                    // noHeader
+                    defaultSortField="id"
+                    defaultSortAsc={false}
+                    conditionalRowStyles = {conditionalRowStyles}
+                    highlightOnHover
+                    onRowClicked = {onDataRowClicked}
+                    dense
+                    progressPending={pendingIndPort}
+                    progressComponent={<Loader />}
+                    onRowMouseLeave = {(row, e)=> setTooltipContent("") }
+                    onRowMouseEnter={(row, e) => 
+                      showTooltip(row, e) 
+                    }
+                  />
+                  {tooltipContent && (                  
+                    <span
+                     style={{
+                      position: "fixed",
+                      background: "#000000",
+                      color: "#FFFFFF",
+                      fontSize: "14px",
+                      padding:{
+                        top: "5px",
+                        left: "5px",
+                        right: "5px",
+                        bottom: "5px",
+                      },
+                      top: tooltipPosition.top,
+                      left: tooltipPosition.left,
+                     }}
+                    >
+                       {tooltipContent}
+                    </span>
+
+                  )}
+                </div>
+              </div>
+            </> : null }
+
+            {forPortDataList.portsList && forPortDataList.portsList.length > 0 ?
+            <>
+              <h4>Top 10 Foreign Ports</h4>
+              <div className="row mb-4">
+                <div className="col-md-6">
+                  <DataTable
+                    className="table table-striped table-hover"
+                    columns={portColumns}
+                    data={forPortDataLT}
+                    // noHeader
+                    defaultSortField="id"
+                    defaultSortAsc={false}
+                    conditionalRowStyles = {conditionalRowStyles}
+                    onRowClicked = {onDataRowClicked}
+                    highlightOnHover
+                    dense
+                    progressPending={pendingForPort}
+                    progressComponent={<Loader />}
+                    onRowMouseLeave = {(row, e)=> setTooltipContent("") }
+                    onRowMouseEnter={(row, e) => 
+                      showTooltip(row, e) 
+                    }
+                  />
+                  {tooltipContent && (                  
+                    <span
+                     style={{
+                      position: "fixed",
+                      background: "#000000",
+                      color: "#FFFFFF",
+                      fontSize: "14px",
+                      padding:{
+                        top: "5px",
+                        left: "5px",
+                        right: "5px",
+                        bottom: "5px",
+                      },
+                      top: tooltipPosition.top,
+                      left: tooltipPosition.left,
+                     }}
+                    >
+                       {tooltipContent}
+                    </span>
+
+                  )}
+                </div>
+                <div className="col-md-6">
+                  {!pendingForPort ? (
+                    <Tabs defaultIndex={0}>
+                      <TabList>
+                        <Tab>Pie</Tab>
+                        <Tab>Bar</Tab>
+                        {/* <Tab>Line</Tab> */}
+                      </TabList>
+
+                      <TabPanel>
+                        <GraphPI barTitle={'Top 10 foreign ports'} labels={forPortLabel()} data={foreignPortPie()} />
+                      </TabPanel>
+                      <TabPanel>
+                        <GraphBar barTitle={'Top 10 foreign ports'} labels={forPortLabel()} data={forPortData()} dataLabel="Total value (USD)"/>
+                      </TabPanel>
+                      {/* <TabPanel>
+                        <GraphLine barTitle={'Top 10 foreign ports'} labels={forPortLabel()} data={forPortData()} />
+                      </TabPanel> */}
+                    </Tabs>
+                  ) : (
+                    <div className="loaderBlock">
+                      <div className="loader"></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </> : null }
+
+            {hsCodeDataList.hscodesList && hsCodeDataList.hscodesList.length > 0 ?
+            <>
+              <h4>Top 10 HS Codes</h4>
+              <div className="row mb-4">
+                <div className="col-md-6">
+                  {!pendingHSCode ? (
+                    <Tabs defaultIndex={1}>
+                      <TabList>
+                        <Tab>Pie</Tab>
+                        <Tab>Bar</Tab>
+                        {/* <Tab>Line</Tab> */}
+                      </TabList>
+
+                      <TabPanel>
+                        <GraphPI barTitle={'Top 10 HS Codes'} labels={hsCodeLabel()} data={hsCodePie()} />
+                      </TabPanel>
+                      <TabPanel>
+                        <GraphBar barTitle={'Top 10 HS Codes'} labels={hsCodeLabel()} data={hsCodeData()} dataLabel="Total value (USD)"/>
+                      </TabPanel>
+                      {/* <TabPanel>
+                        <GraphLine barTitle={'Top 10 HS Codes'} labels={hsCodeLabel()} data={hsCodeData()} />
+                      </TabPanel> */}
+                    </Tabs>
+                  ) : (
+                    <div className="loaderBlock">
+                      <div className="loader"></div>
+                    </div>
+                  )}
+                </div>
+                <div className="col-md-6">
+                  <DataTable
+                    className="table table-striped table-hover"
+                    columns={hsCodeColumns}
+                    data={hsCodeDataLT}
+                    // noHeader
+                    defaultSortField="id"
+                    defaultSortAsc={false}
+                    conditionalRowStyles = {conditionalRowStyles}
+                    onRowClicked = {onDataRowClicked}
+                    highlightOnHover
+                    dense
+                    progressPending={pendingHSCode}
+                    progressComponent={<Loader />}
+                    onRowMouseLeave = {(row, e)=> setTooltipContent("") }
+                    onRowMouseEnter={(row, e) => 
+                      showTooltip(row, e) 
+                    }
+                  />
+                  {tooltipContent && (                  
+                    <span
+                     style={{
+                      position: "fixed",
+                      background: "#000000",
+                      color: "#FFFFFF",
+                      fontSize: "14px",
+                      padding:{
+                        top: "5px",
+                        left: "5px",
+                        right: "5px",
+                        bottom: "5px",
+                      },
+                      top: tooltipPosition.top,
+                      left: tooltipPosition.left,
+                     }}
+                    >
+                       {tooltipContent}
+                    </span>
+
+                  )}
+                </div>
+              </div>
+            </> : null }
+
+            {countryDataList.countriesList && countryDataList.countriesList.length > 0 ?
+            <>
+              <h4>Top 10 Countries</h4>
+              <div className="row mb-4">
+                <div className="col-md-6">
+                  <DataTable
+                    className="table table-striped table-hover"
+                    columns={countryColumns}
+                    data={countryDataLT}
+                    defaultSortField="id"
+                    defaultSortAsc={false}
+                    conditionalRowStyles = {conditionalRowStyles}
+                    onRowClicked = {onDataRowClicked}
+                    highlightOnHover
+                    dense
+                    progressPending={pendingCountry}
+                    progressComponent={<Loader />}
+                    onRowMouseLeave = {(row, e)=> setTooltipContent("") }
+                    onRowMouseEnter={(row, e) => 
+                      showTooltip(row, e) 
+                    }
+                  />
+                  {tooltipContent && (                  
+                    <span
+                     style={{
+                      position: "fixed",
+                      background: "#000000",
+                      color: "#FFFFFF",
+                      fontSize: "14px",
+                      padding:{
+                        top: "5px",
+                        left: "5px",
+                        right: "5px",
+                        bottom: "5px",
+                      },
+                      top: tooltipPosition.top,
+                      left: tooltipPosition.left,
+                     }}
+                    >
+                       {tooltipContent}
+                    </span>
+
+                  )}
+                </div>
+                <div className="col-md-6">
+                  {!pendingCountry ? (
+                    <Tabs defaultIndex={2}>
+                      <TabList>
+                        <Tab>Pie</Tab>
+                        <Tab>Bar</Tab>
+                        {/* <Tab>Line</Tab> */}
+                      </TabList>
+
+                      <TabPanel>
+                        <GraphPI barTitle={'Top 10 countries'} labels={countryLabel()} data={countryDataPie()} />
+                      </TabPanel>
+                      <TabPanel>
+                        <GraphBar barTitle={'Top 10 countries'} labels={countryLabel()} data={countryData()} dataLabel="Total value (USD)"/>
+                      </TabPanel>
+                      {/* <TabPanel>
+                        <GraphLine barTitle={'Top 10 countries'} labels={countryLabel()} data={countryData()} />
+                      </TabPanel> */}
+                    </Tabs>
+                  ) : (
+                    <div className="loaderBlock">
+                      <div className="loader"></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </> : null }
+
+            {cityDataList.citiesList && cityDataList.citiesList.length > 0 ?
+            <>
+              <h4>Top 10 Cities</h4>
+              <div className="row mb-4">
+                <div className="col-md-6">
+                  {!pendingCity ? (
+                    <Tabs defaultIndex={0}>
+                      <TabList>
+                        <Tab>Pie</Tab>
+                        <Tab>Bar</Tab>
+                        {/* <Tab>Line</Tab> */}
+                      </TabList>
+
+                      <TabPanel>
+                        <GraphPI barTitle={'Top 10 Cities'} labels={cityLabel()} data={cityDataPie()} />
+                      </TabPanel>
+                      <TabPanel>
+                        <GraphBar barTitle={'Top 10 Cities'} labels={cityLabel()} data={cityData()} dataLabel="Total value (USD)"/>
+                      </TabPanel>
+                      {/* <TabPanel>
+                        <GraphLine barTitle={'Top 10 Cities'} labels={cityLabel()} data={cityData()} />
+                      </TabPanel> */}
+                    </Tabs>
+                  ) : (
+                    <div className="loaderBlock">
+                      <div className="loader"></div>
+                    </div>
+                  )}
+                </div>
+                <div className="col-md-6">
+                  <DataTable
+                    className="table table-striped table-hover"
+                    columns={cityColumns}
+                    data={cityDataLT}
+                    // noHeader
+                    defaultSortField="id"
+                    defaultSortAsc={false}
+                    conditionalRowStyles = {conditionalRowStyles}
+                    onRowClicked = {onDataRowClicked}
+                    highlightOnHover
+                    dense
+                    progressPending={pendingCity}
+                    progressComponent={<Loader />}
+                    onRowMouseLeave = {(row, e)=> setTooltipContent("") }
+                    onRowMouseEnter={(row, e) => 
+                      showTooltip(row, e) 
+                    }
+                  />
+                  {tooltipContent && (                  
+                    <span
+                     style={{
+                      position: "fixed",
+                      background: "#000000",
+                      color: "#FFFFFF",
+                      fontSize: "14px",
+                      padding:{
+                        top: "5px",
+                        left: "5px",
+                        right: "5px",
+                        bottom: "5px",
+                      },
+                      top: tooltipPosition.top,
+                      left: tooltipPosition.left,
+                     }}
+                    >
+                       {tooltipContent}
+                    </span>
+
+                  )}
+                </div>
+              </div>
+            </> : null }
+          </>
+        ) : null}
+        
+        {toggle && <AdvanceSearch toggleFromChild={setToggle}
+          importerDataList={importerDataArray}
+          exporterDataList={exporterDataArray}
+          portOriginDataList={portOriginDataArray}
+          portDestinationDataList={portDestinationDataArray}
+          countryOriginList={countryOriginList}
+          countryDestinationList={countryDestinationList}
+          hsCodeDataList={hsCodeDataArray}
+          shipmentModeDataList={shipmentModeDataArray}
+          shipmentModeList={shipmentModeList}
+          type={searchParams.tradeType}
+          updateFilter={updateFilter}
+          portOriginList={portOriginList}
+          portDestinationList={portDestinationList}
+          hsCodeList={hsCodeList}
+          importerList={importerList}
+          exporterList={exporterList}
+          cityOriginList={cityOriginList}
+          cityDestinationList={cityDestinationList}
+          hsCode4digitDataList={hsCode4digitDataArray}
+          hsCode4DigitList={hsCode4DigitList}
+          fetchSearchQuery={fetchSearchQuery}
+          resetFilter = {resetFilter}
+          stdUnitList = {stdUnitList}
+          stdUnitDataList = {stdUnitDataArray}
+          importerForExport = {importerForExport}
+          exporterForImport = {exporterForImport}
+
+        />}
       </div>
+      <div>
+          { showModal ? 
+          <Modal 
+              show={showModal}
+              onHide={handleModalClose} 
+              dialogClassName={"modal-xl"}
+              >             
+              <Modal.Header closeButton > Details </Modal.Header>
+              <Modal.Title >  </Modal.Title>
 
-      {/* Button 2 */}
-      <div className="col-lg-2 col-md-3 mb-3">
-        <button
-          className={`btn w-100 py-3 ${
-            active === "exporter" ? "btn-warning" : "btn-primary"
-          }`}
-          onClick={() => setActive("exporter")}
-        >
-          Loream Ipsume 1
-        </button>
+                  <Modal.Body >
+                  <div>
+                  <AnalysisTable  
+                    columnList = {newModalColumn}
+                    dataList = {newModalData}
+                  />
+                  </div>
+                  </Modal.Body>
+                      
+            </Modal>
+          : null}
       </div>
-
-      {/* Button 3 */}
-      <div className="col-lg-2 col-md-3 mb-3">
-        <button
-          className={`btn w-100 py-3 ${
-            active === "hscode" ? "btn-warning" : "btn-primary"
-          }`}
-          onClick={() => setActive("hscode")}
-        >
-          Loream Ipsume 2
-        </button>
-      </div>
-
-      {/* Button 4 */}
-      <div className="col-lg-2 col-md-3 mb-3">
-        <button
-          className={`btn w-100 py-3 ${
-            active === "country" ? "btn-warning" : "btn-primary"
-          }`}
-          onClick={() => setActive("country")}
-        >
-          Loream Ipsume 3
-        </button>
-      </div>
-
-      {/* Button 5 */}
-      <div className="col-lg-2 col-md-3 mb-3">
-        <button
-          className={`btn w-100 py-3 ${
-            active === "indepthAnalysis" ? "btn-warning" : "btn-primary"
-          }`}
-          onClick={() => setActive("indepthAnalysis")}
-        >
-          Loream Ipsume 4
-        </button>
-      </div>
-
-   
-    </div>
-  
-
-
-<div className="row mb-4">
-   {/* Card 1 - Exporters (static) */}
-<div className="col-lg-2 col-md-3 mb-3">
-  <div style={{ height: "38px", marginBottom: "8px" }}></div>
-  <div className="card shadow-sm border-2">
-    <div className="card-header bg-primary text-white text-center fw-bold">
-      Exporter Name 
-    </div>
-  <div className="card-body" style={{ height: "300px", overflowY: "auto", padding: "12px" }}>
-  {exporterDataList.exportersList && exporterDataList.exportersList.length > 0 ? (
-    exporterDataList.exportersList.map((item, i) => (
-      <div className="form-check mb-2 border-bottom" key={i}>
-        <input type="checkbox" className="form-check-input" id={`exporter-${i}`} />
-        <label className="form-check-label" htmlFor={`exporter-${i}`} style={{ fontSize: "16px" }}>
-          {item.exporter_name} [{item.shipment_count}]
-        </label>
-      </div>
-    ))
-  ) : (
-    <div className="text-muted text-center" style={{marginTop: "100px"}}>No data to display</div>
-  )}
-</div>
-  </div>
-</div>
-
-           {/* Card 2 */}
-          {renderCard(card2Select, setCard2Select, 2, "Select Variable", "select2", "div_body2", card2Loading)}
-          {/* Card 3 */}
-          {renderCard(card3Select, setCard3Select, 3, "Select Variable", "select3", "div_body3", card3Loading)}
-          {/* Card 4 */}
-          {renderCard(card4Select, setCard4Select, 4, "Select Variable", "select4", "div_body4", card4Loading)}
-          {/* Card 5 */}
-          {renderCard(card5Select, setCard5Select, 5, "Select Variable", "select5", "div_body5", card5Loading)}
-
-{/* Value Button */}
-<div className="col-lg-2 col-md-3 mb-3 d-flex flex-column justify-content-top">
-  <h5 className="text-center mb-2">Value</h5>
-  <button className="btn btn-outline-dark w-100 py-3 fw-bold shadow-sm">
-    20000.00
-  </button>
-</div>
-    </div>
-
-
-
-<div className="row mb-4">
-  <div className="col-12 d-flex justify-content-end">
-    <button
-      className="btn btn-success btn-lg fw-bold shadow-sm px-4 py-2"
-      onClick={() => setShowTable(!showTable)}
-    >
-      {showTable ? "Hide Data" : "Show Data"}
-    </button>
-  </div>
-</div>
-
-
-
-{showTable && (
-        <div className="row">
-          <div className="col-6">
-           <div className="card shadow-sm border-2 mt-4">
-      <div className="card-header bg-dark text-white fw-bold">
-        Example Calculation (Dummy Data)
-      </div>
-      <div className="card-body">
-        <table className="table table-bordered table-hover text-center">
-          <thead className="table-light">
-            <tr>
-              <th>Month</th>
-              <th>HS Code Export (M USD)</th>
-              <th>Industry Export (M USD)</th>
-              <th>Market Share %</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Jan</td>
-              <td>120</td>
-              <td>1000</td>
-              <td>(120 ÷ 1000) × 100 = <b>12.0%</b></td>
-            </tr>
-            <tr>
-              <td>Feb</td>
-              <td>150</td>
-              <td>1100</td>
-              <td>(150 ÷ 1100) × 100 = <b>13.6%</b></td>
-            </tr>
-            <tr>
-              <td>Mar</td>
-              <td>170</td>
-              <td>1150</td>
-              <td>(170 ÷ 1150) × 100 = <b>14.8%</b></td>
-            </tr>
-            <tr>
-              <td>Apr</td>
-              <td>160</td>
-              <td>1120</td>
-              <td>(160 ÷ 1120) × 100 = <b>14.3%</b></td>
-            </tr>
-            <tr>
-              <td>May</td>
-              <td>200</td>
-              <td>1250</td>
-              <td>(200 ÷ 1250) × 100 = <b>16.0%</b></td>
-            </tr>
-            <tr>
-              <td>Jun</td>
-              <td>220</td>
-              <td>1300</td>
-              <td>(220 ÷ 1300) × 100 = <b>16.9%</b></td>
-            </tr>
-            <tr>
-              <td>Jul</td>
-              <td>210</td>
-              <td>1280</td>
-              <td>(210 ÷ 1280) × 100 = <b>16.4%</b></td>
-            </tr>
-            <tr>
-              <td>Aug</td>
-              <td>250</td>
-              <td>1400</td>
-              <td>(250 ÷ 1400) × 100 = <b>17.9%</b></td>
-            </tr>
-            <tr>
-              <td>Sep</td>
-              <td>240</td>
-              <td>1380</td>
-              <td>(240 ÷ 1380) × 100 = <b>17.4%</b></td>
-            </tr>
-            <tr>
-              <td>Oct</td>
-              <td>260</td>
-              <td>1450</td>
-              <td>(260 ÷ 1450) × 100 = <b>17.9%</b></td>
-            </tr>
-            <tr>
-              <td>Nov</td>
-              <td>280</td>
-              <td>1500</td>
-              <td>(280 ÷ 1500) × 100 = <b>18.7%</b></td>
-            </tr>
-            <tr>
-              <td>Dec</td>
-              <td>300</td>
-              <td>1550</td>
-              <td>(300 ÷ 1550) × 100 = <b>19.4%</b></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-          </div>
-        </div>
-      )}
-
-
-
-      </div>
-     
     </>
   );
 }
