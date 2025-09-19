@@ -1330,7 +1330,7 @@ const List = (props) => {
           }
         })
           .then(res => {
-
+          //  console.log("list1 Export res", res);
           //  console.log("Main list1 export res", res);
             let exportDataSet = [];
             // if (searchParams.tradeType.toLowerCase() === "export" && searchParams.countryCode.toUpperCase() != "IND" && searchParams.countryCode.toUpperCase() != "SEZ") {
@@ -2201,6 +2201,7 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
       }
     })
       .then(async (res) => {
+        console.log("search res", res);
         props.setSearchQuery(postData);
         // if (params.tradeType.toLowerCase() === "export" && params.countryCode.toUpperCase() != "IND" && params.countryCode.toUpperCase() != "SEZ") {
         //   tempSearchResult = res.data.expForeignList
@@ -2417,6 +2418,7 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
       }
     })
       .then(res => {
+        console.log("search res pagination ", res);
         // if (params.tradeType.toLowerCase() === "export" && params.countryCode.toUpperCase() != "IND" && params.countryCode.toUpperCase() != "SEZ") {
         //   tempSearchResult = res.data.expForeignList
         // }
