@@ -232,57 +232,31 @@ const fetchSearchQuery = () => {
   const [showTable, setShowTable] = useState(false);
 
   // Loading states for each card
+
+  const [card1ImportExport, setCard1ImportExport] = useState("exporter"); // default to exporter
+
+  const [card1Loading, setCard1Loading] = useState(false);
   const [card2Loading, setCard2Loading] = useState(false);
   const [card3Loading, setCard3Loading] = useState(false);
   const [card4Loading, setCard4Loading] = useState(false);
   const [card5Loading, setCard5Loading] = useState(false);
 
+  const [card1Select, setCard1Select] = useState("");
   const [card2Select, setCard2Select] = useState("");
   const [card3Select, setCard3Select] = useState("");
   const [card4Select, setCard4Select] = useState("");
   const [card5Select, setCard5Select] = useState("");
+
+
+  // Add new state variables for Card 1
+
+
+
   
-
-//   const cardData = {
-//   hscode: ["HS1001", "HS1002", "HS1003", "HS1004"],
-//   port: ["Mumbai", "Chennai", "Kolkata", "Delhi"],
-//   country: ["India", "USA", "China", "Brazil"],
-//   importer: ["ABC Corp", "XYZ Ltd", "Global Traders", "ImportX"]
-// };
-
-
 
 /* 18/09/2025 */
 
-// Dummy API data
-/*
-const hsCodeDataList1 = {
-  hscodesList: [
-    { hscode: "1001", shipment_count: 25 },
-    { hscode: "2002", shipment_count: 30 },
-    { hscode: "3003", shipment_count: 15 },
-  ],
-};  */
-// const importerDataList1 = {
-//   importersList: [
-//     { importer_name: "Importer A", shipment_count: 12 },
-//     { importer_name: "Importer B", shipment_count: 20 },
-//   ],
-// };
-// const countryDataList1 = {
-//   countriesList: [
-//     { country_name: "India", shipment_count: 45 },
-//     { country_name: "USA", shipment_count: 18 },
-//     { country_name: "UK", shipment_count: 22 },
-//   ],
-// };
-// const indianPortDataList1 = {
-//   portsList: [
-//     { port_name: "Mumbai", shipment_count: 30 },
-//     { port_name: "Chennai", shipment_count: 20 },
-//   ],
-// };
-
+// Helper: get API data for each card type
 // Helper: get API data for each card type
 const getCardApiData = (type) => {
   switch (type) {
@@ -290,6 +264,8 @@ const getCardApiData = (type) => {
       return hsCodeDataList.hscodesList || [];
     case "importer":
       return importerDataList.importersList || [];
+    case "exporter":
+      return exporterDataList.exportersList || [];
     case "country":
       return countryDataList.countriesList || [];
     case "port":
@@ -298,7 +274,7 @@ const getCardApiData = (type) => {
       return [];
   }
 };
-
+// Helper: get label for each card type
 // Helper: get label for each card type
 const getCardLabel = (type, item) => {
   switch (type) {
@@ -306,6 +282,8 @@ const getCardLabel = (type, item) => {
       return `${item.hscode} [${item.shipment_count}]`;
     case "importer":
       return `${item.importer_name} [${item.shipment_count}]`;
+    case "exporter":
+      return `${item.exporter_name} [${item.shipment_count}]`;
     case "country":
       return `${item.country_name} [${item.shipment_count}]`;
     case "port":
@@ -315,83 +293,157 @@ const getCardLabel = (type, item) => {
   }
 };
 
-  const isOptionSelectedElsewhere = (option, currentCardIndex) => {
-  const selected = [card2Select, card3Select, card4Select, card5Select];
-  // cardIndex is 2 for card2, 3 for card3, etc.
-  return selected.some((val, idx) => val === option && (idx !== currentCardIndex - 2));
+const isOptionSelectedElsewhere = (option, currentCardIndex) => {
+  const allSelected = [card2Select, card3Select, card4Select, card5Select];
+  return allSelected.some((val, idx) => val === option && (idx !== currentCardIndex - 2));
 };
 
 // Card rendering function
-  const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, bodyId, loading) => (
-    <div className="col-lg-2 col-md-3 mb-3">
-      <select
-        className="form-select mb-2 form-control"
-        value={cardSelect}
-        onChange={(e) => {
-          setCardSelect(e.target.value);
-          // Set loading true and fetch data for this card type
-          if (cardIndex === 2) setCard2Loading(true);
-          if (cardIndex === 3) setCard3Loading(true);
-          if (cardIndex === 4) setCard4Loading(true);
-          if (cardIndex === 5) setCard5Loading(true);
-          // Simulate API call (replace with your actual fetch logic)
-          setTimeout(() => {
-            if (cardIndex === 2) setCard2Loading(false);
-            if (cardIndex === 3) setCard3Loading(false);
-            if (cardIndex === 4) setCard4Loading(false);
-            if (cardIndex === 5) setCard5Loading(false);
-          }, 1000);
-        }}
-        id={selectId}
-      >
-        <option value="">Select Variable</option>
-        <option value="hscode" disabled={isOptionSelectedElsewhere("hscode", cardIndex)}>HS Code</option>
-  <option value="port" disabled={isOptionSelectedElsewhere("port", cardIndex)}>Port</option>
-  <option value="country" disabled={isOptionSelectedElsewhere("country", cardIndex)}>Country</option>
-  <option value="importer" disabled={isOptionSelectedElsewhere("importer", cardIndex)}>Importer</option>
-      </select>
-      <div className="card shadow-sm border-2">
-        <div
-          className="card-header bg-primary text-white text-center fw-bold"
-          id={`div_title${cardIndex}`}
-        >
-          {cardSelect
-            ? cardSelect.charAt(0).toUpperCase() + cardSelect.slice(1)
-            : cardTitle}
-        </div>
-        <div
-          className="card-body"
-          style={{ height: "300px", overflowY: "auto", padding: "12px" }}
-          id={bodyId}
-        >
-          {loading ? (
-            <div className="" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-              <div className="loader"></div>
+// Card rendering function
+
+// Special render function for Card 1 with import/export dropdown
+const RenderFirstCard = () => (
+  <div className="col-lg-2 col-md-3 mb-3">
+    {/* Import/Export Selection Dropdown */}
+    <select
+      className="form-select mb-2 form-control"
+      value={card1ImportExport}
+      onChange={(e) => {
+        const newValue = e.target.value;
+        setCard1ImportExport(newValue);
+        setCard1Loading(true);
+        setCard2Loading(true);
+        setCard3Loading(true);
+        setCard4Loading(true);
+        setCard5Loading(true);
+        
+        // Reset all other card selections when changing import/export
+        setCard2Select("");
+        setCard3Select("");
+        setCard4Select("");
+        setCard5Select("");
+        
+        // Simulate API call
+        setTimeout(() => {
+          setCard1Loading(false);
+          setCard2Loading(false);
+          setCard3Loading(false);
+          setCard4Loading(false);
+          setCard5Loading(false);
+        }, 1500);
+      }}
+    >
+      <option value="importer">Importer</option>
+      <option value="exporter">Exporter</option>
+    </select>
+    
+    <div className="card shadow-sm border-2">
+      <div className="card-header bg-primary text-white text-center fw-bold">
+        {card1ImportExport === "importer" ? "Importer" : "Exporter"}
+      </div>
+      <div className="card-body" style={{ height: "300px", overflowY: "auto", padding: "12px" }}>
+        {card1Loading ? (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
+            <div className="loader"></div>
+          </div>
+        ) : getCardApiData(card1ImportExport).length > 0 ? (
+          getCardApiData(card1ImportExport).map((item, i) => (
+            <div className="form-check mb-2 border-bottom" key={i}>
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id={`card1-${getCardLabel(card1ImportExport, item)}`}
+              />
+              <label
+                className="form-check-label"
+                htmlFor={`card1-${getCardLabel(card1ImportExport, item)}`}
+                style={{ fontSize: "16px" }}
+              >
+                {getCardLabel(card1ImportExport, item)}
+              </label>
             </div>
-          ) : cardSelect && getCardApiData(cardSelect).length > 0 ? (
-            getCardApiData(cardSelect).map((item, i) => (
-              <div className="form-check mb-2 border-bottom" key={i}>
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id={`card${cardIndex}-${getCardLabel(cardSelect, item)}`}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor={`card${cardIndex}-${getCardLabel(cardSelect, item)}`}
-                  style={{ fontSize: "16px" }}
-                >
-                  {getCardLabel(cardSelect, item)}
-                </label>
-              </div>
-            ))
-          ) : (
-            <div className="text-muted text-center" style={{marginTop: "100px",fontSize: "70px",fontWeight: "bold"}}>+</div>
-          )}
-        </div>
+          ))
+        ) : (
+          <div className="text-muted text-center" style={{marginTop: "100px", fontSize: "70px", fontWeight: "bold"}}>+</div>
+        )}
       </div>
     </div>
-  );
+  </div>
+);
+
+const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, bodyId, loading) => (
+  <div className="col-lg-2 col-md-3 mb-3">
+    <select
+      className="form-select mb-2 form-control"
+      value={cardSelect}
+      onChange={(e) => {
+        setCardSelect(e.target.value);
+        // Set loading true and fetch data for this card type
+        if (cardIndex === 2) setCard2Loading(true);
+        if (cardIndex === 3) setCard3Loading(true);
+        if (cardIndex === 4) setCard4Loading(true);
+        if (cardIndex === 5) setCard5Loading(true);
+        // Simulate API call (replace with your actual fetch logic)
+        setTimeout(() => {
+          if (cardIndex === 2) setCard2Loading(false);
+          if (cardIndex === 3) setCard3Loading(false);
+          if (cardIndex === 4) setCard4Loading(false);
+          if (cardIndex === 5) setCard5Loading(false);
+        }, 1000);
+      }}
+      id={selectId}
+    >
+      <option value="">Select Variable</option>
+      <option value="hscode" disabled={isOptionSelectedElsewhere("hscode", cardIndex)}>HS Code</option>
+      <option value="port" disabled={isOptionSelectedElsewhere("port", cardIndex)}>Port</option>
+      <option value="country" disabled={isOptionSelectedElsewhere("country", cardIndex)}>Country</option>
+      <option value={card1ImportExport === "importer" ? "exporter" : "importer"} 
+              disabled={isOptionSelectedElsewhere(card1ImportExport === "importer" ? "exporter" : "importer", cardIndex)}>
+        {card1ImportExport === "importer" ? "Exporter" : "Importer"}
+      </option>
+    </select>
+    <div className="card shadow-sm border-2">
+      <div
+        className="card-header bg-primary text-white text-center fw-bold"
+        id={`div_title${cardIndex}`}
+      >
+        {cardSelect
+          ? cardSelect.charAt(0).toUpperCase() + cardSelect.slice(1)
+          : cardTitle}
+      </div>
+      <div
+        className="card-body"
+        style={{ height: "300px", overflowY: "auto", padding: "12px" }}
+        id={bodyId}
+      >
+        {loading ? (
+          <div className="" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
+            <div className="loader"></div>
+          </div>
+        ) : cardSelect && getCardApiData(cardSelect).length > 0 ? (
+          getCardApiData(cardSelect).map((item, i) => (
+            <div className="form-check mb-2 border-bottom" key={i}>
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id={`card${cardIndex}-${getCardLabel(cardSelect, item)}`}
+              />
+              <label
+                className="form-check-label"
+                htmlFor={`card${cardIndex}-${getCardLabel(cardSelect, item)}`}
+                style={{ fontSize: "16px" }}
+              >
+                {getCardLabel(cardSelect, item)}
+              </label>
+            </div>
+          ))
+        ) : (
+          <div className="text-muted text-center" style={{marginTop: "100px",fontSize: "70px",fontWeight: "bold"}}>+</div>
+        )}
+      </div>
+    </div>
+  </div>
+);
 /*18/09/2025 */
 
 
@@ -2519,47 +2571,26 @@ const getCardLabel = (type, item) => {
 
 
 <div className="row mb-4">
-   {/* Card 1 - Exporters (static) */}
-<div className="col-lg-2 col-md-3 mb-3">
-  <div style={{ height: "38px", marginBottom: "8px" }}></div>
-  <div className="card shadow-sm border-2">
-    <div className="card-header bg-primary text-white text-center fw-bold">
-      Exporter Name 
-    </div>
-  <div className="card-body" style={{ height: "300px", overflowY: "auto", padding: "12px" }}>
-  {exporterDataList.exportersList && exporterDataList.exportersList.length > 0 ? (
-    exporterDataList.exportersList.map((item, i) => (
-      <div className="form-check mb-2 border-bottom" key={i}>
-        <input type="checkbox" className="form-check-input" id={`exporter-${i}`} />
-        <label className="form-check-label" htmlFor={`exporter-${i}`} style={{ fontSize: "16px" }}>
-          {item.exporter_name} [{item.shipment_count}]
-        </label>
-      </div>
-    ))
-  ) : (
-    <div className="text-muted text-center" style={{marginTop: "100px"}}>No data to display</div>
-  )}
-</div>
-  </div>
-</div>
+   {/* Card 1 - Dynamic Import/Export */}
+   {RenderFirstCard()}
 
-           {/* Card 2 */}
-          {RenderCard(card2Select, setCard2Select, 2, "Select Variable", "select2", "div_body2", card2Loading)}
-          {/* Card 3 */}
-          {RenderCard(card3Select, setCard3Select, 3, "Select Variable", "select3", "div_body3", card3Loading)}
-          {/* Card 4 */}
-          {RenderCard(card4Select, setCard4Select, 4, "Select Variable", "select4", "div_body4", card4Loading)}
-          {/* Card 5 */}
-          {RenderCard(card5Select, setCard5Select, 5, "Select Variable", "select5", "div_body5", card5Loading)}
+   {/* Card 2 */}
+   {RenderCard(card2Select, setCard2Select, 2, "Select Variable", "select2", "div_body2", card2Loading)}
+   {/* Card 3 */}
+   {RenderCard(card3Select, setCard3Select, 3, "Select Variable", "select3", "div_body3", card3Loading)}
+   {/* Card 4 */}
+   {RenderCard(card4Select, setCard4Select, 4, "Select Variable", "select4", "div_body4", card4Loading)}
+   {/* Card 5 */}
+   {RenderCard(card5Select, setCard5Select, 5, "Select Variable", "select5", "div_body5", card5Loading)}
 
-{/* Value Button */}
-<div className="col-lg-2 col-md-3 mb-3 d-flex flex-column justify-content-top">
-  <h5 className="text-center mb-2">Value</h5>
-  <button className="btn btn-outline-dark w-100 py-3 fw-bold shadow-sm">
-    20000.00
-  </button>
+   {/* Value Button */}
+   <div className="col-lg-2 col-md-3 mb-3 d-flex flex-column justify-content-top">
+     <h5 className="text-center mb-2">Value</h5>
+     <button className="btn btn-outline-dark w-100 py-3 fw-bold shadow-sm">
+       20000.00
+     </button>
+   </div>
 </div>
-    </div>
 
 
 
@@ -2577,97 +2608,136 @@ const getCardLabel = (type, item) => {
 
 
 {showTable && (
-        <div className="row">
-          <div className="col-6">
-           <div className="card shadow-sm border-2 mt-4">
+  <div className="row">
+  <div className="col-12">
+    <div className="card shadow-sm border-2 mt-4">
       <div className="card-header bg-dark text-white fw-bold">
-        Example Calculation (Dummy Data)
+        Importers Data
       </div>
-      <div className="card-body">
-        <table className="table table-bordered table-hover text-center">
-          <thead className="table-light">
+      <div className="card-body p-0">
+        <div style={{ overflowX: "auto", width: "100%" }}>
+          <table className="table table-bordered table-hover table-striped align-middle mb-0">
+            <thead className="table-dark text-center">
             <tr>
-              <th>Month</th>
-              <th>HS Code Export (M USD)</th>
-              <th>Industry Export (M USD)</th>
-              <th>Market Share %</th>
+             <th>Date</th>
+          <th>HS Code</th>
+          <th>Product Description</th>
+          <th>Importer Name</th>
+          <th>Exporter Name</th>
+          <th>Country of Origin</th>
+          <th>Std Quantity</th>
+          <th>Std Unit</th>
+          <th>Total Value $</th>
+          <th>Quantity</th>
+          <th>Unit</th>
+          <th>Unit Price $</th>
+          <th>Total Value</th>
+          <th>Currency</th>
+          <th>Origin Port</th>
+          <th>Destination Port</th>
+          <th>Mode of Transport</th>
+          <th>Month</th>
+          <th>Year</th>
+          <th>HS Code2</th>
+          <th>HS Code4</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Jan</td>
-              <td>120</td>
-              <td>1000</td>
-              <td>(120 ÷ 1000) × 100 = <b>12.0%</b></td>
-            </tr>
-            <tr>
-              <td>Feb</td>
-              <td>150</td>
-              <td>1100</td>
-              <td>(150 ÷ 1100) × 100 = <b>13.6%</b></td>
-            </tr>
-            <tr>
-              <td>Mar</td>
-              <td>170</td>
-              <td>1150</td>
-              <td>(170 ÷ 1150) × 100 = <b>14.8%</b></td>
-            </tr>
-            <tr>
-              <td>Apr</td>
-              <td>160</td>
-              <td>1120</td>
-              <td>(160 ÷ 1120) × 100 = <b>14.3%</b></td>
-            </tr>
-            <tr>
-              <td>May</td>
-              <td>200</td>
-              <td>1250</td>
-              <td>(200 ÷ 1250) × 100 = <b>16.0%</b></td>
-            </tr>
-            <tr>
-              <td>Jun</td>
-              <td>220</td>
-              <td>1300</td>
-              <td>(220 ÷ 1300) × 100 = <b>16.9%</b></td>
-            </tr>
-            <tr>
-              <td>Jul</td>
-              <td>210</td>
-              <td>1280</td>
-              <td>(210 ÷ 1280) × 100 = <b>16.4%</b></td>
-            </tr>
-            <tr>
-              <td>Aug</td>
-              <td>250</td>
-              <td>1400</td>
-              <td>(250 ÷ 1400) × 100 = <b>17.9%</b></td>
-            </tr>
-            <tr>
-              <td>Sep</td>
-              <td>240</td>
-              <td>1380</td>
-              <td>(240 ÷ 1380) × 100 = <b>17.4%</b></td>
-            </tr>
-            <tr>
-              <td>Oct</td>
-              <td>260</td>
-              <td>1450</td>
-              <td>(260 ÷ 1450) × 100 = <b>17.9%</b></td>
-            </tr>
-            <tr>
-              <td>Nov</td>
-              <td>280</td>
-              <td>1500</td>
-              <td>(280 ÷ 1500) × 100 = <b>18.7%</b></td>
-            </tr>
-            <tr>
-              <td>Dec</td>
-              <td>300</td>
-              <td>1550</td>
-              <td>(300 ÷ 1550) × 100 = <b>19.4%</b></td>
-            </tr>
+             <tr>
+          <td>2024-01-31</td>
+          <td>84329090</td>
+          <td>AGRICULTURE RICE TRANSPLANTER WHEEL 1600*120MM</td>
+          <td>RAJSON AGRO ENGINEERS</td>
+          <td>QINGDAO BOSTONE TYRE CO LTD</td>
+          <td>CHINA</td>
+          <td>2.0</td>
+          <td>UNT</td>
+          <td>295.63</td>
+          <td>2.0</td>
+          <td>UNT</td>
+          <td>147.815</td>
+          <td>280.0</td>
+          <td>USD</td>
+          <td>Qingdao</td>
+          <td>GRFL ICD/SAHNEWAL</td>
+          <td>SEA</td>
+          <td>JAN-24</td>
+          <td>2024</td>
+          <td>84</td>
+          <td>8432</td>
+        </tr>
+        <tr>
+          <td>2024-01-31</td>
+          <td>84329090</td>
+          <td>AGRICULTURE RICE TRANSPLANTER WHEEL 1800*120MM</td>
+          <td>RAJSON AGRO ENGINEERS</td>
+          <td>QINGDAO BOSTONE TYRE CO LTD</td>
+          <td>CHINA</td>
+          <td>6.0</td>
+          <td>UNT</td>
+          <td>1152.95</td>
+          <td>6.0</td>
+          <td>UNT</td>
+          <td>192.158</td>
+          <td>1092.0</td>
+          <td>USD</td>
+          <td>Qingdao</td>
+          <td>GRFL ICD/SAHNEWAL</td>
+          <td>SEA</td>
+          <td>JAN-24</td>
+          <td>2024</td>
+          <td>84</td>
+          <td>8432</td>
+        </tr>
+        <tr>
+          <td>2024-01-31</td>
+          <td>84379020</td>
+          <td>12E SPLINED UJT 1-1/4"R X 14T</td>
+          <td>MILLTEC MACHINERY PVT LTD</td>
+          <td>AGI WESTFIELD</td>
+          <td>CANADA</td>
+          <td>2.0</td>
+          <td>NOS</td>
+          <td>265.42</td>
+          <td>2.0</td>
+          <td>NOS</td>
+          <td>132.71</td>
+          <td>121.92</td>
+          <td>USD</td>
+          <td>WINNIPEG</td>
+          <td>Bangalore Air</td>
+          <td>AIR</td>
+          <td>JAN-24</td>
+          <td>2024</td>
+          <td>84</td>
+          <td>8437</td>
+        </tr>
+        <tr>
+          <td>2024-01-31</td>
+          <td>84329090</td>
+          <td>AGRICULTURE RICE TRANSPLANTER WHEEL 1800*100MM</td>
+          <td>RAJSON AGRO ENGINEERS</td>
+          <td>QINGDAO BOSTONE TYRE CO LTD</td>
+          <td>CHINA</td>
+          <td>96.0</td>
+          <td>UNT</td>
+          <td>14494.18</td>
+          <td>96.0</td>
+          <td>UNT</td>
+          <td>150.981</td>
+          <td>13728.0</td>
+          <td>USD</td>
+          <td>Qingdao</td>
+          <td>GRFL ICD/SAHNEWAL</td>
+          <td>SEA</td>
+          <td>JAN-24</td>
+          <td>2024</td>
+          <td>84</td>
+          <td>8432</td>
+        </tr>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
           </div>
