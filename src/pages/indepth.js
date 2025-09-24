@@ -9,11 +9,11 @@ import DataTableExtensions from "react-data-table-component-extensions";
 import "react-data-table-component-extensions/dist/index.css";
 import moment from 'moment';
 import Loader from '../components/Loader';
-import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+//import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
-import GraphPI from '../components/GraphPI';
-import GraphBar from '../components/GrapghBar';
-import GraphLine from '../components/GraphLine';
+//import GraphPI from '../components/GraphPI';
+//import GraphBar from '../components/GrapghBar';
+//import GraphLine from '../components/GraphLine';
 import { TagsInput } from "react-tag-input-component";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css"
@@ -23,10 +23,10 @@ import Swal from 'sweetalert2';
 import { loaderStart, loaderStop } from "../store/actions/loader";
 import { connect } from "react-redux";
 import { withRouter } from 'react-router-dom';
-import AnalysisTable from '../components/IndepthTable'
-import AdvanceSearch from '../components/AdvanceSearch';
-import Draggable from 'react-draggable';
-import BlankImg from '../assets/image/BlankImg.png'
+//import AnalysisTable from '../components/IndepthTable'
+//import AdvanceSearch from '../components/AdvanceSearch';
+//import Draggable from 'react-draggable';
+//import BlankImg from '../assets/image/BlankImg.png'
 
 const dateFormat = "YYYY-MM-DD";
 
@@ -482,7 +482,7 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
   ];
     */
   /*Checking Working 17/09/2025 */
-  
+  /*
   const importerColumns = [
     {
       name: "Importer Name",
@@ -519,8 +519,9 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
       sortable: false,
       // cell: d => <span>{d.genres.join(", ")}</span>
     }
-  ];
+  ];  */
    /*Checking Working 17/09/2025 */
+   /*
   const exporterColumns = [
     {
       name: "Exporter Name",
@@ -557,7 +558,9 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
       sortable: false,
     }
   ];
+  */
   /*Checking Working 17/09/2025 */
+  /*
   const portColumns = [
     {
       name: "Port Name",
@@ -594,7 +597,9 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
       sortable: false,
     }
   ];
+  */
   /*Checking Working 17/09/2025 */
+  /*
   const hsCodeColumns = [
     {
       name: "HS Code",
@@ -631,7 +636,9 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
       sortable: false,
     }
   ];
+  */
   /*Checking Working 17/09/2025 */
+  /*
   const countryColumns = [
     {
       name: "Country Name",
@@ -668,7 +675,9 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
       sortable: false,
     }
   ];
+  */
   /*Checking Working 17/09/2025 */
+  /*
   const cityColumns = [
     {
       name: "City Name",
@@ -704,7 +713,7 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
       selector: row => row.share,
       sortable: false,
     }
-  ];
+  ];*/
 
   const handleModal = (rowData,columns)  => {
     setShowModal(true)
@@ -2254,7 +2263,7 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
       />
     )
   }
-
+/*
   const onDataRowClicked = (row,index) =>{
 
     if(row.hasOwnProperty("importer_name") && row.importer_name == "OTHERS"){
@@ -2278,7 +2287,7 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
     else if(row.hasOwnProperty("port_name") && row.port_name == "OTHERS" && row.country == 'Foreign'){
       handleModal(forPortDataList.portsList,portColumns)
     }
-  }  
+  }    */
 
  
 
@@ -2608,41 +2617,45 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
 
 
 {showTable && (
-  <div className="row">
+ <div className="row">
   <div className="col-12">
     <div className="card shadow-sm border-2 mt-4">
       <div className="card-header bg-dark text-white fw-bold">
         Importers Data
       </div>
       <div className="card-body p-0">
-        <div style={{ overflowX: "auto", width: "100%" }}>
-          <table className="table table-bordered table-hover table-striped align-middle mb-0">
+        {/* ✅ Bootstrap horizontal scroll wrapper */}
+        <div className="table-responsive">
+          <table
+      className="table table-bordered table-hover table-striped align-middle mb-0"
+      style={{ minWidth: "2940px", whiteSpace: "nowrap" }} // adjust if you need wider
+    >
             <thead className="table-dark text-center">
-            <tr>
-             <th>Date</th>
-          <th>HS Code</th>
-          <th>Product Description</th>
-          <th>Importer Name</th>
-          <th>Exporter Name</th>
-          <th>Country of Origin</th>
-          <th>Std Quantity</th>
-          <th>Std Unit</th>
-          <th>Total Value $</th>
-          <th>Quantity</th>
-          <th>Unit</th>
-          <th>Unit Price $</th>
-          <th>Total Value</th>
-          <th>Currency</th>
-          <th>Origin Port</th>
-          <th>Destination Port</th>
-          <th>Mode of Transport</th>
-          <th>Month</th>
-          <th>Year</th>
-          <th>HS Code2</th>
-          <th>HS Code4</th>
-            </tr>
-          </thead>
-          <tbody>
+              <tr>
+                <th>Date</th>
+                <th>HS Code</th>
+                <th>Product Description</th>
+                <th>Importer Name</th>
+                <th>Exporter Name</th>
+                <th>Country of Origin</th>
+                <th>Std Quantity</th>
+                <th>Std Unit</th>
+                <th>Total Value $</th>
+                <th>Quantity</th>
+                <th>Unit</th>
+                <th>Unit Price $</th>
+                <th>Total Value</th>
+                <th>Currency</th>
+                <th>Origin Port</th>
+                <th>Destination Port</th>
+                <th>Mode of Transport</th>
+                <th>Month</th>
+                <th>Year</th>
+                <th>HS Code2</th>
+                <th>HS Code4</th>
+              </tr>
+            </thead>
+            <tbody>
              <tr>
           <td>2024-01-31</td>
           <td>84329090</td>
@@ -2726,6 +2739,75 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
           <td>UNT</td>
           <td>150.981</td>
           <td>13728.0</td>
+          <td>USD</td>
+          <td>Qingdao</td>
+          <td>GRFL ICD/SAHNEWAL</td>
+          <td>SEA</td>
+          <td>JAN-24</td>
+          <td>2024</td>
+          <td>84</td>
+          <td>8432</td>
+        </tr>
+         <tr>
+          <td>2024-01-31</td>
+          <td>84329090</td>
+          <td>AGRICULTURE RICE TRANSPLANTER WHEEL 1600*120MM</td>
+          <td>RAJSON AGRO ENGINEERS</td>
+          <td>QINGDAO BOSTONE TYRE CO LTD</td>
+          <td>CHINA</td>
+          <td>2.0</td>
+          <td>UNT</td>
+          <td>295.63</td>
+          <td>2.0</td>
+          <td>UNT</td>
+          <td>147.815</td>
+          <td>280.0</td>
+          <td>USD</td>
+          <td>Qingdao</td>
+          <td>GRFL ICD/SAHNEWAL</td>
+          <td>SEA</td>
+          <td>JAN-24</td>
+          <td>2024</td>
+          <td>84</td>
+          <td>8432</td>
+        </tr>
+         <tr>
+          <td>2024-01-31</td>
+          <td>84329090</td>
+          <td>AGRICULTURE RICE TRANSPLANTER WHEEL 1600*120MM</td>
+          <td>RAJSON AGRO ENGINEERS</td>
+          <td>QINGDAO BOSTONE TYRE CO LTD</td>
+          <td>CHINA</td>
+          <td>2.0</td>
+          <td>UNT</td>
+          <td>295.63</td>
+          <td>2.0</td>
+          <td>UNT</td>
+          <td>147.815</td>
+          <td>280.0</td>
+          <td>USD</td>
+          <td>Qingdao</td>
+          <td>GRFL ICD/SAHNEWAL</td>
+          <td>SEA</td>
+          <td>JAN-24</td>
+          <td>2024</td>
+          <td>84</td>
+          <td>8432</td>
+        </tr>
+         <tr>
+          <td>2024-01-31</td>
+          <td>84329090</td>
+          <td>AGRICULTURE RICE TRANSPLANTER WHEEL 1600*120MM</td>
+          <td>RAJSON AGRO ENGINEERS</td>
+          <td>QINGDAO BOSTONE TYRE CO LTD</td>
+          <td>CHINA</td>
+          <td>2.0</td>
+          <td>UNT</td>
+          <td>295.63</td>
+          <td>2.0</td>
+          <td>UNT</td>
+          <td>147.815</td>
+          <td>280.0</td>
           <td>USD</td>
           <td>Qingdao</td>
           <td>GRFL ICD/SAHNEWAL</td>
