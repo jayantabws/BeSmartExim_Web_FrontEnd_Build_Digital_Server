@@ -254,6 +254,10 @@ const fetchSearchQuery = () => {
 
   // Search state for Card 1
   const [card1SearchTerm, setCard1SearchTerm] = useState("");
+  const [card2SearchTerm, setCard2SearchTerm] = useState("");
+  const [card3SearchTerm, setCard3SearchTerm] = useState("");
+  const [card4SearchTerm, setCard4SearchTerm] = useState("");
+  const [card5SearchTerm, setCard5SearchTerm] = useState("");
 
   // Add new state variables for Card 1
 
@@ -382,8 +386,10 @@ const RenderFirstCard = () => (
               onClick={() => setCard1SearchTerm("")}
               title="Clear search"
             >
-              ❌
+              ✖
             </button>
+
+          
           )}
         </div>
         
@@ -443,19 +449,23 @@ const RenderFirstCard = () => (
   </div>
 );
 
-const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, bodyId, loading) => (
+const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, bodyId, loading, searchTerm, setSearchTerm) => (
   <div className="col mb-3">
     <select
       className="form-select mb-2 form-control"
       value={cardSelect}
       onChange={(e) => {
-        setCardSelect(e.target.value);
+        const value = e.target.value;
+        setCardSelect(value);
+        setSearchTerm(""); // Clear search when changing selection
+        
         // Set loading true and fetch data for this card type
         if (cardIndex === 2) setCard2Loading(true);
         if (cardIndex === 3) setCard3Loading(true);
         if (cardIndex === 4) setCard4Loading(true);
         if (cardIndex === 5) setCard5Loading(true);
-        // Simulate API call (replace with your actual fetch logic)
+        
+        // Simulate API call
         setTimeout(() => {
           if (cardIndex === 2) setCard2Loading(false);
           if (cardIndex === 3) setCard3Loading(false);
@@ -474,44 +484,105 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
         {card1ImportExport === "importer" ? "Exporter" : "Importer"}
       </option>
     </select>
+    
     <div className="card shadow-sm border-2">
-      <div
-        className="card-header bg-primary text-white text-center fw-bold"
-        id={`div_title${cardIndex}`}
-      >
-        {cardSelect
-          ? cardSelect.charAt(0).toUpperCase() + cardSelect.slice(1)
-          : cardTitle}
+      <div className="card-header bg-primary text-white text-center fw-bold" id={`div_title${cardIndex}`}>
+        {cardSelect ? cardSelect.charAt(0).toUpperCase() + cardSelect.slice(1) : cardTitle}
       </div>
-      <div
-        className="card-body"
-        style={{ height: "300px", overflowY: "auto", padding: "12px" }}
-        id={bodyId}
-      >
-       
+      <div className="card-body" style={{ height: "300px", overflowY: "auto", padding: "12px" }} id={bodyId}>
+        
+        {/* Search Input for Cards 2-5 */}
+        {cardSelect && (
+          <div className="input-group mb-2">
+            {/* <span className="input-group-text">
+              <i className="fas fa-search"></i>
+            </span> */}
+            <input 
+              type='text' 
+              className='form-control' 
+              placeholder={`Search ${cardSelect}s...`}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button
+                  className="btn btn-outline-secondary"
+                  type="button"
+                  onClick={() => setSearchTerm("")}
+              >
+                  ✖
+              </button>
+            )}
+          </div>
+        )}
+
         {loading ? (
-          <div className="" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
             <div className="loader"></div>
           </div>
-        ) : cardSelect && getCardApiData(cardSelect).length > 0 ? (
-          getCardApiData(cardSelect).map((item, i) => (
-            <div className="form-check mb-2 border-bottom" key={i}>
-              <input
-                type="checkbox"
-                className="form-check-input"
-                id={`card${cardIndex}-${getCardLabel(cardSelect, item)}`}
-              />
-              <label
-                className="form-check-label"
-                htmlFor={`card${cardIndex}-${getCardLabel(cardSelect, item)}`}
-                style={{ fontSize: "16px" }}
-              >
-                {getCardLabel(cardSelect, item)}
-              </label>
+        ) : cardSelect ? (() => {
+          const filteredData = getFilteredCardData(cardSelect, searchTerm);
+          
+          return filteredData.length > 0 ? (
+            <>
+              {/* Search Results Info */}
+              {searchTerm && (
+                <div className="text-muted small mb-2">
+                  <i className="fas fa-info-circle me-1"></i>
+                  Found {filteredData.length} result(s) for "{searchTerm}"
+                </div>
+              )}
+              
+              {/* Filtered Results */}
+              {filteredData.map((item, i) => (
+                <div className="form-check mb-2 border-bottom" key={i}>
+                  <input
+                    type="checkbox"
+                    className="form-check-input"
+                    id={`card${cardIndex}-${getCardLabel(cardSelect, item)}-${i}`}
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor={`card${cardIndex}-${getCardLabel(cardSelect, item)}-${i}`}
+                    style={{ fontSize: "16px" }}
+                  >
+                    {getCardLabel(cardSelect, item)}
+                  </label>
+                </div>
+              ))}
+            </>
+          ) : searchTerm ? (
+            // No search results
+            <div className="text-center text-muted py-4">
+              <i className="fas fa-search" style={{ fontSize: "48px", opacity: 0.3 }}></i>
+              <div className="mt-2">
+                <strong>No results found</strong>
+              </div>
+              <div className="small">
+                Try adjusting your search term: "{searchTerm}"
+              </div>
             </div>
-          ))
-        ) : (
-          <div className="text-muted text-center" style={{marginTop: "100px",fontSize: "70px",fontWeight: "bold"}}>+</div>
+          ) : (
+            // Show all data when no search term
+            getCardApiData(cardSelect).map((item, i) => (
+              <div className="form-check mb-2 border-bottom" key={i}>
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id={`card${cardIndex}-${getCardLabel(cardSelect, item)}-${i}`}
+                />
+                <label
+                  className="form-check-label"
+                  htmlFor={`card${cardIndex}-${getCardLabel(cardSelect, item)}-${i}`}
+                  style={{ fontSize: "16px" }}
+                >
+                  {getCardLabel(cardSelect, item)}
+                </label>
+              </div>
+            ))
+          );
+        })() : (
+          <div className="text-muted text-center" style={{marginTop: "100px", fontSize: "70px", fontWeight: "bold"}}>+</div>
         )}
       </div>
     </div>
@@ -2662,40 +2733,44 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
 <div className="d-flex justify-content-center gap-5 mb-4">
 
   {/* Value */}
-  <div className="d-flex align-items-center gap-3">
-    <h5 className="mb-0">Value:</h5>
-    <button className="btn btn-outline-dark  fw-bold shadow-sm px-5 py-3">
+  <div className="d-flex align-items-center gap-4">
+    <h5 className="mb-0">Value </h5>&nbsp;&nbsp;&nbsp;&nbsp;
+    <button className="btn btn-outline-dark fw-bold shadow-sm px-3">
       20000.00
     </button>
   </div>
-  &nbsp;&nbsp;&nbsp;&nbsp;
-
+  &nbsp;&nbsp;
+  &nbsp;&nbsp;
+  &nbsp;&nbsp;
+  &nbsp;&nbsp;
   {/* Shipment */}
-  <div className="d-flex align-items-center gap-3">
-    <h5 className="mb-0">Shipment:</h5>
-    <button className="btn btn-outline-primary  fw-bold shadow-sm px-5 py-3">
+  <div className="d-flex align-items-center gap-4">
+    <h5 className="mb-0">Shipment </h5>&nbsp;&nbsp;&nbsp;&nbsp;
+    <button className="btn btn-outline-primary fw-bold shadow-sm px-3">
       30000.00
     </button>
   </div>
+
 </div>
 
+
   
-
-
 <div className="row mb-4">
    {/* Card 1 - Dynamic Import/Export */}
    {RenderFirstCard()}
 
    {/* Card 2 */}
-   {RenderCard(card2Select, setCard2Select, 2, "Select Variable", "select2", "div_body2", card2Loading)}
+   {RenderCard(card2Select, setCard2Select, 2, "Select Variable", "select2", "div_body2", card2Loading, card2SearchTerm, setCard2SearchTerm)}
+   
    {/* Card 3 */}
-   {RenderCard(card3Select, setCard3Select, 3, "Select Variable", "select3", "div_body3", card3Loading)}
+   {RenderCard(card3Select, setCard3Select, 3, "Select Variable", "select3", "div_body3", card3Loading, card3SearchTerm, setCard3SearchTerm)}
+   
    {/* Card 4 */}
-   {RenderCard(card4Select, setCard4Select, 4, "Select Variable", "select4", "div_body4", card4Loading)}
+   {RenderCard(card4Select, setCard4Select, 4, "Select Variable", "select4", "div_body4", card4Loading, card4SearchTerm, setCard4SearchTerm)}
+   
    {/* Card 5 */}
-   {RenderCard(card5Select, setCard5Select, 5, "Select Variable", "select5", "div_body5", card5Loading)}
+   {RenderCard(card5Select, setCard5Select, 5, "Select Variable", "select5", "div_body5", card5Loading, card5SearchTerm, setCard5SearchTerm)}
 
-   {/* Value Button */}
 
 </div>
 
