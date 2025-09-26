@@ -17,6 +17,7 @@ import 'react-tabs/style/react-tabs.css';
 import { TagsInput } from "react-tag-input-component";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css"
+import Select from 'react-select';
 import 'react-datepicker/dist/react-datepicker-cssmodules.min.css'
 import { useHistory, Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -247,6 +248,12 @@ const fetchSearchQuery = () => {
   const [card4Select, setCard4Select] = useState("");
   const [card5Select, setCard5Select] = useState("");
 
+  // State for searchable dropdowns
+  const [selectedImporters, setSelectedImporters] = useState([]);
+  const [selectedExporters, setSelectedExporters] = useState([]);
+
+  // Search state for Card 1
+  const [card1SearchTerm, setCard1SearchTerm] = useState("");
 
   // Add new state variables for Card 1
 
@@ -279,18 +286,32 @@ const getCardApiData = (type) => {
 const getCardLabel = (type, item) => {
   switch (type) {
     case "hscode":
-      return `${item.hscode} [${item.shipment_count}]`;
+      return `${item.hscode} [$${item.value_usd}]`;
     case "importer":
-      return `${item.importer_name} [${item.shipment_count}]`;
+      return `${item.importer_name} [$${item.value_usd}]`;
     case "exporter":
-      return `${item.exporter_name} [${item.shipment_count}]`;
+      return `${item.exporter_name} [$${item.value_usd}]`;
     case "country":
-      return `${item.country_name} [${item.shipment_count}]`;
+      return `${item.country_name} [$${item.value_usd}]`;
     case "port":
-      return `${item.port_name} [${item.shipment_count}]`;
+      return `${item.port_name} [$${item.value_usd}]`;
     default:
       return "";
   }
+};
+
+// Helper: filter data based on search term
+const getFilteredCardData = (type, searchTerm = "") => {
+  const data = getCardApiData(type);
+  
+  if (!searchTerm.trim()) {
+    return data; // Return all data if no search term
+  }
+  
+  return data.filter(item => {
+    const label = getCardLabel(type, item);
+    return label.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 };
 
 const isOptionSelectedElsewhere = (option, currentCardIndex) => {
@@ -303,7 +324,7 @@ const isOptionSelectedElsewhere = (option, currentCardIndex) => {
 
 // Special render function for Card 1 with import/export dropdown
 const RenderFirstCard = () => (
-  <div className="col-lg-2 col-md-3 mb-3">
+  <div className="col mb-3">
     {/* Import/Export Selection Dropdown */}
     <select
       className="form-select mb-2 form-control"
@@ -311,6 +332,7 @@ const RenderFirstCard = () => (
       onChange={(e) => {
         const newValue = e.target.value;
         setCard1ImportExport(newValue);
+          setCard1SearchTerm(""); // Clear search when switching type
         setCard1Loading(true);
         setCard2Loading(true);
         setCard3Loading(true);
@@ -342,37 +364,87 @@ const RenderFirstCard = () => (
         {card1ImportExport === "importer" ? "Importer" : "Exporter"}
       </div>
       <div className="card-body" style={{ height: "300px", overflowY: "auto", padding: "12px" }}>
+
+            {/* Enhanced Search Input with Live Search */}
+        <div className="input-group mb-2">
+        
+          <input 
+            type='text' 
+            className='form-control' 
+            placeholder={`Search ${card1ImportExport}s...`}
+            value={card1SearchTerm}
+            onChange={(e) => setCard1SearchTerm(e.target.value)}
+          />
+          {card1SearchTerm && (
+            <button 
+              className="btn btn-outline-secondary" 
+              type="button"
+              onClick={() => setCard1SearchTerm("")}
+              title="Clear search"
+            >
+              ❌
+            </button>
+          )}
+        </div>
+        
         {card1Loading ? (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
             <div className="loader"></div>
           </div>
-        ) : getCardApiData(card1ImportExport).length > 0 ? (
-          getCardApiData(card1ImportExport).map((item, i) => (
-            <div className="form-check mb-2 border-bottom" key={i}>
-              <input
-                type="checkbox"
-                className="form-check-input"
-                id={`card1-${getCardLabel(card1ImportExport, item)}`}
-              />
-              <label
-                className="form-check-label"
-                htmlFor={`card1-${getCardLabel(card1ImportExport, item)}`}
-                style={{ fontSize: "16px" }}
-              >
-                {getCardLabel(card1ImportExport, item)}
-              </label>
+        ) : (() => {
+          const filteredData = getFilteredCardData(card1ImportExport, card1SearchTerm);
+          
+          return filteredData.length > 0 ? (
+            <>
+              {/* Search Results Info */}
+              {card1SearchTerm && (
+                <div className="text-muted small mb-2">
+                  <i className="fas fa-info-circle me-1"></i>
+                  Found {filteredData.length} result(s) for "{card1SearchTerm}"
+                </div>
+              )}
+              
+              {/* Filtered Results */}
+              {filteredData.map((item, i) => (
+                <div className="form-check mb-2 border-bottom" key={i}>
+                  <input
+                    type="checkbox"
+                    className="form-check-input"
+                    id={`card1-${getCardLabel(card1ImportExport, item)}-${i}`}
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor={`card1-${getCardLabel(card1ImportExport, item)}-${i}`}
+                    style={{ fontSize: "16px" }}
+                  >
+                    {getCardLabel(card1ImportExport, item)}
+                  </label>
+                </div>
+              ))}
+            </>
+          ) : card1SearchTerm ? (
+            // No search results
+            <div className="text-center text-muted py-4">
+              <i className="fas fa-search" style={{ fontSize: "48px", opacity: 0.3 }}></i>
+              <div className="mt-2">
+                <strong>No results found</strong>
+              </div>
+              <div className="small">
+                Try adjusting your search term: "{card1SearchTerm}"
+              </div>
             </div>
-          ))
-        ) : (
-          <div className="text-muted text-center" style={{marginTop: "100px", fontSize: "70px", fontWeight: "bold"}}>+</div>
-        )}
+          ) : (
+            // No data available
+            <div className="text-muted text-center" style={{marginTop: "100px", fontSize: "70px", fontWeight: "bold"}}>+</div>
+          );
+        })()}
       </div>
     </div>
   </div>
 );
 
 const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, bodyId, loading) => (
-  <div className="col-lg-2 col-md-3 mb-3">
+  <div className="col mb-3">
     <select
       className="form-select mb-2 form-control"
       value={cardSelect}
@@ -416,6 +488,7 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
         style={{ height: "300px", overflowY: "auto", padding: "12px" }}
         id={bodyId}
       >
+       
         {loading ? (
           <div className="" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
             <div className="loader"></div>
@@ -993,7 +1066,7 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
       }
     })
       .then(res => {
-
+        console.log("importer data ============= ", res.data.importersList);
         let importersList = [];
         if (res.data.importersList) {
           res.data.importersList.forEach((item) => {
@@ -2507,11 +2580,7 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
         </div>
         
     
-      <div className="row mb-4">
-    <div className="col-12">
-      <h3 className="mb-3">In-Depth Analysis</h3>
-    </div>
-    </div>
+ 
   <div className="row mb-4">
  
       {/* Button 1 */}
@@ -2574,8 +2643,42 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
         </button>
       </div>
 
+           {/* Button 5 */}
+      <div className="col-lg-2 col-md-3 mb-3">
+        <button
+          className={`btn w-100 py-3 ${
+            active === "indepthAnalysis2" ? "btn-warning" : "btn-primary"
+          }`}
+          onClick={() => setActive("indepthAnalysis2")}
+        >
+          Loream Ipsume 5
+        </button>
+      </div>
+
+
    
     </div>
+
+<div className="d-flex justify-content-center gap-5 mb-4">
+
+  {/* Value */}
+  <div className="d-flex align-items-center gap-3">
+    <h5 className="mb-0">Value:</h5>
+    <button className="btn btn-outline-dark  fw-bold shadow-sm px-5 py-3">
+      20000.00
+    </button>
+  </div>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+
+  {/* Shipment */}
+  <div className="d-flex align-items-center gap-3">
+    <h5 className="mb-0">Shipment:</h5>
+    <button className="btn btn-outline-primary  fw-bold shadow-sm px-5 py-3">
+      30000.00
+    </button>
+  </div>
+</div>
+
   
 
 
@@ -2593,12 +2696,7 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
    {RenderCard(card5Select, setCard5Select, 5, "Select Variable", "select5", "div_body5", card5Loading)}
 
    {/* Value Button */}
-   <div className="col-lg-2 col-md-3 mb-3 d-flex flex-column justify-content-top">
-     <h5 className="text-center mb-2">Value</h5>
-     <button className="btn btn-outline-dark w-100 py-3 fw-bold shadow-sm">
-       20000.00
-     </button>
-   </div>
+
 </div>
 
 
