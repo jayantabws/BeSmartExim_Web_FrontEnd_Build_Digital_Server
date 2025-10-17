@@ -214,7 +214,7 @@ const Header = (props) => {
                 Download History
               </Link>
               <Link to="/subscriptions" className="nav-link">
-                Subsciptions
+                Subscriptions
               </Link>
               <Link to="/list1" className="nav-link">
                 Search Global Data

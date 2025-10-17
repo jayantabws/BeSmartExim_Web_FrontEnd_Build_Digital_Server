@@ -132,7 +132,8 @@ const List = (props) => {
   const workspace_desc = props.location.state ? props.location.state.workspace_desc : "";
   const workspaceId = props.location.state ? props.location.state.workspaceId : "";
   const newSearch = [{ "value": props && props.location.state && props.location.state.searchValue, "label": props && props.location.state && props.location.state.searchValue }];
-
+console.log('list props.location.state:', props.location.state);
+console.log(newSearch);
 
   const gridRef = useRef();
 
@@ -363,11 +364,11 @@ const List = (props) => {
     else setshowNewWorkspaceInput(false)
   }
 
-  useEffect(() => {
-    return () => {
-      initialValues = {}
-    }
-  }, [])
+  // useEffect(() => {
+  //   return () => {
+  //     initialValues = {}
+  //   }
+  // }, [])
 
   useEffect(() => {
 

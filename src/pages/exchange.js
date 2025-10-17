@@ -119,11 +119,11 @@ const Exchange = (props) => {
   }
 const routeToList = (data) => {
   history.push({
-        pathname:"/list", 
+        pathname:"/list1", 
         state: {
           searchType: data.searchType, 
           searchValue: data.searchValue
-        } ,
+        },
         search: "searchValue"
        });
 }

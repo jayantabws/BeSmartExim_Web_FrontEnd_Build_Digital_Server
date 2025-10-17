@@ -261,8 +261,13 @@ const fetchSearchQuery = () => {
 
   // Add new state variables for Card 1
 
+  // Add these state variables for Cards 2-5 selections
+const [selectedCard2Items, setSelectedCard2Items] = useState([]);
+const [selectedCard3Items, setSelectedCard3Items] = useState([]);
+const [selectedCard4Items, setSelectedCard4Items] = useState([]);
+const [selectedCard5Items, setSelectedCard5Items] = useState([]);
 
-
+  
   
 
 /* 18/09/2025 */
@@ -323,9 +328,323 @@ const isOptionSelectedElsewhere = (option, currentCardIndex) => {
   return allSelected.some((val, idx) => val === option && (idx !== currentCardIndex - 2));
 };
 
-// Card rendering function
-// Card rendering function
 
+/*15/10/2025 Start */
+
+// ✅ Updated handleSelectionChange to handle all card types
+const handleSelectionChange = (selectedItems, type) => {
+  console.log(`${type} selection changed:`, selectedItems);
+  
+  if (selectedItems.length > 0 && searchParams) {
+    // Update search parameters with selected items based on type
+    const updatedParams = {
+      ...searchParams,
+      ...(type === 'exporter' && { exporterList: selectedItems }),
+      ...(type === 'importer' && { importerList: selectedItems }),
+      ...(type === 'hscode' && { hsCodeList: selectedItems }),
+      ...(type === 'country' && { countryList: selectedItems }),
+      ...(type === 'port' && { portOriginList: selectedItems })
+    };
+    
+    console.log(`Updating dependent data based on ${type}:`, selectedItems);
+    
+    // ✅ Set loading states for cards that will be updated
+    setCard2Loading(true);
+    setCard3Loading(true);
+    setCard4Loading(true);
+    setCard5Loading(true);
+    props.loadingStart();
+    
+    // ✅ Call APIs based on selection type
+    let updatePromises = [
+      getIndianPortList(updatedParams),
+      getHSCodeList(updatedParams),
+      getForeignCountryList(updatedParams),
+      getHSCode4digitList(updatedParams),
+      getForeignPortList(updatedParams)
+    ];
+
+    // ✅ Conditional API calls based on type
+    if (type !== 'importer') {
+      updatePromises.push(getImporterList(updatedParams));
+    }
+    if (type !== 'exporter') {
+      updatePromises.push(getExporterList(updatedParams));
+    }
+
+    // ✅ Handle completion of all API calls
+    Promise.all(updatePromises).then(() => {
+      console.log(`All dependent data updated successfully for ${type}`);
+    }).catch((error) => {
+      console.error("Error updating dependent data:", error);
+    }).finally(() => {
+      setTimeout(() => {
+        setCard2Loading(false);
+        setCard3Loading(false);
+        setCard4Loading(false);
+        setCard5Loading(false);
+        props.loadingStop();
+      }, 1500);
+    });
+  }
+};
+
+//Caluelate
+
+// ✅ SEPARATE FUNCTIONS FOR EACH CARD
+
+// ✅ UPDATED CARD FUNCTIONS - NO BACKWARD TRACKING
+
+// Function for Card 1 (Importer/Exporter) changes - affects Cards 2, 3, 4, 5 only
+const handleCard1Change = (selectedItems, type) => {
+  console.log(`Card 1 ${type} selection changed:`, selectedItems);
+  
+  if (selectedItems.length > 0) {
+    // Call existing handleSelectionChange function
+    handleSelectionChange(selectedItems, type);
+  } else {
+    resetToOriginalData();
+  }
+};
+
+// ✅ UPDATED CARD FUNCTIONS - NO BACKWARD DATA UPDATES
+
+// Function for Card 2 changes - affects Cards 3, 4, 5 only (NO backward updates)
+const handleCard2Change = (selectedItems, type) => {
+  console.log(`Card 2 ${type} selection changed:`, selectedItems);
+  
+  if (selectedItems.length > 0 && searchParams) {
+    const updatedParams = {
+      ...searchParams,
+      ...(type === 'hscode' && { hsCodeList: selectedItems }),
+      ...(type === 'country' && { countryList: selectedItems }),
+      ...(type === 'port' && { portOriginList: selectedItems }),
+      ...(type === 'importer' && { importerList: selectedItems }),
+      ...(type === 'exporter' && { exporterList: selectedItems })
+    };
+    
+    console.log('Card 2 Updated Params:', updatedParams);
+    
+    // ✅ Set loading ONLY for Cards 3, 4, 5
+    setCard3Loading(true);
+    setCard4Loading(true);
+    setCard5Loading(true);
+    props.loadingStart();
+    
+    // ✅ ONLY call APIs for Cards 3, 4, 5 data types (forward-dependent only)
+    let updatePromises = [];
+    
+    // ✅ Only update data that Card 3, 4, 5 can use (NOT Card 1 exporter/importer)
+    // Don't call getExporterList or getImporterList to avoid updating Card 1
+    if (type !== 'hscode') updatePromises.push(getHSCodeList(updatedParams));
+    if (type !== 'country') updatePromises.push(getForeignCountryList(updatedParams));
+    if (type !== 'port') {
+      updatePromises.push(getIndianPortList(updatedParams));
+      updatePromises.push(getForeignPortList(updatedParams));
+    }
+    
+    // Supporting APIs only (these don't affect displayed card data)
+    updatePromises.push(getHSCode4digitList(updatedParams));
+    updatePromises.push(getCityList(updatedParams));
+    updatePromises.push(getShipmentModeList(updatedParams));
+    updatePromises.push(getStdUnitList(updatedParams));
+    
+    console.log('Card 2 API Promises (forward-only):', updatePromises.length);
+    
+    Promise.all(updatePromises).then(() => {
+      console.log(`Card 2 updated Cards 3, 4, 5 successfully (no backward updates)`);
+    }).catch((error) => {
+      console.error("Error updating from Card 2:", error);
+    }).finally(() => {
+      setTimeout(() => {
+        setCard3Loading(false);
+        setCard4Loading(false);
+        setCard5Loading(false);
+        props.loadingStop();
+      }, 1500);
+    });
+  } else {
+    console.log('Card 2: No items selected');
+    setSelectedCard3Items([]);
+    setSelectedCard4Items([]);
+    setSelectedCard5Items([]);
+  }
+};
+
+// Function for Card 3 changes - affects Cards 4, 5 only
+const handleCard3Change = (selectedItems, type) => {
+  console.log(`Card 3 ${type} selection changed:`, selectedItems);
+  
+  if (selectedItems.length > 0 && searchParams) {
+    const updatedParams = {
+      ...searchParams,
+      ...(type === 'hscode' && { hsCodeList: selectedItems }),
+      ...(type === 'country' && { countryList: selectedItems }),
+      ...(type === 'port' && { portOriginList: selectedItems }),
+      ...(type === 'importer' && { importerList: selectedItems }),
+      ...(type === 'exporter' && { exporterList: selectedItems })
+    };
+    
+    // ✅ Set loading ONLY for Cards 4, 5
+    setCard4Loading(true);
+    setCard5Loading(true);
+    props.loadingStart();
+    
+    // ✅ ONLY call APIs for Cards 4, 5 data types
+    let updatePromises = [];
+    
+    if (type !== 'hscode') updatePromises.push(getHSCodeList(updatedParams));
+    if (type !== 'country') updatePromises.push(getForeignCountryList(updatedParams));
+    if (type !== 'port') {
+      updatePromises.push(getIndianPortList(updatedParams));
+      updatePromises.push(getForeignPortList(updatedParams));
+    }
+    
+    // Supporting APIs only
+    updatePromises.push(getHSCode4digitList(updatedParams));
+    updatePromises.push(getCityList(updatedParams));
+    updatePromises.push(getShipmentModeList(updatedParams));
+    updatePromises.push(getStdUnitList(updatedParams));
+    
+    Promise.all(updatePromises).then(() => {
+      console.log(`Card 3 updated Cards 4, 5 successfully (no backward updates)`);
+    }).catch((error) => {
+      console.error("Error updating from Card 3:", error);
+    }).finally(() => {
+      setTimeout(() => {
+        setCard4Loading(false);
+        setCard5Loading(false);
+        props.loadingStop();
+      }, 1500);
+    });
+  } else {
+    console.log('Card 3: No items selected');
+    setSelectedCard4Items([]);
+    setSelectedCard5Items([]);
+  }
+};
+
+// Function for Card 4 changes - affects Card 5 only
+const handleCard4Change = (selectedItems, type) => {
+  console.log(`Card 4 ${type} selection changed:`, selectedItems);
+  
+  if (selectedItems.length > 0 && searchParams) {
+    const updatedParams = {
+      ...searchParams,
+      ...(type === 'hscode' && { hsCodeList: selectedItems }),
+      ...(type === 'country' && { countryList: selectedItems }),
+      ...(type === 'port' && { portOriginList: selectedItems }),
+      ...(type === 'importer' && { importerList: selectedItems }),
+      ...(type === 'exporter' && { exporterList: selectedItems })
+    };
+    
+    // ✅ Set loading ONLY for Card 5
+    setCard5Loading(true);
+    props.loadingStart();
+    
+    // ✅ ONLY call APIs for Card 5 data types
+    let updatePromises = [];
+    
+    if (type !== 'hscode') updatePromises.push(getHSCodeList(updatedParams));
+    if (type !== 'country') updatePromises.push(getForeignCountryList(updatedParams));
+    if (type !== 'port') {
+      updatePromises.push(getIndianPortList(updatedParams));
+      updatePromises.push(getForeignPortList(updatedParams));
+    }
+    
+    // Supporting APIs only
+    updatePromises.push(getHSCode4digitList(updatedParams));
+    updatePromises.push(getCityList(updatedParams));
+    updatePromises.push(getShipmentModeList(updatedParams));
+    updatePromises.push(getStdUnitList(updatedParams));
+    
+    Promise.all(updatePromises).then(() => {
+      console.log(`Card 4 updated Card 5 successfully (no backward updates)`);
+    }).catch((error) => {
+      console.error("Error updating from Card 4:", error);
+    }).finally(() => {
+      setTimeout(() => {
+        setCard5Loading(false);
+        props.loadingStop();
+      }, 1500);
+    });
+  } else {
+    console.log('Card 4: No items selected');
+    setSelectedCard5Items([]);
+  }
+};
+
+// Function for Card 5 changes - NO other cards to update
+const handleCard5Change = (selectedItems, type) => {
+  console.log(`Card 5 ${type} selection changed:`, selectedItems);
+  
+  if (selectedItems.length > 0) {
+    console.log('Card 5 selection complete - NO dependent cards to update');
+    // ✅ Card 5 is the end of the chain - no API calls needed
+  } else {
+    console.log('Card 5: No items selected');
+  }
+};
+
+// ✅ Helper function to sanitize IDs (remove special characters)
+const sanitizeId = (str) => {
+  return str.replace(/[^a-zA-Z0-9-_]/g, '_');
+};
+
+// ✅ NEW SEPARATE FUNCTION: Reset all card data to original unfiltered state
+const resetToOriginalData = () => {
+  console.log("Resetting all data to original state without search API");
+  
+  if (searchParams) {
+    // Create clean params without any exporter/importer filters
+    const resetParams = {
+      ...searchParams,
+      exporterList: [], // ✅ Clear exporter filters
+      importerList: [], // ✅ Clear importer filters
+    };
+    
+    // ✅ Set loading states for all dependent cards
+    setCard2Loading(true);
+    setCard3Loading(true);
+    setCard4Loading(true);
+    setCard5Loading(true);
+    props.loadingStart();
+    
+    console.log("Calling APIs to reset all data to original state");
+    
+    // ✅ Call all APIs to get original unfiltered data
+    let resetPromises = [
+      getImporterList(resetParams),     // ✅ Reset Importer data
+      getExporterList(resetParams),     // ✅ Reset Exporter data
+      getHSCodeList(resetParams),       // ✅ Reset HSCode data
+      getForeignCountryList(resetParams), // ✅ Reset Country data  
+      getIndianPortList(resetParams),   // ✅ Reset Indian Port data
+      getForeignPortList(resetParams),  // ✅ Reset Foreign Port data
+      getHSCode4digitList(resetParams), // ✅ Reset HS Code 4-digit data
+      getCityList(resetParams),         // ✅ Reset City data
+      getShipmentModeList(resetParams), // ✅ Reset Shipment Mode data
+      getStdUnitList(resetParams)       // ✅ Reset Standard Unit data
+    ];
+    
+    // ✅ Handle completion of all API calls
+    Promise.all(resetPromises).then(() => {
+      console.log("All data reset to original state successfully");
+    }).catch((error) => {
+      console.error("Error resetting data:", error);
+    }).finally(() => {
+      // ✅ Hide loading states after API calls complete
+      setTimeout(() => {
+        setCard2Loading(false);
+        setCard3Loading(false);
+        setCard4Loading(false);
+        setCard5Loading(false);
+        props.loadingStop();
+      }, 1500); // Small delay to show loading effect
+    });
+  }
+};
+
+// Card rendering function
 // Special render function for Card 1 with import/export dropdown
 const RenderFirstCard = () => (
   <div className="col mb-3">
@@ -336,7 +655,12 @@ const RenderFirstCard = () => (
       onChange={(e) => {
         const newValue = e.target.value;
         setCard1ImportExport(newValue);
-          setCard1SearchTerm(""); // Clear search when switching type
+        setCard1SearchTerm(""); // Clear search when switching type
+        
+        // Clear selections when switching type
+        setSelectedExporters([]);
+        setSelectedImporters([]);
+        
         setCard1Loading(true);
         setCard2Loading(true);
         setCard3Loading(true);
@@ -369,9 +693,8 @@ const RenderFirstCard = () => (
       </div>
       <div className="card-body" style={{ height: "300px", overflowY: "auto", padding: "12px" }}>
 
-            {/* Enhanced Search Input with Live Search */}
+        {/* Enhanced Search Input */}
         <div className="input-group mb-2">
-        
           <input 
             type='text' 
             className='form-control' 
@@ -388,10 +711,33 @@ const RenderFirstCard = () => (
             >
               ✖
             </button>
-
-          
           )}
         </div>
+
+        {/* Show Selected Items Summary */}
+        {((card1ImportExport === "exporter" && selectedExporters.length > 0) || 
+          (card1ImportExport === "importer" && selectedImporters.length > 0)) && (
+          <div className="alert alert-info small p-2 mb-2">
+            <strong>Selected:</strong> {card1ImportExport === "exporter" 
+              ? selectedExporters.length : selectedImporters.length} items
+         <button 
+  className="btn btn-sm btn-outline-danger ms-2"
+  onClick={() => {
+    // Clear selections based on current type
+    if (card1ImportExport === "exporter") {
+      setSelectedExporters([]);
+    } else {
+      setSelectedImporters([]);
+    }
+    
+    // ✅ Call resetToOriginalData function
+    resetToOriginalData();
+  }}
+>
+  Clear All
+</button>
+          </div>
+        )}
         
         {card1Loading ? (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
@@ -410,23 +756,62 @@ const RenderFirstCard = () => (
                 </div>
               )}
               
-              {/* Filtered Results */}
-              {filteredData.map((item, i) => (
-                <div className="form-check mb-2 border-bottom" key={i}>
-                  <input
-                    type="checkbox"
-                    className="form-check-input"
-                    id={`card1-${getCardLabel(card1ImportExport, item)}-${i}`}
-                  />
-                  <label
-                    className="form-check-label"
-                    htmlFor={`card1-${getCardLabel(card1ImportExport, item)}-${i}`}
-                    style={{ fontSize: "16px" }}
-                  >
-                    {getCardLabel(card1ImportExport, item)}
-                  </label>
-                </div>
-              ))}
+              {/* Filtered Results with Checkboxes */}
+              {filteredData.map((item, i) => {
+                const itemValue = card1ImportExport === "exporter" ? item.exporter_name : item.importer_name;
+                const isSelected = card1ImportExport === "exporter" 
+                  ? selectedExporters.includes(itemValue)
+                  : selectedImporters.includes(itemValue);
+                
+                return (
+                  <div className="form-check mb-2 border-bottom" key={i}>
+                    <input
+                      type="checkbox"
+                      className="form-check-input"
+                      id={`card1-${itemValue}-${i}`}
+                      checked={isSelected}
+                      onChange={(e) => {
+                        if (card1ImportExport === "exporter") {
+                          let newSelected;
+                          if (e.target.checked) {
+                            newSelected = [...selectedExporters, itemValue];
+                          } else {
+                            newSelected = selectedExporters.filter(exp => exp !== itemValue);
+                          }
+                          setSelectedExporters(newSelected);
+                          
+                          // ✅ Call API to update dependent data when exporters change
+                          if (newSelected.length > 0) {
+                            handleSelectionChange(newSelected, 'exporter');
+                          }
+                        } else {
+                          let newSelected;
+                          if (e.target.checked) {
+                            newSelected = [...selectedImporters, itemValue];
+                          } else {
+                            newSelected = selectedImporters.filter(imp => imp !== itemValue);
+                          }
+                          setSelectedImporters(newSelected);
+                          
+                          // ✅ Call API to update dependent data when importers change
+                          if (newSelected.length > 0) {
+                            handleSelectionChange(newSelected, 'importer');
+                          }else {
+                      resetToOriginalData(); // ✅ This was missing!
+    }
+                        }
+                      }}
+                    />
+                    <label
+                      className="form-check-label"
+                      htmlFor={`card1-${itemValue}-${i}`}
+                      style={{ fontSize: "16px" }}
+                    >
+                      {getCardLabel(card1ImportExport, item)}
+                    </label>
+                  </div>
+                );
+              })}
             </>
           ) : card1SearchTerm ? (
             // No search results
@@ -458,6 +843,12 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
         const value = e.target.value;
         setCardSelect(value);
         setSearchTerm(""); // Clear search when changing selection
+        
+        // Clear selections when changing card type
+        if (cardIndex === 2) setSelectedCard2Items([]);
+        if (cardIndex === 3) setSelectedCard3Items([]);
+        if (cardIndex === 4) setSelectedCard4Items([]);
+        if (cardIndex === 5) setSelectedCard5Items([]);
         
         // Set loading true and fetch data for this card type
         if (cardIndex === 2) setCard2Loading(true);
@@ -494,9 +885,6 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
         {/* Search Input for Cards 2-5 */}
         {cardSelect && (
           <div className="input-group mb-2">
-            {/* <span className="input-group-text">
-              <i className="fas fa-search"></i>
-            </span> */}
             <input 
               type='text' 
               className='form-control' 
@@ -506,15 +894,45 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
             />
             {searchTerm && (
               <button
-                  className="btn btn-outline-secondary"
-                  type="button"
-                  onClick={() => setSearchTerm("")}
+                className="btn btn-outline-secondary"
+                type="button"
+                onClick={() => setSearchTerm("")}
               >
-                  ✖
+                ✖
               </button>
             )}
           </div>
         )}
+
+        {/* Show Selected Items Summary */}
+        {(() => {
+          let selectedItems = [];
+          if (cardIndex === 2) selectedItems = selectedCard2Items;
+          if (cardIndex === 3) selectedItems = selectedCard3Items;
+          if (cardIndex === 4) selectedItems = selectedCard4Items;
+          if (cardIndex === 5) selectedItems = selectedCard5Items;
+          
+          return selectedItems.length > 0 && (
+            <div className="alert alert-info small p-2 mb-2">
+              <strong>Selected:</strong> {selectedItems.length} items
+              <button 
+                className="btn btn-sm btn-outline-danger ms-2"
+                onClick={() => {
+                  // Clear selections for this card
+                  if (cardIndex === 2) setSelectedCard2Items([]);
+                  if (cardIndex === 3) setSelectedCard3Items([]);
+                  if (cardIndex === 4) setSelectedCard4Items([]);
+                  if (cardIndex === 5) setSelectedCard5Items([]);
+                  
+                  console.log(`Card ${cardIndex}: All selections cleared`);
+                  resetToOriginalData();
+                }}
+              >
+                Clear All
+              </button>
+            </div>
+          );
+        })()}
 
         {loading ? (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
@@ -533,23 +951,89 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
                 </div>
               )}
               
-              {/* Filtered Results */}
-              {filteredData.map((item, i) => (
-                <div className="form-check mb-2 border-bottom" key={i}>
-                  <input
-                    type="checkbox"
-                    className="form-check-input"
-                    id={`card${cardIndex}-${getCardLabel(cardSelect, item)}-${i}`}
-                  />
-                  <label
-                    className="form-check-label"
-                    htmlFor={`card${cardIndex}-${getCardLabel(cardSelect, item)}-${i}`}
-                    style={{ fontSize: "16px" }}
-                  >
-                    {getCardLabel(cardSelect, item)}
-                  </label>
-                </div>
-              ))}
+              {/* Filtered Results with Working Checkboxes */}
+              {filteredData.map((item, i) => {
+                // Get current selection state for this card
+                let selectedItems = [];
+                let setSelectedItems = null;
+                
+                if (cardIndex === 2) {
+                  selectedItems = selectedCard2Items;
+                  setSelectedItems = setSelectedCard2Items;
+                } else if (cardIndex === 3) {
+                  selectedItems = selectedCard3Items;
+                  setSelectedItems = setSelectedCard3Items;
+                } else if (cardIndex === 4) {
+                  selectedItems = selectedCard4Items;
+                  setSelectedItems = setSelectedCard4Items;
+                } else if (cardIndex === 5) {
+                  selectedItems = selectedCard5Items;
+                  setSelectedItems = setSelectedCard5Items;
+                }
+                
+                // Get item value based on card type
+                const getItemValue = (type, item) => {
+                  switch (type) {
+                    case "hscode": return item.hscode;
+                    case "importer": return item.importer_name;
+                    case "exporter": return item.exporter_name;
+                    case "country": return item.country_name;
+                    case "port": return item.port_name;
+                    default: return "";
+                  }
+                };
+                
+                const itemValue = getItemValue(cardSelect, item);
+                const isSelected = selectedItems ? selectedItems.includes(itemValue) : false;
+                
+                return (
+                  <div className="form-check mb-2 border-bottom" key={i}>
+                    <input
+                      type="checkbox"
+                      className="form-check-input"
+                      id={`card${cardIndex}-item-${i}`}
+                      checked={isSelected}
+                      onChange={(e) => {
+                        console.log(`Checkbox clicked for card ${cardIndex}, item: ${itemValue}`);
+                        
+                        if (!setSelectedItems) return;
+                        
+                        let newSelected;
+                        if (e.target.checked) {
+                          newSelected = [...selectedItems, itemValue];
+                        } else {
+                          newSelected = selectedItems.filter(sel => sel !== itemValue);
+                        }
+                        setSelectedItems(newSelected);
+                        
+                        console.log(`Card ${cardIndex} new selection:`, newSelected);
+                        
+                        // ✅ Call appropriate card function based on cardIndex
+                        if (cardIndex === 2) {
+                          console.log('Calling handleCard2Change');
+                          handleCard2Change(newSelected, cardSelect);
+                        } else if (cardIndex === 3) {
+                          console.log('Calling handleCard3Change');
+                          handleCard3Change(newSelected, cardSelect);
+                        } else if (cardIndex === 4) {
+                          console.log('Calling handleCard4Change');
+                          handleCard4Change(newSelected, cardSelect);
+                        } else if (cardIndex === 5) {
+                          console.log('Calling handleCard5Change');
+                          handleCard5Change(newSelected, cardSelect);
+                        }
+                      }}
+                    />
+                    <label
+                      className="form-check-label"
+                      htmlFor={`card${cardIndex}-item-${i}`}
+                      style={{ fontSize: "16px" }}
+                    >
+                      {getCardLabel(cardSelect, item)}
+                    </label>
+                  </div>
+                );
+              })}
             </>
           ) : searchTerm ? (
             // No search results
@@ -563,23 +1047,87 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
               </div>
             </div>
           ) : (
-            // Show all data when no search term
-            getCardApiData(cardSelect).map((item, i) => (
-              <div className="form-check mb-2 border-bottom" key={i}>
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id={`card${cardIndex}-${getCardLabel(cardSelect, item)}-${i}`}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor={`card${cardIndex}-${getCardLabel(cardSelect, item)}-${i}`}
-                  style={{ fontSize: "16px" }}
-                >
-                  {getCardLabel(cardSelect, item)}
-                </label>
-              </div>
-            ))
+            // Show all data when no search term - with same checkbox logic
+            getCardApiData(cardSelect).map((item, i) => {
+              let selectedItems = [];
+              let setSelectedItems = null;
+              
+              if (cardIndex === 2) {
+                selectedItems = selectedCard2Items;
+                setSelectedItems = setSelectedCard2Items;
+              } else if (cardIndex === 3) {
+                selectedItems = selectedCard3Items;
+                setSelectedItems = setSelectedCard3Items;
+              } else if (cardIndex === 4) {
+                selectedItems = selectedCard4Items;
+                setSelectedItems = setSelectedCard4Items;
+              } else if (cardIndex === 5) {
+                selectedItems = selectedCard5Items;
+                setSelectedItems = setSelectedCard5Items;
+              }
+              
+              const getItemValue = (type, item) => {
+                switch (type) {
+                  case "hscode": return item.hscode;
+                  case "importer": return item.importer_name;
+                  case "exporter": return item.exporter_name;
+                  case "country": return item.country_name;
+                  case "port": return item.port_name;
+                  default: return "";
+                }
+              };
+              
+              const itemValue = getItemValue(cardSelect, item);
+              const isSelected = selectedItems ? selectedItems.includes(itemValue) : false;
+              
+              return (
+                <div className="form-check mb-2 border-bottom" key={i}>
+                  <input
+                    type="checkbox"
+                    className="form-check-input"
+                    id={`card${cardIndex}-item-${i}`}
+                    checked={isSelected}
+                    onChange={(e) => {
+                      console.log(`Checkbox clicked for card ${cardIndex}, item: ${itemValue}`);
+                      
+                      if (!setSelectedItems) return;
+                      
+                      let newSelected;
+                      if (e.target.checked) {
+                        newSelected = [...selectedItems, itemValue];
+                      } else {
+                        newSelected = selectedItems.filter(sel => sel !== itemValue);
+                      }
+                      setSelectedItems(newSelected);
+                      
+                      console.log(`Card ${cardIndex} new selection:`, newSelected);
+                      
+                      // ✅ Call appropriate card function
+                      if (cardIndex === 2) {
+                        console.log('Calling handleCard2Change');
+                        handleCard2Change(newSelected, cardSelect);
+                      } else if (cardIndex === 3) {
+                        console.log('Calling handleCard3Change');
+                        handleCard3Change(newSelected, cardSelect);
+                      } else if (cardIndex === 4) {
+                        console.log('Calling handleCard4Change');
+                        handleCard4Change(newSelected, cardSelect);
+                      } else if (cardIndex === 5) {
+                        console.log('Calling handleCard5Change');
+                        handleCard5Change(newSelected, cardSelect);
+                      }
+                    }}
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor={`card${cardIndex}-item-${i}`}
+                    style={{ fontSize: "16px" }}
+                  >
+                    {getCardLabel(cardSelect, item)}
+                  </label>
+                </div>
+              );
+            })
           );
         })() : (
           <div className="text-muted text-center" style={{marginTop: "100px", fontSize: "70px", fontWeight: "bold"}}>+</div>
@@ -871,6 +1419,7 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
 
 
   const handleSearch = (values) => {
+    console.log("Search Values:", values);
     var params = [];
     params["tradeType"] = values.tradeType;
     params["searchBy"] = values.searchBy;
@@ -2627,7 +3176,7 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
                         <div className="col-md-3 pr-0 pb-3">
                           
                           <Link className="btn btn-primary" to={{ 
-                                pathname: "/list", 
+                                pathname: "/list1", 
                                 state: {search_id : search_id , 
                                   workspace_id : props.location.state ? props.location.state.workspace_id : "",
                                   workspace_name : props.location.state ? props.location.state.workspace_name : "",

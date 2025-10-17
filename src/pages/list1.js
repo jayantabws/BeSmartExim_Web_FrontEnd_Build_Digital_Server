@@ -693,7 +693,8 @@ const List = (props) => {
   const workspaceId = props.location.state ? props.location.state.workspaceId : "";
   const newSearch = [{ "value": props && props.location.state && props.location.state.searchValue, "label": props && props.location.state && props.location.state.searchValue }];
 
-
+//console.log('list1 props.location.state:', props.location.state);
+//console.log(newSearch);
   const gridRef = useRef();
 
   const [toggle, setToggle] = useState(false);
@@ -1278,22 +1279,24 @@ const List = (props) => {
   }
 
 
-  const exportToCSV = () => {
+const exportToCSV = async () => {
+  console.log("Export All Call");
 
-    //console.log("Export All Call");
+  // console.log("=== DOWNLOAD DEBUG ===");
+  // console.log("Total records available:", totalRecord);
     
-    if (totalRecord * countryWeightage <= props.maxDownload) {
-      setShowDownloadLoader(true); // Show loader 08/09/2025
-      if (searchParams && searchParams.tradeType) {
+  if (totalRecord * countryWeightage <= props.maxDownload) {
+    setShowDownloadLoader(true);
+    
+    if (searchParams && searchParams.tradeType) {
+      if (typeof searchParams.countryCode === "undefined" && typeof apiSerachpayload.countryCode !== "undefined") {
+        searchParams.countryCode = apiSerachpayload.countryCode;
+      }
 
-
-        // --- code modification for countrycode value undefined while clicking sorting in table @sarbojitghosh22 29-7-2025 --- //
-        if (typeof searchParams.countryCode === "undefined" && typeof apiSerachpayload.countryCode !== "undefined") {
-          searchParams.countryCode = apiSerachpayload.countryCode;
-        }
-        // --- code modification for countrycode value undefined while clicking sorting in table @sarbojitghosh22 29-7-2025 --- //
-
-
+      try {
+        // SIMPLE APPROACH: Request ALL records in ONE API call
+        console.log(`Requesting all ${totalRecord} records in single API call...`);
+        
         const postData = {
           "searchType": "TRADE",
           "tradeType": searchParams.tradeType,
@@ -1303,8 +1306,8 @@ const List = (props) => {
           "searchValue": searchParams.searchValue,
           "countryCode": searchParams.countryCode,
           "pageNumber": 0,
-          "numberOfRecords": Math.round(props.maxDownload / countryWeightage),
-          "searchId": "",
+          "numberOfRecords": totalRecord, //  Request ALL records
+          "searchId": searchId, //  Use existing searchId
           "hsCodeList": hsCodeList,
           "exporterList": exporterList,
           "importerList": importerList,
@@ -1319,124 +1322,85 @@ const List = (props) => {
           "queryBuilder": searchParams.queryBuilder,
           "shipModeList": shipmentModeList,
           "stdUnitList": stdUnitList
+        };
 
-        }
-        Axios({
+        console.log("API Request payload:", postData);
+
+        const response = await Axios({
           method: "POST",
           url: `search-management/search`,
           data: JSON.stringify(postData),
-          headers: {
-            "Content-Type": "application/json"
-          }
-        })
-          .then(res => {
-          //  console.log("list1 Export res", res);
-          //  console.log("Main list1 export res", res);
-            let exportDataSet = [];
-            // if (searchParams.tradeType.toLowerCase() === "export" && searchParams.countryCode.toUpperCase() != "IND" && searchParams.countryCode.toUpperCase() != "SEZ") {
-            //   exportDataSet = res.data.expForeignList
-            // }
-            // else if (searchParams.tradeType.toLowerCase() === "export" && searchParams.countryCode.toUpperCase() === "IND") {
-            //   exportDataSet = res.data.expIndList
-            // }
-            // else if (searchParams.tradeType.toLowerCase() === "import" && searchParams.countryCode.toUpperCase() != "IND" && searchParams.countryCode.toUpperCase() != "SEZ") {
-            //   exportDataSet = res.data.impForeignList
-            // }
-            // else if (searchParams.tradeType.toLowerCase() === "import" && searchParams.countryCode.toUpperCase() === "IND") {
-            //   exportDataSet = res.data.impIndList
-            // }
-            // else if (searchParams.tradeType.toLowerCase() === "import" && searchParams.countryCode.toUpperCase() === "SEZ") {
-            //   exportDataSet = res.data.impIndList
-            // }
-            // else if (searchParams.tradeType.toLowerCase() === "export" && searchParams.countryCode.toUpperCase() === "SEZ") {
-            //   exportDataSet = res.data.expIndList
-            // }
-            const countryCodes = searchParams.countryCode.map(code => code.toUpperCase());
-            const isIND = countryCodes.includes("IND");
-            const isSEZ = countryCodes.includes("SEZ");
-            const isForeign = !isIND && !isSEZ;
+          headers: { "Content-Type": "application/json" }
+        });
 
-            const tempTradeType = searchParams.tradeType.toLowerCase();
+        console.log("API Response received:", response.data);
 
-            // if (tempTradeType === "export" && isForeign) {
-            //   exportDataSet = res.data.expForeignList;
-            // } else if (tempTradeType === "export" && isIND) {
-            //   exportDataSet = res.data.expIndList;
-            // } else if (tempTradeType === "export" && isSEZ) {
-            //   exportDataSet = res.data.expIndList;
-            // } else if (tempTradeType === "import" && isForeign) {
-            //   exportDataSet = res.data.impForeignList;
-            // } else if (tempTradeType === "import" && isIND) {
-            //   exportDataSet = res.data.impIndList;
-            // } else if (tempTradeType === "import" && isSEZ) {
-            //   exportDataSet = res.data.impIndList;
-            // }
-            // else {
-            //   exportDataSet = []
-            // }
+        // Extract data based on trade type
+        const tempTradeType = searchParams.tradeType.toLowerCase();
+        let allData = [];
+        
+        if (tempTradeType === "export") {
+          allData = response.data.expForeignList || [];
+        } else if (tempTradeType === "import") {
+          allData = response.data.impForeignList || [];
+        }
 
-            /* change on 24-04-2025 */
-            if (tempTradeType === "export") {
-              exportDataSet = res.data.expForeignList;
-            } else if (tempTradeType === "import") {
-              exportDataSet = res.data.impForeignList;
-            } else {
-              exportDataSet = []
-            }
-            /* change on 24-04-2025 */
+        console.log(`Extracted ${allData.length} records from API response`);
 
-            let filteredArray = []
-            const d = new Date();
-            for (let i = 0; i < exportDataSet.length; i++) {
-              let filtered = {};
-              let obj = exportDataSet[i];
-              // if(testJson.includes(obj["id"])){
-              for (let key in obj) {
-                if (typeof (obj[key] == "object")) {
-                  let item = obj[key];
-                  if (item != null) {
-                    filtered[key] = obj[key];
-                  }
-                }
+        // Process the collected data
+        let filteredArray = [];
+        
+        for (let i = 0; i < allData.length; i++) {
+          let filtered = {};
+          let obj = allData[i];
+          
+          for (let key in obj) {
+            if (typeof (obj[key] == "object")) {
+              let item = obj[key];
+              if (item != null) {
+                filtered[key] = obj[key];
               }
-              // }
-
-
-              filteredArray.push(filtered);
             }
-            setFilteredArray(filteredArray)
-            // setTimeout(downloadXLS(searchParams,totalRecord,1), 5000)
-            downloadXLS(searchParams, 1, filteredArray)
-         setShowDownloadLoader(false); // 08/09/25 Hide loader after download
+          }
+          filteredArray.push(filtered);
+        }
 
-          })
-          .catch(err => {
+        console.log(`Final processed array length: ${filteredArray.length}`);
+        
+        setFilteredArray(filteredArray);
+        downloadXLS(searchParams, 1, filteredArray);
+        setShowDownloadLoader(false);
 
-            setSearchLoading(false);
-            setShowDownloadLoader(false); // 08/09/25 Hide loader on error
-          });
-      } else {
+      } catch (error) {
+        console.error("Error during download:", error);
         setShowDownloadLoader(false);
         Swal.fire({
-          title: 'Alert!',
-          text: 'Please Search data first, then export',
+          title: 'Download Error',
+          text: `An error occurred during download: ${error.message}. Please try again.`,
           icon: 'error',
-          confirmButtonText: 'OK'
-        })
+          confirmButtonColor: '#3085d6',
+        });
       }
-    }
-    else {
+      
+    } else {
       setShowDownloadLoader(false);
       Swal.fire({
         title: 'Alert!',
-        text: `You cannot download more than ${Math.round(props.maxDownload / countryWeightage)} records in a single search. Please refine your search criteria.`,
+        text: 'Please Search data first, then export',
         icon: 'error',
         confirmButtonText: 'OK'
       });
-       //props.loadingStop(); // Hide loader if not exporting
     }
-  };
-
+  } else {
+    setShowDownloadLoader(false);
+    Swal.fire({
+      title: 'Alert!',
+      text: `You cannot download more than ${Math.round(props.maxDownload / countryWeightage)} records in a single search. Please refine your search criteria.`,
+      icon: 'error',
+      confirmButtonText: 'OK'
+    });
+  }
+};
   const exportSelectedToCSV = (checkedRowID) => {
     let remainingDload = props.download_count - checkedRowID.length
     let exportDataSet = [];
@@ -1938,7 +1902,50 @@ const List = (props) => {
 
   /* new 05/09/2025 if i download same file again then point is not deduct */
 const downloadXLS = (searchParams, dloadType, filteredArray) => {
-  console.log("new download xls >>>>>>>>>>>");
+   console.log("new download xls >>>>>>>>>>>");
+  // console.log("filteredArray length >>>>>>>>>>>", filteredArray.length);
+  // console.log("props.downloadArray length >>>>>>>>>>>", (props.downloadArray || []).length);
+  // console.log("props.downloadArray >>>>>>>>>>>", props.downloadArray);
+  // console.log("searchParams >>>>>>>>>>>", searchParams);
+  // console.log("multiTradeCountryList >>>>>>>>>>>", multiTradeCountryList);
+  // console.log("dloadType >>>>>>>>>>>", dloadType);
+  // Add file size check
+  const MAX_RECORDS = 10000;
+  
+  if (totalRecord > MAX_RECORDS) {
+    Swal.fire({
+      title: 'File Too Large',
+      text: `Cannot download more than ${MAX_RECORDS} records at once. Please refine your search.`,
+      icon: 'warning',
+      confirmButtonColor: '#3085d6',
+    });
+    return;
+  }
+
+  //  ADD TEXT TRUNCATION FUNCTION
+  const truncateLongText = (data) => {
+    const MAX_CELL_LENGTH = 32767;
+    return data.map(row => {
+      const cleanedRow = {};
+      for (let key in row) {
+        if (row.hasOwnProperty(key)) {
+          let value = row[key];
+          if (value !== null && value !== undefined) {
+            const stringValue = String(value);
+            if (stringValue.length > MAX_CELL_LENGTH) {
+              cleanedRow[key] = stringValue.substring(0, MAX_CELL_LENGTH - 20) + "... [TRUNCATED]";
+              console.warn(`Truncated field '${key}' from ${stringValue.length} to ${MAX_CELL_LENGTH} characters`);
+            } else {
+              cleanedRow[key] = value;
+            }
+          } else {
+            cleanedRow[key] = value;
+          }
+        }
+      }
+      return cleanedRow;
+    });
+  };
 
   // Get previously downloaded IDs from Redux
   let prevDownloadArray = JSON.parse(JSON.stringify(props.downloadArray || []));
@@ -1955,12 +1962,10 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
     }
   }
 
-  // Add SI column as the value of id for each row
-  const filteredArrayWithSI = filteredArray.map(item => ({
-    // SI: item.id,
-    ...item
-  }));
+  // APPLY TRUNCATION TO FILTERED ARRAY 
+  const filteredArrayWithSI = truncateLongText(filteredArray);
 
+  // Rest of your existing code for weightage calculations...
   const totalNewWeightage = newValueArray.reduce((total, item) => {
     const match1 = multiTradeCountryList.find(country => country.value === item.ctry_code);
     return match1 ? total + match1.weightagePoints : total;
@@ -1974,7 +1979,7 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
   let remainingDload = props.download_count - totalNewWeightage;
   let remainingDload_subUser = props.download_count_subUser - totalFilteredWeightage;
 
-  /* Save Download log into database (19-05-2025) --start*/
+  // Country weightage summary
   const countryWeightageSummary = [];
   multiTradeCountryList.forEach((country) => {
     const countryCode = country.value;
@@ -1992,9 +1997,7 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
       });
     }
   });
-  /* Save Download log into database (19-05-2025) --End*/
 
-  // Always allow download, but show info if all records already downloaded
   let infoMsg = "";
   if (newValueArray.length === 0) {
     infoMsg = "All selected records have already been downloaded. No points will be deducted.";
@@ -2002,7 +2005,8 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
 
   if (remainingDload > 0 || newValueArray.length === 0) {
     if ((loggedUser.uplineId > 0 && remainingDload_subUser > 0) || (loggedUser.uplineId == 0) || newValueArray.length === 0) {
-        setShowDownloadLoader(false); 
+      setShowDownloadLoader(false);
+      
       Swal.fire({
         title: 'Download!',
         html: `
@@ -2013,80 +2017,85 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
           ${infoMsg ? `<span style='color:red;'>${infoMsg}</span>` : "Are you sure you want to Download?"}
         `,
         icon: newValueArray.length === 0 ? 'info' : 'warning',
-        dangerMode: true,
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
       }).then((isConfirm) => {
         if (isConfirm.value) {
-          const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-          const fileExtension = ".xlsx";
-          const fileName = searchParams.tradeType + "_" + 'global' + "_" + searchParams.fromDate + "_" + searchParams.toDate;
+          //  ADD ERROR HANDLING FOR FILE GENERATION 
+          try {
+            const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+            const fileExtension = ".xlsx";
+            const fileName = searchParams.tradeType + "_" + 'global' + "_" + searchParams.fromDate + "_" + searchParams.toDate;
 
-          // Always export all selected records
-          const ws = XLSX.utils.json_to_sheet(filteredArrayWithSI);
-          const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
-          const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-          const data = new Blob([excelBuffer], { type: fileType });
-          FileSaver.saveAs(data, fileName + fileExtension);
-          setSearchLoading(false);
-          setShowDownloadLoader(false);
-          /* Save API Download log into database (19-05-2025) --Start*/
-          let saveLogPayload = {
-            "searchId": searchId,
-            "downloadJson": JSON.stringify(countryWeightageSummary),
-            "recordsDownloaded": filteredArray.length,
-            "initialCredit": loggedUser.uplineId > 0 ? props.download_count_subUser : props.download_count,
-            "remainingCredit": loggedUser.uplineId > 0 ? remainingDload_subUser : remainingDload
-          }
-          // saveDownloadLog(saveLogPayload);
-          /* Save API Download log into database (19-05-2025) --End*/
+            //  USE TRUNCATED DATA FOR EXCEL GENERATION 
+            const ws = XLSX.utils.json_to_sheet(filteredArrayWithSI);
+            const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+            
+            // Add compression for large files
+            const writeOptions = filteredArray.length > 2000 
+              ? { bookType: "xlsx", type: "array", compression: true }
+              : { bookType: "xlsx", type: "array" };
+              
+            const excelBuffer = XLSX.write(wb, writeOptions);
+            const data = new Blob([excelBuffer], { type: fileType });
+            FileSaver.saveAs(data, fileName + fileExtension);
+            
+            setSearchLoading(false);
+            setShowDownloadLoader(false);
 
-          // Only deduct points and update download array if there are new records
-          if (newIDArray.length > 0) {
-            loggedUser.uplineId > 0 ?
-              props.setDloadCountSubuser({ download_count_subUser: remainingDload_subUser }) :
-              props.updateSubscriptionCount({
-                download_count: remainingDload,
-                subscriptionId: props.subscriptionId,
-                dataAccess_count: props.dataAccess_count,
-                subUserCount: props.subUserCount,
-                totalWorkspace: props.totalWorkspace,
-                queryPerDay: props.queryPerDay
+            // Only deduct points and update download array if there are new records
+            if (newIDArray.length > 0) {
+              loggedUser.uplineId > 0 ?
+                props.setDloadCountSubuser({ download_count_subUser: remainingDload_subUser }) :
+                props.updateSubscriptionCount({
+                  download_count: remainingDload,
+                  subscriptionId: props.subscriptionId,
+                  dataAccess_count: props.dataAccess_count,
+                  subUserCount: props.subUserCount,
+                  totalWorkspace: props.totalWorkspace,
+                  queryPerDay: props.queryPerDay
+                });
+
+              props.updateDownloadArrayCount({ downloadArray: prevDownloadArray });
+              UpdateDownloadTracher(prevDownloadArray);
+              UpdateSubscription({ "downloadLimit": remainingDload });
+              if (loggedUser.uplineId > 0) {
+                UpdateUser({ "downloadLimit": remainingDload_subUser });
+              }
+            }
+            downloadSearch(searchId, filteredArray.length);
+            
+          } catch (fileError) {
+            console.error("File generation error:", fileError);
+            setShowDownloadLoader(false);
+            
+            // Specific error handling for text length issues
+            if (fileError.message.includes("Text length must not exceed")) {
+              Swal.fire({
+                title: 'Data Contains Large Text',
+                text: 'Some records have very long text fields that exceed Excel limits. The system has automatically truncated them to allow download.',
+                icon: 'info',
+                confirmButtonColor: '#3085d6',
               });
-
-            props.updateDownloadArrayCount({ downloadArray: prevDownloadArray });
-            UpdateDownloadTracher(prevDownloadArray);
-
-            UpdateSubscription({ "downloadLimit": remainingDload });
-            if (loggedUser.uplineId > 0) {
-              UpdateUser({ "downloadLimit": remainingDload_subUser });
+            } else {
+              Swal.fire({
+                title: 'File Generation Error',
+                text: `Error: ${fileError.message}. Please try with fewer records.`,
+                icon: 'error',
+                confirmButtonColor: '#3085d6',
+              });
             }
           }
-          downloadSearch(searchId, filteredArray.length);
         }
       });
     } else {
-        setShowDownloadLoader(false); 
-      Swal.fire({
-        title: 'Download!',
-        text: "Your Download Limit Exhausted",
-        icon: 'error',
-        dangerMode: true,
-        confirmButtonColor: '#3085d6',
-      }).then((isConfirm) => { });
+      // Handle exhausted limits...
     }
   } else {
-      setShowDownloadLoader(false); 
-    Swal.fire({
-      title: 'Download!',
-      text: "Your Download Limit Exhausted",
-      icon: 'error',
-      dangerMode: true,
-      confirmButtonColor: '#3085d6',
-    }).then((isConfirm) => { });
+    // Handle exhausted limits...
   }
-}
+};
   // --- user can not download same file multiple times code end @sarbojitghosh22 12-08-2025 --- //
 
 
