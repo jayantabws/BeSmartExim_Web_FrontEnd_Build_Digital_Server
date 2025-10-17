@@ -342,7 +342,7 @@ const handleSelectionChange = (selectedItems, type) => {
       ...(type === 'importer' && { importerList: selectedItems }),
       ...(type === 'hscode' && { hsCodeList: selectedItems }),
       ...(type === 'country' && { countryList: selectedItems }),
-      ...(type === 'port' && { portOriginList: selectedItems })
+      ...(type === 'port' && { portDestinationList: selectedItems })
     };
     setSearchParams(updatedParams);
      getValueForParams(updatedParams, 1)
@@ -412,7 +412,7 @@ const handleCard2Change = async (selectedItems, type) => {
     ...searchParams,
     ...(type === "hscode" && { hsCodeList: selectedItems }),
     ...(type === "country" && { countryList: selectedItems }),
-    ...(type === "port" && { portOriginList: selectedItems }),
+    ...(type === "port" && { portDestinationList: selectedItems }),
     ...(type === "importer" && { importerList: selectedItems }),
     ...(type === "exporter" && { exporterList: selectedItems }),
   };
@@ -459,7 +459,7 @@ const handleCard3Change = async (selectedItems, type) => {
     ...searchParams,
     ...(type === "hscode" && { hsCodeList: selectedItems }),
     ...(type === "country" && { countryList: selectedItems }),
-    ...(type === "port" && { portOriginList: selectedItems }),
+    ...(type === "port" && { portDestinationList: selectedItems }),
     ...(type === "importer" && { importerList: selectedItems }),
     ...(type === "exporter" && { exporterList: selectedItems }),
   };
@@ -503,7 +503,7 @@ const handleCard4Change = async (selectedItems, type) => {
     ...searchParams,
     ...(type === "hscode" && { hsCodeList: selectedItems }),
     ...(type === "country" && { countryList: selectedItems }),
-    ...(type === "port" && { portOriginList: selectedItems }),
+    ...(type === "port" && { portDestinationList: selectedItems }),
     ...(type === "importer" && { importerList: selectedItems }),
     ...(type === "exporter" && { exporterList: selectedItems }),
   };
@@ -542,7 +542,7 @@ const handleCard5Change = async (selectedItems, type) => {
     ...searchParams,
     ...(type === "hscode" && { hsCodeList: selectedItems }),
     ...(type === "country" && { countryList: selectedItems }),
-    ...(type === "port" && { portOriginList: selectedItems }),
+    ...(type === "port" && { portDestinationList: selectedItems }),
     ...(type === "importer" && { importerList: selectedItems }),
     ...(type === "exporter" && { exporterList: selectedItems }),
   };
