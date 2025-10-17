@@ -175,7 +175,7 @@ const fetchSearchQuery = () => {
   const [toggle, setToggle] = useState(false);
   const [pendingImport, setPendingImport] = useState(true);
   const [pendingExport, setPendingExport] = useState(true);
-  const [searchParams, setSearchParams] = useState();
+  const [searchParams, setSearchParams] = useState({});
   const [importerDataList, setImporterDataList] = useState([]); //Usig for data card
   const [exporterDataList, setExporterDataList] = useState([]);
   const [pendingIndPort, setPendingIndPort] = useState(true);
@@ -252,27 +252,27 @@ const fetchSearchQuery = () => {
   const [selectedImporters, setSelectedImporters] = useState([]);
   const [selectedExporters, setSelectedExporters] = useState([]);
 
-  // Search state for Card 1
+  // Search state for Card 1 ,2 , 3 ,4 ,5 
   const [card1SearchTerm, setCard1SearchTerm] = useState("");
   const [card2SearchTerm, setCard2SearchTerm] = useState("");
   const [card3SearchTerm, setCard3SearchTerm] = useState("");
   const [card4SearchTerm, setCard4SearchTerm] = useState("");
   const [card5SearchTerm, setCard5SearchTerm] = useState("");
 
-  // Add new state variables for Card 1
+    // Add these state variables for Cards 2-5 selections
+  const [selectedCard2Items, setSelectedCard2Items] = useState([]);
+  const [selectedCard3Items, setSelectedCard3Items] = useState([]);
+  const [selectedCard4Items, setSelectedCard4Items] = useState([]);
+  const [selectedCard5Items, setSelectedCard5Items] = useState([]);
 
-  // Add these state variables for Cards 2-5 selections
-const [selectedCard2Items, setSelectedCard2Items] = useState([]);
-const [selectedCard3Items, setSelectedCard3Items] = useState([]);
-const [selectedCard4Items, setSelectedCard4Items] = useState([]);
-const [selectedCard5Items, setSelectedCard5Items] = useState([]);
+    // Add state to track per-card values
+  const [cardValuesTotal, setCardValuesTotal] = useState(0);
 
-  
-  
 
-/* 18/09/2025 */
+  useEffect(() => {
+  setCardValuesTotal(cardValuesTotal);
 
-// Helper: get API data for each card type
+}, [cardValuesTotal]);
 // Helper: get API data for each card type
 const getCardApiData = (type) => {
   switch (type) {
@@ -290,7 +290,7 @@ const getCardApiData = (type) => {
       return [];
   }
 };
-// Helper: get label for each card type
+
 // Helper: get label for each card type
 const getCardLabel = (type, item) => {
   switch (type) {
@@ -316,7 +316,6 @@ const getFilteredCardData = (type, searchTerm = "") => {
   if (!searchTerm.trim()) {
     return data; // Return all data if no search term
   }
-  
   return data.filter(item => {
     const label = getCardLabel(type, item);
     return label.toLowerCase().includes(searchTerm.toLowerCase());
@@ -331,7 +330,7 @@ const isOptionSelectedElsewhere = (option, currentCardIndex) => {
 
 /*15/10/2025 Start */
 
-// ✅ Updated handleSelectionChange to handle all card types
+// ✅ Updated handleSelectionChange to handle all card 1 types
 const handleSelectionChange = (selectedItems, type) => {
   console.log(`${type} selection changed:`, selectedItems);
   
@@ -346,6 +345,13 @@ const handleSelectionChange = (selectedItems, type) => {
       ...(type === 'port' && { portOriginList: selectedItems })
     };
     setSearchParams(updatedParams);
+     getValueForParams(updatedParams, 1)
+      .then(result => {
+        console.log('Card 1 value from getValueForParams:', result);
+      })
+      .catch(err => {
+        console.error('Error fetching Card 1 value:', err);
+      });
     console.log(`Updating dependent data based on ${type}:`, selectedItems);
     
     // ✅ Set loading states for cards that will be updated
@@ -389,199 +395,169 @@ const handleSelectionChange = (selectedItems, type) => {
   }
 };
 
-//Caluelate
 
-// ✅ SEPARATE FUNCTIONS FOR EACH CARD
+// ...existing code...
 
-// ✅ UPDATED CARD FUNCTIONS - NO BACKWARD TRACKING
-
-
-
-// ✅ UPDATED CARD FUNCTIONS - NO BACKWARD DATA UPDATES
-
-// Function for Card 2 changes - affects Cards 3, 4, 5 only (NO backward updates)
-const handleCard2Change = (selectedItems, type) => {
-  console.log(`Card 2 ${type} selection changed:`, selectedItems);
-  
-  if (selectedItems.length > 0 && searchParams) {
-    const updatedParams = {
-      ...searchParams,
-      ...(type === 'hscode' && { hsCodeList: selectedItems }),
-      ...(type === 'country' && { countryList: selectedItems }),
-      ...(type === 'port' && { portOriginList: selectedItems }),
-      ...(type === 'importer' && { importerList: selectedItems }),
-      ...(type === 'exporter' && { exporterList: selectedItems })
-    };
-     setSearchParams(updatedParams);
-    console.log('Card 2 Updated Params:', updatedParams , searchParams);
-    
-    // ✅ Set loading ONLY for Cards 3, 4, 5
-    setCard3Loading(true);
-    setCard4Loading(true);
-    setCard5Loading(true);
-    props.loadingStart();
-    
-    // ✅ ONLY call APIs for Cards 3, 4, 5 data types (forward-dependent only)
-    let updatePromises = [];
-    
-    // ✅ Only update data that Card 3, 4, 5 can use (NOT Card 1 exporter/importer)
-    // Don't call getExporterList or getImporterList to avoid updating Card 1
-    if (type !== 'hscode') updatePromises.push(getHSCodeList(updatedParams));
-    if (type !== 'country') updatePromises.push(getForeignCountryList(updatedParams));
-    if (type !== 'port') {
-      updatePromises.push(getIndianPortList(updatedParams));
-      updatePromises.push(getForeignPortList(updatedParams));
-    }
-    
-    // Supporting APIs only (these don't affect displayed card data)
-    updatePromises.push(getHSCode4digitList(updatedParams));
-    updatePromises.push(getCityList(updatedParams));
-    updatePromises.push(getShipmentModeList(updatedParams));
-    updatePromises.push(getStdUnitList(updatedParams));
-    
-    console.log('Card 2 API Promises (forward-only):', updatePromises.length);
-    
-    Promise.all(updatePromises).then(() => {
-      console.log(`Card 2 updated Cards 3, 4, 5 successfully (no backward updates)`);
-    }).catch((error) => {
-      console.error("Error updating from Card 2:", error);
-    }).finally(() => {
-      setTimeout(() => {
-        setCard3Loading(false);
-        setCard4Loading(false);
-        setCard5Loading(false);
-        props.loadingStop();
-      }, 1500);
-    });
-  } else {
-    console.log('Card 2: No items selected');
+// Forward-only handler for Card 2
+const handleCard2Change = async (selectedItems, type) => {
+  console.log("card 2 change called", type, selectedItems);
+  if (!selectedItems || selectedItems.length === 0 || !searchParams) {
     setSelectedCard3Items([]);
     setSelectedCard4Items([]);
     setSelectedCard5Items([]);
+    return;
+  }
+
+  const updatedParams = {
+    ...searchParams,
+    ...(type === "hscode" && { hsCodeList: selectedItems }),
+    ...(type === "country" && { countryList: selectedItems }),
+    ...(type === "port" && { portOriginList: selectedItems }),
+    ...(type === "importer" && { importerList: selectedItems }),
+    ...(type === "exporter" && { exporterList: selectedItems }),
+  };
+
+  setSearchParams(updatedParams);
+  await getValueForParams(updatedParams, 2);
+
+  setCard3Loading(true);
+  setCard4Loading(true);
+  setCard5Loading(true);
+  props.loadingStart();
+
+  try {
+    const forwardNeeded = [card3Select, card4Select, card5Select];
+    const promises = [];
+    if (forwardNeeded.includes("hscode") && type !== "hscode") promises.push(getHSCodeList(updatedParams));
+    if (forwardNeeded.includes("country") && type !== "country") promises.push(getForeignCountryList(updatedParams));
+    if (forwardNeeded.includes("port") && type !== "port") promises.push(getForeignPortList(updatedParams));
+    if (forwardNeeded.includes("importer") && type !== "importer") promises.push(getImporterList(updatedParams));
+    if (forwardNeeded.includes("exporter") && type !== "exporter") promises.push(getExporterList(updatedParams));
+
+    await Promise.all(promises);
+    console.log("Card 2 -> forward cards updated");
+  } catch (err) {
+    console.error("Error updating from Card 2:", err);
+  } finally {
+    setCard3Loading(false);
+    setCard4Loading(false);
+    setCard5Loading(false);
+    props.loadingStop();
   }
 };
 
-// Function for Card 3 changes - affects Cards 4, 5 only
-const handleCard3Change = (selectedItems, type) => {
-  console.log(`Card 3 ${type} selection changed:`, selectedItems);
-  
-  if (selectedItems.length > 0 && searchParams) {
-    const updatedParams = {
-      ...searchParams,
-      ...(type === 'hscode' && { hsCodeList: selectedItems }),
-      ...(type === 'country' && { countryList: selectedItems }),
-      ...(type === 'port' && { portOriginList: selectedItems }),
-      ...(type === 'importer' && { importerList: selectedItems }),
-      ...(type === 'exporter' && { exporterList: selectedItems })
-    };
-     setSearchParams(updatedParams);
-    // ✅ Set loading ONLY for Cards 4, 5
-    setCard4Loading(true);
-    setCard5Loading(true);
-    props.loadingStart();
-    
-    // ✅ ONLY call APIs for Cards 4, 5 data types
-    let updatePromises = [];
-    console.log('Card 3 Updated Params:', updatedParams);
-    if (type !== 'hscode') updatePromises.push(getHSCodeList(updatedParams));
-    if (type !== 'country') updatePromises.push(getForeignCountryList(updatedParams));
-    if (type !== 'port') {
-      updatePromises.push(getIndianPortList(updatedParams));
-      updatePromises.push(getForeignPortList(updatedParams));
-    }
-    
-    // Supporting APIs only
-    updatePromises.push(getHSCode4digitList(updatedParams));
-    updatePromises.push(getCityList(updatedParams));
-    updatePromises.push(getShipmentModeList(updatedParams));
-    updatePromises.push(getStdUnitList(updatedParams));
-    
-    Promise.all(updatePromises).then(() => {
-      console.log(`Card 3 updated Cards 4, 5 successfully (no backward updates)`);
-    }).catch((error) => {
-      console.error("Error updating from Card 3:", error);
-    }).finally(() => {
-      setTimeout(() => {
-        setCard4Loading(false);
-        setCard5Loading(false);
-        props.loadingStop();
-      }, 1500);
-    });
-  } else {
-    console.log('Card 3: No items selected');
+// Forward-only handler for Card 3
+const handleCard3Change = async (selectedItems, type) => {
+  console.log("card 3 change called", type, selectedItems);
+  if (!selectedItems || selectedItems.length === 0 || !searchParams) {
     setSelectedCard4Items([]);
     setSelectedCard5Items([]);
+    return;
+  }
+
+  const updatedParams = {
+    ...searchParams,
+    ...(type === "hscode" && { hsCodeList: selectedItems }),
+    ...(type === "country" && { countryList: selectedItems }),
+    ...(type === "port" && { portOriginList: selectedItems }),
+    ...(type === "importer" && { importerList: selectedItems }),
+    ...(type === "exporter" && { exporterList: selectedItems }),
+  };
+
+  setSearchParams(updatedParams);
+  await getValueForParams(updatedParams, 3);
+
+  setCard4Loading(true);
+  setCard5Loading(true);
+  props.loadingStart();
+
+  try {
+    const forwardNeeded = [card4Select, card5Select];
+    const promises = [];
+    if (forwardNeeded.includes("hscode") && type !== "hscode") promises.push(getHSCodeList(updatedParams));
+    if (forwardNeeded.includes("country") && type !== "country") promises.push(getForeignCountryList(updatedParams));
+    if (forwardNeeded.includes("port") && type !== "port") promises.push(getForeignPortList(updatedParams));
+    if (forwardNeeded.includes("importer") && type !== "importer") promises.push(getImporterList(updatedParams));
+    if (forwardNeeded.includes("exporter") && type !== "exporter") promises.push(getExporterList(updatedParams));
+
+    await Promise.all(promises);
+    console.log("Card 3 -> forward cards updated");
+  } catch (err) {
+    console.error("Error updating from Card 3:", err);
+  } finally {
+    setCard4Loading(false);
+    setCard5Loading(false);
+    props.loadingStop();
   }
 };
 
-// Function for Card 4 changes - affects Card 5 only
-const handleCard4Change = (selectedItems, type) => {
-  console.log(`Card 4 ${type} selection changed:`, selectedItems);
-  
-  if (selectedItems.length > 0 && searchParams) {
-    const updatedParams = {
-      ...searchParams,
-      ...(type === 'hscode' && { hsCodeList: selectedItems }),
-      ...(type === 'country' && { countryList: selectedItems }),
-      ...(type === 'port' && { portOriginList: selectedItems }),
-      ...(type === 'importer' && { importerList: selectedItems }),
-      ...(type === 'exporter' && { exporterList: selectedItems })
-    };
-     setSearchParams(updatedParams);
-
-     console.log('Card 4 Updated Params:', updatedParams);
-    // ✅ Set loading ONLY for Card 5
-    setCard5Loading(true);
-    props.loadingStart();
-    
-    // ✅ ONLY call APIs for Card 5 data types
-    let updatePromises = [];
-    
-    if (type !== 'hscode') updatePromises.push(getHSCodeList(updatedParams));
-    if (type !== 'country') updatePromises.push(getForeignCountryList(updatedParams));
-    if (type !== 'port') {
-      updatePromises.push(getIndianPortList(updatedParams));
-      updatePromises.push(getForeignPortList(updatedParams));
-    }
-    
-    // Supporting APIs only
-    updatePromises.push(getHSCode4digitList(updatedParams));
-    updatePromises.push(getCityList(updatedParams));
-    updatePromises.push(getShipmentModeList(updatedParams));
-    updatePromises.push(getStdUnitList(updatedParams));
-    
-    Promise.all(updatePromises).then(() => {
-      console.log(`Card 4 updated Card 5 successfully (no backward updates)`);
-    }).catch((error) => {
-      console.error("Error updating from Card 4:", error);
-    }).finally(() => {
-      setTimeout(() => {
-        setCard5Loading(false);
-        props.loadingStop();
-      }, 1500);
-    });
-  } else {
-    console.log('Card 4: No items selected');
+// Forward-only handler for Card 4
+const handleCard4Change = async (selectedItems, type) => {
+  console.log("card 4 change called", type, selectedItems);
+  if (!selectedItems || selectedItems.length === 0 || !searchParams) {
     setSelectedCard5Items([]);
+    return;
+  }
+
+  const updatedParams = {
+    ...searchParams,
+    ...(type === "hscode" && { hsCodeList: selectedItems }),
+    ...(type === "country" && { countryList: selectedItems }),
+    ...(type === "port" && { portOriginList: selectedItems }),
+    ...(type === "importer" && { importerList: selectedItems }),
+    ...(type === "exporter" && { exporterList: selectedItems }),
+  };
+
+  setSearchParams(updatedParams);
+  await getValueForParams(updatedParams, 4);
+
+  setCard5Loading(true);
+  props.loadingStart();
+
+  try {
+    const forwardNeeded = [card5Select];
+    const promises = [];
+    if (forwardNeeded.includes("hscode") && type !== "hscode") promises.push(getHSCodeList(updatedParams));
+    if (forwardNeeded.includes("country") && type !== "country") promises.push(getForeignCountryList(updatedParams));
+    if (forwardNeeded.includes("port") && type !== "port") promises.push(getForeignPortList(updatedParams));
+    if (forwardNeeded.includes("importer") && type !== "importer") promises.push(getImporterList(updatedParams));
+    if (forwardNeeded.includes("exporter") && type !== "exporter") promises.push(getExporterList(updatedParams));
+
+    await Promise.all(promises);
+    console.log("Card 4 -> forward card updated");
+  } catch (err) {
+    console.error("Error updating from Card 4:", err);
+  } finally {
+    setCard5Loading(false);
+    props.loadingStop();
   }
 };
 
-// Function for Card 5 changes - NO other cards to update
-const handleCard5Change = (selectedItems, type) => {
-  console.log(`Card 5 ${type} selection changed:`, selectedItems);
-  
-  if (selectedItems.length > 0) {
-    console.log('Card 5 selection complete - NO dependent cards to update');
-    // ✅ Card 5 is the end of the chain - no API calls needed
-  } else {
-    console.log('Card 5: No items selected');
-  }
+// Handler for Card 5 (end of chain)
+const handleCard5Change = async (selectedItems, type) => {
+  console.log("card 5 change called", type, selectedItems);
+  if (!searchParams) return;
+
+  const updatedParams = {
+    ...searchParams,
+    ...(type === "hscode" && { hsCodeList: selectedItems }),
+    ...(type === "country" && { countryList: selectedItems }),
+    ...(type === "port" && { portOriginList: selectedItems }),
+    ...(type === "importer" && { importerList: selectedItems }),
+    ...(type === "exporter" && { exporterList: selectedItems }),
+  };
+
+  setSearchParams(updatedParams);
+  await getValueForParams(updatedParams, 5);
+  // Card 5 has no forward cards — no list refresh needed
 };
+
+// ...existing code...
 
 // ✅ Helper function to sanitize IDs (remove special characters)
-const sanitizeId = (str) => {
-  return str.replace(/[^a-zA-Z0-9-_]/g, '_');
-};
+// const sanitizeId = (str) => {
+//   return str.replace(/[^a-zA-Z0-9-_]/g, '_');
+// };
 
 // ✅ NEW SEPARATE FUNCTION: Reset all card data to original unfiltered state
 const resetToOriginalData = () => {
@@ -610,12 +586,12 @@ const resetToOriginalData = () => {
       getExporterList(resetParams),     // ✅ Reset Exporter data
       getHSCodeList(resetParams),       // ✅ Reset HSCode data
       getForeignCountryList(resetParams), // ✅ Reset Country data  
-      getIndianPortList(resetParams),   // ✅ Reset Indian Port data
+     // getIndianPortList(resetParams),   // ✅ Reset Indian Port data
       getForeignPortList(resetParams),  // ✅ Reset Foreign Port data
       getHSCode4digitList(resetParams), // ✅ Reset HS Code 4-digit data
-      getCityList(resetParams),         // ✅ Reset City data
-      getShipmentModeList(resetParams), // ✅ Reset Shipment Mode data
-      getStdUnitList(resetParams)       // ✅ Reset Standard Unit data
+     // getCityList(resetParams),         // ✅ Reset City data
+      //getShipmentModeList(resetParams), // ✅ Reset Shipment Mode data
+      //getStdUnitList(resetParams)       // ✅ Reset Standard Unit data
     ];
     
     // ✅ Handle completion of all API calls
@@ -635,6 +611,63 @@ const resetToOriginalData = () => {
     });
   }
 };
+
+
+// New helper: call /search-management/getvalue with updatedParams and assign to specific card
+const getValueForParams = (updatedParams, cardNumber) => {
+  if (!updatedParams) return 0;
+
+  const postData = {
+    searchType: "TRADE",
+    tradeType: updatedParams.tradeType,
+    fromDate: updatedParams.fromDate,
+    toDate: updatedParams.toDate,
+    searchBy: updatedParams.searchBy,
+    searchValue: updatedParams.searchValue,
+    countryCode: updatedParams.countryCode,
+    pageNumber: 0,
+    numberOfRecords: 20,
+    matchType: updatedParams.matchType,
+    portOriginList: updatedParams.portOriginList || [],
+    portDestinationList: updatedParams.portDestinationList || [],
+    hsCodeList: updatedParams.hsCodeList || [],
+    hsCode4DigitList: updatedParams.hsCode4DigitList || [],
+    exporterList: updatedParams.exporterList || [],
+    importerList: updatedParams.importerList || [],
+    cityOriginList: updatedParams.cityOriginList || [],
+    cityDestinationList: updatedParams.cityDestinationList || [],
+    searchId: search_id,
+    queryBuilder: updatedParams.queryBuilder || [],
+    shipModeList: updatedParams.shipmentModeList || [],
+    stdUnitList: updatedParams.stdUnitList || [],
+    countryList: updatedParams.countryList || []
+  };
+
+  console.log(`Payload getValueForParams called for card${cardNumber}`, postData);
+ var valueTotal = 0;
+  return Axios({
+    method: "POST",
+    url: `/search-management/getvalue`,
+    data: JSON.stringify(postData),
+    headers: { "Content-Type": "application/json" }
+  })
+    .then(res => {
+      
+      console.log(`getValueForParams response for card${cardNumber}:`, res);
+      var valueTotal = (res && res.data) ? res.data : 0;
+     
+      //const shipment_count = (res && res.data && res.data.shipmentCount) ? res.data.shipmentCount : 0;
+      setCardValuesTotal(valueTotal);
+      console.log(`Card ${cardNumber} value set:`, valueTotal);
+      return { valueTotal };
+    })
+    .catch(err => {
+      console.error(`getValueForParams error for card${cardNumber}:`, err);
+      setCardValuesTotal(valueTotal);
+      return { valueTotal: 0};
+    });
+};
+
 
 // Card rendering function
 // Special render function for Card 1 with import/export dropdown
@@ -3277,7 +3310,7 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
   <div className="d-flex align-items-center gap-4">
     <h5 className="mb-0">Value </h5>&nbsp;&nbsp;&nbsp;&nbsp;
     <button className="btn btn-outline-dark fw-bold shadow-sm px-3">
-      20000.00
+    ${cardValuesTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
     </button>
   </div>
   &nbsp;&nbsp;
