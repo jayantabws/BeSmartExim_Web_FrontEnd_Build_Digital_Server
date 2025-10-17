@@ -345,7 +345,7 @@ const handleSelectionChange = (selectedItems, type) => {
       ...(type === 'country' && { countryList: selectedItems }),
       ...(type === 'port' && { portOriginList: selectedItems })
     };
-    
+    setSearchParams(updatedParams);
     console.log(`Updating dependent data based on ${type}:`, selectedItems);
     
     // ✅ Set loading states for cards that will be updated
@@ -395,17 +395,7 @@ const handleSelectionChange = (selectedItems, type) => {
 
 // ✅ UPDATED CARD FUNCTIONS - NO BACKWARD TRACKING
 
-// Function for Card 1 (Importer/Exporter) changes - affects Cards 2, 3, 4, 5 only
-const handleCard1Change = (selectedItems, type) => {
-  console.log(`Card 1 ${type} selection changed:`, selectedItems);
-  
-  if (selectedItems.length > 0) {
-    // Call existing handleSelectionChange function
-    handleSelectionChange(selectedItems, type);
-  } else {
-    resetToOriginalData();
-  }
-};
+
 
 // ✅ UPDATED CARD FUNCTIONS - NO BACKWARD DATA UPDATES
 
@@ -422,8 +412,8 @@ const handleCard2Change = (selectedItems, type) => {
       ...(type === 'importer' && { importerList: selectedItems }),
       ...(type === 'exporter' && { exporterList: selectedItems })
     };
-    
-    console.log('Card 2 Updated Params:', updatedParams);
+     setSearchParams(updatedParams);
+    console.log('Card 2 Updated Params:', updatedParams , searchParams);
     
     // ✅ Set loading ONLY for Cards 3, 4, 5
     setCard3Loading(true);
@@ -484,7 +474,7 @@ const handleCard3Change = (selectedItems, type) => {
       ...(type === 'importer' && { importerList: selectedItems }),
       ...(type === 'exporter' && { exporterList: selectedItems })
     };
-    
+     setSearchParams(updatedParams);
     // ✅ Set loading ONLY for Cards 4, 5
     setCard4Loading(true);
     setCard5Loading(true);
@@ -492,7 +482,7 @@ const handleCard3Change = (selectedItems, type) => {
     
     // ✅ ONLY call APIs for Cards 4, 5 data types
     let updatePromises = [];
-    
+    console.log('Card 3 Updated Params:', updatedParams);
     if (type !== 'hscode') updatePromises.push(getHSCodeList(updatedParams));
     if (type !== 'country') updatePromises.push(getForeignCountryList(updatedParams));
     if (type !== 'port') {
@@ -537,7 +527,9 @@ const handleCard4Change = (selectedItems, type) => {
       ...(type === 'importer' && { importerList: selectedItems }),
       ...(type === 'exporter' && { exporterList: selectedItems })
     };
-    
+     setSearchParams(updatedParams);
+
+     console.log('Card 4 Updated Params:', updatedParams);
     // ✅ Set loading ONLY for Card 5
     setCard5Loading(true);
     props.loadingStart();
