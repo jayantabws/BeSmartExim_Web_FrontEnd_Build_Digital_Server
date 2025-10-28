@@ -1910,12 +1910,15 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
   // console.log("multiTradeCountryList >>>>>>>>>>>", multiTradeCountryList);
   // console.log("dloadType >>>>>>>>>>>", dloadType);
   // Add file size check
-  const MAX_RECORDS = 10000;
-  
-  if (totalRecord > MAX_RECORDS) {
+  // ✅ UPDATED: Use dynamic MAX_RECORDS based on user limits
+  const DEFAULT_MAX_RECORDS = 10000;
+  const MAX_RECORDS = props.maxDownload || DEFAULT_MAX_RECORDS;
+  console.log(`Using MAX_RECORDS: ${MAX_RECORDS} (props.maxDownload: ${props.maxDownload})`);
+  //totalRecord > MAX_RECORDS
+ if (filteredArray.length > MAX_RECORDS) {
     Swal.fire({
       title: 'File Too Large',
-      text: `Cannot download more than ${MAX_RECORDS} records at once. Please refine your search.`,
+      text: `Cannot download more than ${MAX_RECORDS.toLocaleString()} records at once. You are trying to download ${filteredArray.length.toLocaleString()} records. Please refine your search.`,
       icon: 'warning',
       confirmButtonColor: '#3085d6',
     });
