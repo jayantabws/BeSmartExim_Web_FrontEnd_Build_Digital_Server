@@ -337,7 +337,7 @@ const Login = (props) => {
                 </div> */}
 
                 <div className="login-marketing-main">
-                  Export and Import Trade Insights are updated with Aug'25 transactions at beDATOS. <br />
+                  Export and Import Trade Insights are updated with Nov'25 transactions at beDATOS. <br />
                   YOUR PORTAL HAS BEEN UPDATED. <br />
                   Access the data with more features now <br />
                 </div>
