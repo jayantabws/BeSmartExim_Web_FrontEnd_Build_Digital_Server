@@ -26,8 +26,21 @@ const Login = (props) => {
   const [ip, setIp] = useState([]);
   const [isMaintenance, setIsMaintenance] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
+  const [monthYear, setMonthYear] = useState("");
   const history = useHistory();
+
+  const getDateMonth=()=>{
+      AxiosMaster({
+          method: "GET",
+          url: `/masterdata-management/getdate`,
+        }).then(res => {
+          console.log("date",res.data);
+           setMonthYear(res.data);
+          }).catch(err => {
+      });
+  }
+
+  
 
   const handleSubmit = (values) => {
     // console.log("Values", values);
@@ -116,7 +129,8 @@ const Login = (props) => {
   }
 
   useEffect(() => {
-    getData()
+    getData();
+    getDateMonth();
     checkMaintenance()
     props.loadingStop()
     const userToken = sessionStorage.getItem("userToken") && localStorage.getItem("sessionID");
@@ -337,7 +351,7 @@ const Login = (props) => {
                 </div> */}
 
                 <div className="login-marketing-main">
-                  Export and Import Trade Insights are updated with Nov'25 transactions at beDATOS. <br />
+                  Export and Import Trade Insights are updated with {monthYear ? monthYear : ""} transactions at beDATOS. <br />
                   YOUR PORTAL HAS BEEN UPDATED. <br />
                   Access the data with more features now <br />
                 </div>
