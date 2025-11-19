@@ -56,8 +56,8 @@ const validateForm = Yup.object().shape({
 
 
 
-
-
+/* 11/11/2025 */
+/*
 const conditionalRowStyles = [
   {
     when: row => (row.importer_name == "OTHERS" || row.exporter_name == "OTHERS" || row.port_name == "OTHERS" 
@@ -83,7 +83,7 @@ const conditionalRowStyles = [
     		},
   }
 
-]
+]  */
 
 
 
@@ -94,12 +94,14 @@ const Analysis = (props) => {
 const search_id = props.location.state ? props.location.state.search_id : null ;
 const importerForExport = props.location.state ? props.location.state.importerForExport : null ;
 const exporterForImport = props.location.state ? props.location.state.exporterForImport : null ;
-  const [active, setActive] = useState("importer");
+  const [active, setActive] = useState("indepth");
 
-const [tooltipContent, setTooltipContent] = useState("");
-const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 })
+/* 11/11/2025 */
+// const [tooltipContent, setTooltipContent] = useState("");
+// const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 })
 
-
+/* 11/11/2025 */
+/*
 const showTooltip = (row, event ) => {
 
 // console.log("row ================= ", row)
@@ -118,7 +120,7 @@ const showTooltip = (row, event ) => {
       setTooltipPosition({ top: event.clientY, left: event.clientX+30 });
     }
 };
-
+ */
 
 const fetchSearchQuery = () => {
    console.log('fetchSearchQuery start, search_id=', search_id);
@@ -317,7 +319,7 @@ const buildFinalParams = () => {
       case "country": p.countryList = list; break;
       case "port": 
       //Port assign based on trade type
-      if(p.tradeType=="EXPORT"){
+      if(p.tradeType==="EXPORT"){
          p.portOriginList=list; //Export :foreign ports are origin
          p.portDestinationList=p.portDestinationList ||  []; //Keep existing destination ports
       }else{
@@ -421,7 +423,12 @@ const handleSelectionChange = (selectedItems, type) => {
       ...(type === 'exporter' && { exporterList: selectedItems }),
       ...(type === 'importer' && { importerList: selectedItems }),
       ...(type === 'hscode' && { hsCodeList: selectedItems }),
-      ...(type === 'country' && { countryList: selectedItems }),
+  ...(type === "country" && {
+      // ✅ UPDATED: Country assignment based on trade type
+      ...(searchParams.tradeType === "EXPORT" ? 
+        { cityDestinationList: selectedItems } : 
+        { cityOriginList: selectedItems })
+    }),
       ...(type === 'port' && {
         //Port assign based on trade type
         ...(searchParams.tradeType==="EXPORT" ? { portOriginList: selectedItems } : { portDestinationList: selectedItems })
@@ -478,7 +485,7 @@ const handleSelectionChange = (selectedItems, type) => {
   }
 };
 
-// ✅ UPDATED: handleCard2Change with shipment count
+//  UPDATED: handleCard2Change with shipment count
 const handleCard2Change = async (selectedItems, type) => {
   console.log("card 2 change called", type, selectedItems);
   if (!selectedItems || selectedItems.length === 0 || !searchParams) {
@@ -491,7 +498,12 @@ const handleCard2Change = async (selectedItems, type) => {
   const updatedParams = {
     ...searchParams,
     ...(type === "hscode" && { hsCodeList: selectedItems }),
-    ...(type === "country" && { countryList: selectedItems }),
+   ...(type === "country" && {
+      // ✅ UPDATED: Country assignment based on trade type
+      ...(searchParams.tradeType === "EXPORT" ? 
+        { cityDestinationList: selectedItems } : 
+        { cityOriginList: selectedItems })
+    }),
     ...(type === "port" && {
       //  FIXED: Port assignment based on trade type
       ...(searchParams.tradeType === "EXPORT" ? 
@@ -560,7 +572,13 @@ const handleCard3Change = async (selectedItems, type) => {
   const updatedParams = {
     ...searchParams,
     ...(type === "hscode" && { hsCodeList: selectedItems }),
-    ...(type === "country" && { countryList: selectedItems }),
+    ...(type === "country" && {
+      // ✅ UPDATED: Country assignment based on trade type
+      ...(searchParams.tradeType === "EXPORT" ? 
+        { cityDestinationList: selectedItems } : 
+        { cityOriginList: selectedItems })
+    }),
+    
     ...(type === "port" && {
       //  FIXED: Port assignment based on trade type
       ...(searchParams.tradeType === "EXPORT" ? 
@@ -573,7 +591,7 @@ const handleCard3Change = async (selectedItems, type) => {
 
   setSearchParams(updatedParams);
   
-  // ✅ Call both value and shipment count updates
+  // Call both value and shipment count updates
   await Promise.all([
     getValueForParams(updatedParams, 3),
     getTotalShipmentCount(updatedParams)
@@ -611,7 +629,7 @@ const handleCard3Change = async (selectedItems, type) => {
   }
 };
 
-// ✅ UPDATED: handleCard4Change with shipment count
+//  UPDATED: handleCard4Change with shipment count
 const handleCard4Change = async (selectedItems, type) => {
   console.log("card 4 change called", type, selectedItems);
   if (!selectedItems || selectedItems.length === 0 || !searchParams) {
@@ -622,7 +640,12 @@ const handleCard4Change = async (selectedItems, type) => {
   const updatedParams = {
     ...searchParams,
     ...(type === "hscode" && { hsCodeList: selectedItems }),
-    ...(type === "country" && { countryList: selectedItems }),
+    ...(type === "country" && {
+      // ✅ UPDATED: Country assignment based on trade type
+      ...(searchParams.tradeType === "EXPORT" ? 
+        { cityDestinationList: selectedItems } : 
+        { cityOriginList: selectedItems })
+    }),
   ...(type === "port" && {
       //  FIXED: Port assignment based on trade type
       ...(searchParams.tradeType === "EXPORT" ? 
@@ -635,7 +658,7 @@ const handleCard4Change = async (selectedItems, type) => {
 
   setSearchParams(updatedParams);
   
-  // ✅ Call both value and shipment count updates
+  //  Call both value and shipment count updates
   await Promise.all([
     getValueForParams(updatedParams, 4),
     getTotalShipmentCount(updatedParams)
@@ -669,7 +692,7 @@ const handleCard4Change = async (selectedItems, type) => {
   }
 };
 
-// ✅ UPDATED: handleCard5Change with shipment count
+// UPDATED: handleCard5Change with shipment count
 const handleCard5Change = async (selectedItems, type) => {
   console.log("card 5 change called", type, selectedItems);
   if (!searchParams) return;
@@ -677,7 +700,12 @@ const handleCard5Change = async (selectedItems, type) => {
   const updatedParams = {
     ...searchParams,
     ...(type === "hscode" && { hsCodeList: selectedItems }),
-    ...(type === "country" && { countryList: selectedItems }),
+     ...(type === "country" && {
+      // ✅ UPDATED: Country assignment based on trade type
+      ...(searchParams.tradeType === "EXPORT" ? 
+        { cityDestinationList: selectedItems } : 
+        { cityOriginList: selectedItems })
+    }),
    ...(type === "port" && {
       //  FIXED: Port assignment based on trade type
       ...(searchParams.tradeType === "EXPORT" ? 
@@ -690,7 +718,7 @@ const handleCard5Change = async (selectedItems, type) => {
 
   setSearchParams(updatedParams);
   
-  // ✅ Call both value and shipment count updates
+  // Call both value and shipment count updates
   await Promise.all([
     getValueForParams(updatedParams, 5),
     getTotalShipmentCount(updatedParams)
@@ -701,31 +729,31 @@ const handleCard5Change = async (selectedItems, type) => {
 
 
 
-// ✅ UPDATED: Reset Card 1 and all dependent cards to original state
+//  UPDATED: Reset Card 1 and all dependent cards to original state
 const resetToOriginalData = () => {
   console.log("Resetting Card 1 and all dependent cards to original state");
   
   if (searchParams) {
-    // ✅ 1. Clear all card selections
+    //  1. Clear all card selections
     setCard2Select("");
     setCard3Select("");
     setCard4Select("");
     setCard5Select("");
     
-    // ✅ 2. Clear all selected items arrays
+    //  2. Clear all selected items arrays
     setSelectedCard2Items([]);
     setSelectedCard3Items([]);
     setSelectedCard4Items([]);
     setSelectedCard5Items([]);
     
-    // ✅ 3. Clear Card 1 selections based on current type
+    //  3. Clear Card 1 selections based on current type
     if (card1ImportExport === "exporter") {
       setSelectedExporters([]);
     } else {
       setSelectedImporters([]);
     }
     
-    // ✅ 4. Reset mySelectedOptions to default state
+    //  4. Reset mySelectedOptions to default state
     setMySelectedOptions({
       exporter: card1ImportExport === "exporter" ? 1 : 0,
       importer: card1ImportExport === "importer" ? 1 : 0,
@@ -734,7 +762,7 @@ const resetToOriginalData = () => {
       port: 0
     });
     
-    // ✅ 5. Create clean params without any filters
+    //  5. Create clean params without any filters
     const resetParams = {
       ...searchParams,
       exporterList: [],
@@ -746,7 +774,7 @@ const resetToOriginalData = () => {
     
     setSearchParams(resetParams);
     
-    // ✅ 6. Set loading states for all cards
+    //  6. Set loading states for all cards
     setCard1Loading(true);
     setCard2Loading(true);
     setCard3Loading(true);
@@ -756,7 +784,7 @@ const resetToOriginalData = () => {
     
     console.log("Calling APIs to reset all data to original state");
     
-    // ✅ 7. Call all APIs to get original unfiltered data
+    //  7. Call all APIs to get original unfiltered data
     let resetPromises = [
       getImporterList(resetParams),
       getExporterList(resetParams),
@@ -766,18 +794,18 @@ const resetToOriginalData = () => {
       getHSCode4digitList(resetParams),
     ];
     
-    // ✅ 8. Handle completion of all API calls
+    // 8. Handle completion of all API calls
     Promise.all(resetPromises).then(() => {
       console.log("All data reset to original state successfully");
       
-      // ✅ 9. Reset card values
+      //  9. Reset card values
       setCardValuesTotal(0);
       setTotalShipmentCount(0);
       
     }).catch((error) => {
       console.error("Error resetting data:", error);
     }).finally(() => {
-      // ✅ 10. Hide loading states after API calls complete
+      //  10. Hide loading states after API calls complete
       setTimeout(() => {
         setCard1Loading(false);
         setCard2Loading(false);
@@ -822,7 +850,7 @@ const getValueForParams = (updatedParams, cardNumber) => {
     queryBuilder: updatedParams.queryBuilder || [],
     shipModeList: updatedParams.shipmentModeList || [],
     stdUnitList: updatedParams.stdUnitList || [],
-    countryList: updatedParams.countryList || []
+    //countryList: updatedParams.countryList || []
   };
 
     console.log(`Payload getValueForParams called for card${cardNumber}`, postData);
@@ -977,14 +1005,14 @@ const RenderFirstCard = () => (
   onClick={() => {
     console.log("Card 1 Clear All clicked");
     
-    // ✅ Clear Card 1 selections immediately for UI feedback
+    //  Clear Card 1 selections immediately for UI feedback
     if (card1ImportExport === "exporter") {
       setSelectedExporters([]);
     } else {
       setSelectedImporters([]);
     }
     
-    // ✅ Call resetToOriginalData to handle everything else
+    //  Call resetToOriginalData to handle everything else
     resetToOriginalData();
   }}
 >
@@ -1091,7 +1119,7 @@ const RenderFirstCard = () => (
 
 
 
-// ✅ NEW FUNCTION: Forward-only refresh from specific card
+//  NEW FUNCTION: Forward-only refresh from specific card
 const forwardRefreshFromCard = async (fromCardIndex) => {
   if (!searchParams) return;
   
@@ -3561,9 +3589,9 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
       <div className="col-lg-2 col-md-3 mb-3">
         <button
           className={`btn w-100 py-3 ${
-            active === "importer" ? "btn-warning" : "btn-primary"
+            active === "indepth" ? "btn-warning" : "btn-primary"
           }`}
-          onClick={() => setActive("importer")}
+          onClick={() => setActive("indepth")}
         >
           Nexus
         </button>
@@ -3571,14 +3599,25 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
 
       {/* Button 2 */}
       <div className="col-lg-2 col-md-3 mb-3">
-        <button
+        {/* <button
           className={`btn w-100 py-3 ${
             active === "exporter" ? "btn-warning" : "btn-primary"
           }`}
           onClick={() => setActive("exporter")}
         >
           Loream Ipsume 1
-        </button>
+        </button> */}
+
+              <Link  className={`btn w-100 py-3 ${
+            active === "exporter" ? "btn-warning" : "btn-primary"
+          }`} to={{
+                  pathname: "/relativePerformance",
+                  state: {
+                  search_id: search_id,
+                  importerForExport: props.location.state ? props.location.state.importerForExport : null,
+                  exporterForImport: props.location.state ? props.location.state.exporterForImport : null
+                  },
+              }}> Relative Performance </Link>
       </div>
 
       {/* Button 3 */}
