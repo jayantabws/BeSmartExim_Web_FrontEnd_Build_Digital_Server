@@ -18,12 +18,18 @@ export default function IndepthSearchTable({
 
   // Fixed column definitions (as requested)
   const columnDefs = [
-    { key: "date", label: "Date" },
+    { key: "be_date", label: "Date" },
     { key: "hs_code", label: "HS Code" },
     { key: "product_description", label: "Product Description" },
     { key: "importer_name", label: "Importer Name" },
     { key: "exporter_name", label: "Exporter Name" },
-    { key: "country_of_origin", label: "Country of Origin" },
+   // { key: "country_of_origin", label: "Country of Origin" },
+   { 
+      key: "country_of_origin", 
+      label: "Country of Origin",
+      //  ADD: Multiple possible field names + custom logic
+      alternateKeys: ["country_name", "origin_country", "country", "destination_country", "countryOfOrigin"]
+    },
     { key: "std_quantity", label: "Std Quantity" },
     { key: "std_unit", label: "Std Unit" },
     { key: "total_value_usd", label: "Total Value $" },
@@ -66,6 +72,60 @@ export default function IndepthSearchTable({
     searchId: p?.searchId ?? null
   });
 console.log('params',  params );
+
+  // ✅ ADD: Helper function to get only the selected country from main search
+  const getSelectedCountry = () => {
+    if (!params) return "";
+    
+    // Check if countryCode is set in main search
+    if (params.countryCode && Array.isArray(params.countryCode) && params.countryCode.length > 0) {
+      return params.countryCode[0]; // Return first selected country from main search
+    }
+    
+    // Check cityOriginList and cityDestinationList which contain selected countries
+    if (params.cityOriginList && params.cityOriginList.length > 0) {
+      return params.cityOriginList[0]; // Return first selected country
+    }
+    
+    if (params.cityDestinationList && params.cityDestinationList.length > 0) {
+      return params.cityDestinationList[0]; // Return first selected country
+    }
+    
+    return ""; // Return empty if no country selected
+  };
+
+
+  
+  const getFieldValue = (row, column) => {
+    // Special handling for country_of_origin
+    if (column.key === "country_of_origin") {
+      // Try to get from API response first
+      let value = row[column.key];
+      
+      // Try alternate field names if primary key is empty
+      if ((value === null || value === undefined || value === "") && column.alternateKeys) {
+        for (const altKey of column.alternateKeys) {
+          value = row[altKey];
+          if (value !== null && value !== undefined && value !== "") {
+            break;
+          }
+        }
+      }
+      
+      // ✅ UPDATED: Only use selected country if API doesn't have country data
+      if (value === null || value === undefined || value === "") {
+        value = getSelectedCountry(); // Only return selected country, no default
+      }
+      
+      return value;
+    }
+    
+    // For other fields, return the direct value
+    let value = row[column.key];
+    if (value === null || typeof value === "undefined") value = "";
+    return value;
+  };
+
   const dedupeById = (arr) => {
     const seen = new Set();
     return arr.filter((r) => {
@@ -123,6 +183,9 @@ console.log('params',  params );
         headers: { "Content-Type": "application/json" }
       });
     console.log('res',  res );
+
+     // ✅ ADD: Debug selected country
+      console.log('Selected Country from search:', getSelectedCountry());
       const trade = (postData.tradeType || "").toLowerCase();
       const list = trade === "export" ? (res && res.data && res.data.expForeignList ? res.data.expForeignList : []) : (res && res.data && res.data.impForeignList ? res.data.impForeignList : []);
       const cleaned = dedupeById(Array.isArray(list) ? list : []);
@@ -198,9 +261,9 @@ console.log('params',  params );
                     <tr key={`row-${rowId}`} onDoubleClick={() => onRowClick(row)} style={{ cursor: "pointer" }}>
                       <td className="text-center">{(page - 1) * limit + i + 1}</td>
                       {columnDefs.map(col => {
-                        let v = row[col.key];
-                        if (v === null || typeof v === "undefined") v = "";
-                        else if (typeof v === "object") v = JSON.stringify(v);
+                        // ✅ UPDATED: Use helper function to get value
+                        let v = getFieldValue(row, col);
+                        if (typeof v === "object") v = JSON.stringify(v);
                         return <td key={`${col.key}-${rowId}`}>{v}</td>;
                       })}
                     </tr>
