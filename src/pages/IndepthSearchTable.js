@@ -23,16 +23,19 @@ export default function IndepthSearchTable({
   let exporter_name;
   let importer_name
   let total_value;
+  let country_origin_destination_label;
   if(params.tradeType==="EXPORT"){
       dateColumn="date";
       exporter_name="exporter_name";
       importer_name="recepient_name";
       total_value="total_value_usd";
+      country_origin_destination_label=" Country of Destination";
   }else{
       dateColumn="be_date";
       exporter_name="exporter_name";
       importer_name="importer_name";
       total_value="total_value";
+      country_origin_destination_label=" Country Origin";
   }
   const columnDefs = [
     { key: dateColumn, label: "Date" },
@@ -43,7 +46,7 @@ export default function IndepthSearchTable({
    // { key: "country_of_origin", label: "Country of Origin" },
    { 
       key: "country_of_origin", 
-      label: "Country of Origin",
+      label: country_origin_destination_label,
       //  ADD: Multiple possible field names + custom logic
       alternateKeys: ["country_name", "origin_country", "country", "destination_country", "countryOfOrigin"]
     },
