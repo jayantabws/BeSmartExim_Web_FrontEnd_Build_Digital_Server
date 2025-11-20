@@ -10,6 +10,8 @@ export default function IndepthSearchTable({
   initialLimit = 20,
   onRowClick = () => {}
 }) {
+
+  console.log('IndepthSearchTable params',  params );
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(initialPage);
@@ -17,12 +19,27 @@ export default function IndepthSearchTable({
   const [loading, setLoading] = useState(false);
 
   // Fixed column definitions (as requested)
+  let dateColumn;
+  let exporter_name;
+  let importer_name
+  let total_value;
+  if(params.tradeType==="EXPORT"){
+      dateColumn="date";
+      exporter_name="exporter_name";
+      importer_name="recepient_name";
+      total_value="total_value_usd";
+  }else{
+      dateColumn="be_date";
+      exporter_name="exporter_name";
+      importer_name="importer_name";
+      total_value="total_value";
+  }
   const columnDefs = [
-    { key: "be_date", label: "Date" },
+    { key: dateColumn, label: "Date" },
     { key: "hs_code", label: "HS Code" },
     { key: "product_description", label: "Product Description" },
-    { key: "importer_name", label: "Importer Name" },
-    { key: "exporter_name", label: "Exporter Name" },
+    { key: importer_name, label: "Importer Name" },
+    { key: exporter_name, label: "Exporter Name" },
    // { key: "country_of_origin", label: "Country of Origin" },
    { 
       key: "country_of_origin", 
@@ -36,7 +53,7 @@ export default function IndepthSearchTable({
     { key: "quantity", label: "Quantity" },
     { key: "unit", label: "Unit" },
     { key: "unit_price_usd", label: "Unit Price $" },
-    { key: "total_value", label: "Total Value" },
+    { key: total_value, label: "Total Value" },
     { key: "currency", label: "Currency" },
     { key: "origin_port", label: "Origin Port" },
     { key: "destination_port", label: "Destination Port" },
