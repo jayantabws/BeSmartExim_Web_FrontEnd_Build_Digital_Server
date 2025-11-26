@@ -388,7 +388,10 @@ let defaultCountry = []
 
 
 // --- country modal modification with count @sarbojitghosh22 3-5-2025 --- //
-const CountrySelector = ({ multiTradeCountryList, selectedTradeCountry, setFieldValue, values, setSelectedTradeCountry, setMaxMinDate }) => {
+const CountrySelector = ({ multiTradeCountryList, selectedTradeCountry, setFieldValue, values, setSelectedTradeCountry, setMaxMinDate,
+    hasSearchResults,    // ADD THIS PARAMETER
+  searchId            // ADD THIS PARAMETER
+ }) => {
 
   const [showModal, setShowModal] = useState(false);
   const [tempSelectedCountries, setTempSelectedCountries] = useState([]);
@@ -433,7 +436,28 @@ const CountrySelector = ({ multiTradeCountryList, selectedTradeCountry, setField
       updatedTempSelectedCountries.includes(country.value)
     );
 
-    setSelectedTradeCountry(updatedSelectedCountries);
+   
+  // Check if we should show confirmation before page reload
+  if (hasSearchResults && searchId) {
+    Swal.fire({
+      title: 'Reset Search Results?',
+      text: 'Changing countries will reset all search results and form data. Do you want to continue?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, Continue',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // User confirmed - reload the page
+        window.location.reload();
+      }
+      // If cancelled, do nothing - country selection remains unchanged
+    });
+  } else {
+
+      setSelectedTradeCountry(updatedSelectedCountries);
     setFieldValue("countryCode", updatedTempSelectedCountries);
     setFieldValue("fromDate", "");
     setFieldValue("toDate", "");
@@ -445,10 +469,34 @@ const CountrySelector = ({ multiTradeCountryList, selectedTradeCountry, setField
 
     // Reset the count if manually checked/unchecked
     setCheckedCountryCount(null);
+  }
+
+  
   };
 
   const handleSelectAllChange = () => {
-    if (selectAll) {
+
+  // Check if we should show confirmation before page reload
+  if (hasSearchResults && searchId) {
+    Swal.fire({
+      title: 'Reset Search Results?',
+      text: 'Changing countries will reset all search results and form data. Do you want to continue?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, Continue',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // User confirmed - reload the page
+        window.location.reload();
+      }
+      // If cancelled, do nothing - selection remains unchanged
+    });
+  } else {
+
+     if (selectAll) {
       // Deselect all
       setTempSelectedCountries([]);
       setSelectedTradeCountry([]);
@@ -472,9 +520,11 @@ const CountrySelector = ({ multiTradeCountryList, selectedTradeCountry, setField
     }
 
     setSelectAll(!selectAll); // Toggle "Select All" checkbox state
-
     // Reset the count if manually checked/unchecked
     setCheckedCountryCount(null);
+
+  }
+   
   };
 
   const handleOpenModal = async () => {
@@ -781,6 +831,9 @@ const List = (props) => {
   /* For country filter array after search */
   const [filterCountryList, setFilterCountryList] = useState([]);
   const [selectedFilterCountryList, setSelectedFilterCountryList] = useState([]);
+  /* 21/11/2025 */
+  const [hasSearchResults, setHasSearchResults] = useState(false);
+
   /*08/09/2025 New Download Loader */
   const [showDownloadLoader, setShowDownloadLoader] = useState(false);
 
@@ -1241,6 +1294,7 @@ const List = (props) => {
     setSearchResult([]);
     setSearchValue([]);
     setQueryBuilderSearchValue([])
+    setHasSearchResults(false); // ADD THIS LINE
     setFieldValue("fromDate", "")
     setFieldValue("toDate", "")
     setFieldValue("searchValue", []);
@@ -1364,6 +1418,21 @@ const exportToCSV = async () => {
           }
           filteredArray.push(filtered);
         }
+
+         /*     let filteredArray = [];
+
+      for (let i = 0; i < allData.length; i++) {
+        let filtered = {};
+        let obj = allData[i];
+        
+        for (let key in obj) {
+          // Copy all properties that are not null or undefined
+          if (obj[key] != null && obj[key] !== undefined) {
+            filtered[key] = obj[key];
+          }
+        }
+        filteredArray.push(filtered);
+      } */
 
         console.log(`Final processed array length: ${filteredArray.length}`);
         
@@ -2270,6 +2339,7 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
 
 
           setSearchResult(tempSearchResult);
+          setHasSearchResults(true); // Make sure this line is present
           setNoDataErrorMsg(false)
           getTotalCount(params, res.data.searchId);
 
@@ -2356,6 +2426,7 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
         }
         else {
           setSearchResult([]);
+          setHasSearchResults(false); // Make sure this line is present
           setSearchLoading(false);
           setTotalRecord(0)
           setFilteredColumn([])
@@ -2367,6 +2438,7 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
         // console.log("Err", err);
         setSearchId("")
         setSearchResult([]);
+         setHasSearchResults(false); // ADD THIS LINE
         setSearchLoading(false);
         setFilteredColumn([])
         props.loadingStop()
@@ -2968,6 +3040,7 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
             hsList.push(specificItem);
           })
         }
+        console.log("HS CODE LIST", hsList);
         setHsCodeDataList(hsList);
         isHscodeLoading(false);
       })
@@ -3033,6 +3106,7 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
             hsList.push(specificItem);
           })
         }
+       // console.log("HS CODE 4 digit LIST", hsList);
         setHsCode4digitDataList(hsList);
         isHscodeLoading(false);
       })
@@ -3282,6 +3356,7 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
             icList.push(specificItem);
           })
         }
+        console.log("STD UNIT LIST", icList);
         setStdUnitDataList(icList);
       })
       .catch(err => {
@@ -4677,6 +4752,8 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
                             values={values}
                             setSelectedTradeCountry={setSelectedTradeCountry}
                             setMaxMinDate={setMaxMinDate}
+                             hasSearchResults={hasSearchResults}  // ADD THIS LINE
+  searchId={searchId}                  // ADD THIS LINE
                           />
 
 
