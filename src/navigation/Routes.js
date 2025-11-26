@@ -22,7 +22,7 @@ const Indepth = lazy(() => import('../pages/indepth'))
 const RelativePerformance= lazy(() => import('../pages/relativePerformance'))  
 const DownloadLogNew = lazy(() => import('../pages/downloadlog'))
 const List1 = lazy(() => import('../pages/list1'))
-const indepthTest = lazy(() => import('../pages/indepthTest'))
+//const indepthTest = lazy(() => import('../pages/indepthTest'))
 const NotFound = lazy(() => import('../pages/notfound'))
 
 const PrivateRoute = ({ component: Component, ...rest }) => (
@@ -77,7 +77,7 @@ const Routes = () => {
                            
                             <PrivateRoute exact path={`/subscriptions`} component={Subscriptions} />
                             <PrivateRoute exact path="/indepthAnalysis" component={Indepth} />
-                            <PrivateRoute exact path="/indepthTest" component={indepthTest} />
+                            {/* <PrivateRoute exact path="/indepthTest" component={indepthTest} /> */}
                             <PrivateRoute exact path="/relativePerformance" component={RelativePerformance} />
                             <Redirect from="*" to="/maintenance" />
                         </Switch>
