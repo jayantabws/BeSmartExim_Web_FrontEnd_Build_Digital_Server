@@ -60,7 +60,7 @@ const DownloadLog = (props) => {
   //  FIXED: Get total count for download logs
   const getTotalCount = async (searchValue = "") => {
     try {
-      let userID = userData && userData.uplineId == 0 ? "uplineId" : "userId";
+      let userID = userData && userData.uplineId === 0 ? "uplineId" : "userId";
       
       const params = {
         [userID]: userId,

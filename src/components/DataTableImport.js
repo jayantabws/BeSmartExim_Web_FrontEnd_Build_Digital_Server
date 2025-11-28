@@ -570,6 +570,8 @@ export default function DataTableImport(props) {
         })
             .then((res) => {
                 props.setSearchResult(res.data.searchResult || []);
+
+                console.log("IMPORT Sorted data fetched:", res.data);
             })
             .catch((err) => {
                 console.error("Error fetching sorted data:", err);
