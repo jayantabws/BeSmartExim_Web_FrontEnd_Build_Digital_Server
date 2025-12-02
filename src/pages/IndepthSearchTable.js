@@ -11,7 +11,7 @@ export default function IndepthSearchTable({
   onRowClick = () => {}
 }) {
 
-  console.log('IndepthSearchTable params',  params );
+ // console.log('IndepthSearchTable params',  params );
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(initialPage);

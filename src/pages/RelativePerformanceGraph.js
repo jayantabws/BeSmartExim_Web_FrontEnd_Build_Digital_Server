@@ -12,13 +12,14 @@ import {
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-export default function ExportMarketCharts() {
+export default function ExportMarketCharts({ hsCodeGraphApiResponse, selectedHsCode }) {
+  console.log("Received hsCodeGraphApiResponse:", hsCodeGraphApiResponse,selectedHsCode);
   const [data, setData] = useState({ hs: [], industry: [], market: [] });
 
   // Simulate live sample data updates every 5 seconds
   useEffect(() => {
     const generateData = () => ({
-      hs: MONTHS.map((m) => ({ month: m, amount: Math.round(800 + Math.random() * 2000) })),
+      hs: hsCodeGraphApiResponse.map((m) => ({ month: m.month_name, amount: m.value_usd})),
       industry: MONTHS.map((m) => ({ month: m, amount: Math.round(500 + Math.random() * 1500) })),
       market: MONTHS.map((m) => ({ month: m, amount: Math.round(10 + Math.random() * 90) })),
     });
@@ -26,7 +27,7 @@ export default function ExportMarketCharts() {
     setData(generateData());
     // const interval = setInterval(() => setData(generateData()), 5000);
     // return () => clearInterval(interval);
-  }, []);
+  }, [hsCodeGraphApiResponse, selectedHsCode]);
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">

@@ -71,9 +71,15 @@ const [active, setActive] = useState("relativePerformance");
 
 const [selectedCountry, setSelectedCountry] = useState("");
 const [hsCodeDropdownList, setHsCodeDropdownList] = useState([]); 
-const [hsCodeDropdownListType, setHsCodeDropdownListType] = useState("4digits"); 
+const [hsCodeDropdownListType, setHsCodeDropdownListType] = useState("4Digits"); // "4Digits" or "2Digits"
 // Add this with your existing states
 const [selectedHsCode, setSelectedHsCode] = useState("");
+
+
+// ✅ ADD: State for API response (add this with your existing states)
+const [apiResponse, setApiResponse] = useState(null);
+const [apiLoading, setApiLoading] = useState(false);
+const [apiError, setApiError] = useState(null);
 
 const fetchSearchQuery = () => {
    console.log('fetchSearchQuery start, search_id=', search_id);
@@ -139,18 +145,18 @@ const determineHsCodeDropdown = (sParams) => {
    console.log('determineHsCodeDropdown called with sParams:', sParams);
    
    // Check if we have search values to work with
-   if (!sParams.searchValue || sParams.searchValue.length === 0) {
+ /*  if (!sParams.searchValue || sParams.searchValue.length === 0) {
      console.log('No search values found, checking other fields...');
      
      // Check hsCodeList as fallback
      if (sParams.hsCodeList && sParams.hsCodeList.length > 0) {
        const firstHsCode = sParams.hsCodeList[0];
        if (firstHsCode.length === 8) {
-         setHsCodeDropdownListType("4 Digits");
+         setHsCodeDropdownListType("4Digits");
          getHSCode4digitList(sParams);
          return;
        } else if (firstHsCode.length === 4 || firstHsCode.length === 2) {
-         setHsCodeDropdownListType("2 Digits");
+         setHsCodeDropdownListType("2Digits");
         // getHSCode2digitList(sParams);
          return;
        }
@@ -158,49 +164,173 @@ const determineHsCodeDropdown = (sParams) => {
      
      // Check hsCode4DigitList as fallback
      if (sParams.hsCode4DigitList && sParams.hsCode4DigitList.length > 0) {
-       setHsCodeDropdownListType("2 Digits");
+       setHsCodeDropdownListType("2Digits");
        //getHSCode2digitList(sParams);
        return;
      }
      
      // Default case
-     setHsCodeDropdownListType("4 Digits");
+     setHsCodeDropdownListType("4Digits");
      getHSCode4digitList(sParams);
      return;
-   }
+   }*/
    
    // Main logic for searchValue
    if ((sParams.searchBy === 'HS_CODE' || sParams.searchBy === 'PRODUCT') && 
        sParams.searchValue && sParams.searchValue.length > 0) {
      
      const firstHsCode = sParams.searchValue[0];
+     console.log(' Search By HS_CODE/PRODUCT with searchValue:', sParams.searchValue);
      console.log('First HS Code:', firstHsCode, 'Length:', firstHsCode.length);
-     
-     if (firstHsCode.length === 8) {
+
+      if ((firstHsCode.length === 4 || firstHsCode.length === 2) && (sParams.searchBy === 'HS_CODE')) {
+       console.log('4444444222222222 HHSSSS 4/2-digit HS code detected, showing 2-digit list');
+       setHsCodeDropdownListType("2Digits");
+        getHSCode4digitList(sParams);
+      // getHSCode2digitList(sParams);
+       return;
+     } else {
+       console.log('888888888 PRODUCTCCCC 8-digit HS code detected, showing 4-digit list');
+       setHsCodeDropdownListType("4Digits");
+       getHSCode4digitList(sParams);
+       return;
+     }
+
+     /* if (firstHsCode.length === 8) {
        console.log('8-digit HS code detected, showing 4-digit list');
-       setHsCodeDropdownListType("4 Digits");
+       setHsCodeDropdownListType("4Digits");
        getHSCode4digitList(sParams);
        return;
      } else if (firstHsCode.length === 4 || firstHsCode.length === 2) {
        console.log('4/2-digit HS code detected, showing 2-digit list');
-       setHsCodeDropdownListType("2 Digits");
+       setHsCodeDropdownListType("2Digits");
+        getHSCode4digitList(sParams);
       // getHSCode2digitList(sParams);
        return;
-     }
+     }  */
+
+ 
+     
+    /* if (firstHsCode.length === 8) {
+       console.log('8-digit HS code detected, showing 4-digit list');
+       setHsCodeDropdownListType("4Digits");
+       getHSCode4digitList(sParams);
+       return;
+     } else if (firstHsCode.length === 4 || firstHsCode.length === 2) {
+       console.log('4/2-digit HS code detected, showing 2-digit list');
+       setHsCodeDropdownListType("2Digits");
+        getHSCode4digitList(sParams);
+      // getHSCode2digitList(sParams);
+       return;
+     }  */
    }
    
    // Default case - show 4-digit HS codes
    console.log('Default case, showing 4-digit HS codes');
-   setHsCodeDropdownListType("4 Digits");
+   setHsCodeDropdownListType("4Digits");
    getHSCode4digitList(sParams);
 };
 
 
-const handleHsCodeChange = (newHsCode) => {
-  if(newHsCode){
-    console.log("HS Code changed to: ", newHsCode);
+// ✅ UPDATED: handleHsCodeChange function with API call
+const handleHsCodeChange = async (newHsCode) => {
+  if (newHsCode) {
+    console.log("HS Code changed to:", newHsCode);
+    setSelectedHsCode(newHsCode);
+    console.log("Selected hsCodeDropdownListType:", hsCodeDropdownListType);
+    console.log("Current Search Params:", searchParams);
+    // Build API payload
+    let hsCode4DigitList = [];
+   let hsCodeList = [];
+
+    if (hsCodeDropdownListType === "4Digits") {
+      hsCode4DigitList = [newHsCode];
+      hsCodeList = [];
+    } else {
+      hsCodeList = [newHsCode];
+      hsCode4DigitList = [];
+    }
+    const apiPayload = {
+      searchType: "TRADE",
+      searchId: search_id,
+      tradeType: searchParams.tradeType,
+      searchBy: "HS_CODE",
+      searchValue: searchParams.searchValue,
+      countryCode: searchParams.countryCode || selectedCountry,
+      fromDate: searchParams.fromDate,
+      toDate: searchParams.toDate,
+      matchType: searchParams.matchType || "L",
+      queryBuilder: searchParams.queryBuilder || [],
+      
+      // Include filter lists
+      portOriginList: portOriginList || searchParams.portOriginList || [],
+      portDestinationList: portDestinationList || searchParams.portDestinationList || [],
+      hsCodeList: hsCodeList || searchParams.hsCodeList || [],
+     // hsCode4DigitList: hsCode4DigitList || searchParams.hsCode4DigitList || [],
+      importerList: importerList || searchParams.importerList || [],
+      exporterList: exporterList || searchParams.exporterList || [],
+      cityOriginList: cityOriginList || searchParams.cityOriginList || [],
+      cityDestinationList: cityDestinationList || searchParams.cityDestinationList || [],
+      shipModeList: shipmentModeList || searchParams.shipmentModeList || [],
+      stdUnitList: stdUnitList || searchParams.stdUnitList || [],
+      hsCode4DigitList: hsCode4DigitList || [],
+      hsCodeList: hsCodeList || [],
+      // Add selected HS code to appropriate list
+      // ...(hsCodeDropdownListType === "4Digits" ? 
+      //   { hsCode4DigitList: [newHsCode] } : 
+      //   { hsCodeList: [newHsCode] }
+      // ),
+      
+      // pageNumber: 0,
+      // numberOfRecords: 20
+    };
+    
+    console.log("API Payload for HS Code:", apiPayload);
+    
+    // Start loading
+    props.loadingStart();
+    
+    try {
+      // Call monthwise API
+      const response = await Axios({
+        method: "POST",
+        url: `/search-management/monthwiseindepth`,
+        data: JSON.stringify(apiPayload),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+      
+      console.log("API Response:", response.data.monthwiseList);
+      
+      // Update search params with response data
+      setSearchParams({
+        ...searchParams,
+        selectedHsCode: newHsCode,
+        apiResponse: response.data.monthwiseList, // ✅ Pass API response to graph
+        apiPayload: apiPayload,
+        lastUpdated: new Date().toISOString()
+      });
+
+      setHsCodeGraphApiResponse(response.data.monthwiseList);
+      
+    } catch (error) {
+      console.error("Error fetching HS Code data:", error);
+      
+      // Set error state
+      setSearchParams({
+        ...searchParams,
+        selectedHsCode: newHsCode,
+        apiResponse: null,
+        apiError: error.message,
+        lastUpdated: new Date().toISOString()
+      });
+      setHsCodeGraphApiResponse(null);
+    } finally {
+      props.loadingStop();
+    }
   }
-}
+};
 
   const history = useHistory();
 
@@ -259,6 +389,7 @@ const handleHsCodeChange = (newHsCode) => {
   //const [exporterDataArray, setExporterDataArray] = useState([]);
   const [hsCodeList, setHsCodeList] = useState([]);
   const [hsCodeDataArray, setHsCodeDataArray] = useState([]);
+  const [hsCodeGraphApiResponse, setHsCodeGraphApiResponse] = useState([]); 
 
   /*11/1/2025 */
 
@@ -437,18 +568,18 @@ const data = [
       "pageNumber": 0,
       "numberOfRecords": 20,
       "matchType": params.matchType,
-      "portOriginList": params.portOriginList,
-      "portDestinationList":  params.portDestinationList,
-      "hsCodeList":  params.hsCodeList,
-      "hsCode4DigitList":  params.hsCode4DigitList,
-      "exporterList":  params.exporterList,
-      "importerList":  params.importerList,
-      "cityOriginList":  params.cityOriginList,
-      "cityDestinationList":  params.cityDestinationList,
+      "portOriginList": params.portOriginList || [],
+      "portDestinationList":  params.portDestinationList || [],
+      "hsCodeList":  params.hsCodeList || [],
+      "hsCode4DigitList":  params.hsCode4DigitList || [],
+      "exporterList":  params.exporterList || [],
+      "importerList":  params.importerList || [],
+      "cityOriginList":  params.cityOriginList || [],
+      "cityDestinationList":  params.cityDestinationList || [],
       "searchId": search_id,
       "queryBuilder": params.queryBuilder,
-      "shipModeList": params.shipmentModeList,
-      "stdUnitList": params.stdUnitList
+      "shipModeList": params.shipmentModeList || [],
+      "stdUnitList": params.stdUnitList || []
     }
     props.loadingStart()
     Axios({
@@ -1733,7 +1864,7 @@ const data = [
           </select>
         </div>
         <div className="col-md-6">
-          <label className="form-label fw-semibold">HS Code  {hsCodeDropdownListType ==='2digit' ? '2-digit' : '4-digit'}</label>
+          <label className="form-label fw-semibold">HS Code  {hsCodeDropdownListType ==='2Digits' ? '2-digit' : '4-digit'}</label>
           <select className="form-select form-control" value={selectedHsCode}
           onChange={(e)=>{
                 const newHsCode=e.target.value;
@@ -1743,6 +1874,7 @@ const data = [
                 }
               }
             }>
+              <option value="">Select HS Code</option>
                {hsCodeDropdownList && hsCodeDropdownList.length > 0 ? 
                   hsCodeDropdownList.map((hsCode, index) => (
                     <option key={index} value={hsCode.value}>
@@ -1757,7 +1889,10 @@ const data = [
       </div>
 
       {/* Table */}
-       <RelativePerformanceGraph />
+       <RelativePerformanceGraph 
+         hsCodeGraphApiResponse={hsCodeGraphApiResponse}
+         selectedHsCode={selectedHsCode}
+       />
     </div>
 
 
