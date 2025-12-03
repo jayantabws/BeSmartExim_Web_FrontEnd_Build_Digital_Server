@@ -294,11 +294,11 @@ const fetchSearchQuery = () => {
 
 
 useEffect(() => {
-  console.log("🔄 cardValuesTotal changed:", cardValuesTotal);
+ // console.log(" cardValuesTotal changed:", cardValuesTotal);
 }, [cardValuesTotal]);
 
 useEffect(() => {
-  console.log("🔄 totalShipmentCount changed:", totalShipmentCount);
+ // console.log(" totalShipmentCount changed:", totalShipmentCount);
 }, [totalShipmentCount]);
 
 
@@ -432,31 +432,31 @@ const resetAllPayloadBeyondCurrentCard = (cardIndex) => {
     if (value !== "") newCard.push(value);
   }
   
-  console.log("MY NEW CARD TO RESET ================== ", newCard);
-  console.log("BEFORE reset - searchParams:", searchParams);
+ // console.log("MY NEW CARD TO RESET ================== ", newCard);
+ // console.log("BEFORE reset - searchParams:", searchParams);
   
   // Create a copy of current searchParams
   const updatedParams = { ...searchParams };
   
   // Reset each type found in forward cards
   if (newCard.includes("exporter")) {
-    console.log("RESET EXPORTER LIST");
+   // console.log("RESET EXPORTER LIST");
     setExporterList([]);
     // ✅ FIX: Properly update searchParams state
     updatedParams.exporterList = [];
   }
   if (newCard.includes("importer")) {
-    console.log("RESET IMPORTER LIST");
+  //  console.log("RESET IMPORTER LIST");
     setImporterList([]);
     updatedParams.importerList = [];
   }
   if (newCard.includes("hscode")) {
-    console.log("RESET HSCODE LIST");
+   // console.log("RESET HSCODE LIST");
     setHsCodeList([]);
     updatedParams.hsCodeList = [];
   }
   if (newCard.includes("country")) {
-    console.log("RESET COUNTRY/CITY LISTS");
+   // console.log("RESET COUNTRY/CITY LISTS");
     setCityDestinationList([]);
     setCityOriginList([]);
     
@@ -468,7 +468,7 @@ const resetAllPayloadBeyondCurrentCard = (cardIndex) => {
     }
   }
   if (newCard.includes("port")) {
-    console.log("RESET PORT LISTS");
+   // console.log("RESET PORT LISTS");
     setPortOriginList([]);
     setPortDestinationList([]);
     
@@ -482,7 +482,7 @@ const resetAllPayloadBeyondCurrentCard = (cardIndex) => {
   
   // ✅ CRITICAL: Update the searchParams state with all changes
   setSearchParams(updatedParams);
-  console.log("AFTER reset - searchParams:", updatedParams);
+ // console.log("AFTER reset - searchParams:", updatedParams);
   
   // Also clear the UI selections for forward cards
   resetForwardCardSelections(cardIndex);
@@ -517,7 +517,10 @@ const resetForwardCardSelections = (cardIndex) => {
 // ✅ FIXED: handleSelectionChange - Card 1 Handler
 const handleSelectionChange = async (selectedItems, type) => {
   console.log(`Card 1 ${type} selection changed:`, selectedItems);
-  
+  console.log("mySelectedOptions",mySelectedOptions);
+  console.log("cardSelectFor :",cardSelectFor);
+  console.log("searchParams before update:", searchParams);
+
   if (searchParams) {
     // ✅ BUILD: Complete fresh parameters for Card 1 only
     const updatedParams = {
@@ -547,7 +550,7 @@ const handleSelectionChange = async (selectedItems, type) => {
     
     // ✅ UPDATE: Set searchParams with reset arrays
     setSearchParams(updatedParams);
-    
+    console.log("searchParams after update:", updatedParams);
     // ✅ CLEAR: Reset all forward card UI states
     setSelectedCard2Items([]);
     setSelectedCard3Items([]);
@@ -563,9 +566,9 @@ const handleSelectionChange = async (selectedItems, type) => {
       getValueForParams(updatedParams, 1),
       getTotalShipmentCount(updatedParams)
     ]).then(results => {
-      console.log('Card 1 value and shipment updated with clean params');
+    //  console.log('Card 1 value and shipment updated with clean params');
     }).catch(err => {
-      console.error('Error fetching Card 1 data:', err);
+      //console.error('Error fetching Card 1 data:', err);
     });
 
     // Forward refresh with reset arrays
@@ -613,7 +616,10 @@ const handleSelectionChange = async (selectedItems, type) => {
 };
 // ✅ FIXED: handleCard2Change - Card 2 Handler
 const handleCard2Change = async (selectedItems, type) => {
-  console.log("Card 2 change called type:", type, "selectedItems:", selectedItems);
+   console.log(`Card 2 ${type} selection changed:`, selectedItems);
+  console.log("mySelectedOptions",mySelectedOptions);
+  console.log("cardSelectFor :",cardSelectFor);
+  console.log("searchParams before update:", searchParams);
   
   // ✅ BUILD: Complete parameters with Card 1 + Card 2 only
   const updatedParams = {
@@ -659,6 +665,7 @@ const handleCard2Change = async (selectedItems, type) => {
 
   // ✅ UPDATE: Set searchParams with reset forward arrays
   setSearchParams(updatedParams);
+  console.log("searchParams card 2 after update:", updatedParams);
   
   // ✅ CLEAR: Reset forward card UI states
   setSelectedCard3Items([]);
@@ -688,8 +695,10 @@ const handleCard2Change = async (selectedItems, type) => {
     try {
       // Get available forward options (not selected in Cards 1-2)
       const usedOptions = [card1ImportExport, type].filter(Boolean);
+      console.log("CARD 2 card1ImportExport, type :", card1ImportExport, type);
+      console.log("CARD 2 usedOptions:", usedOptions);
       const promises = [];
-
+       console.log("CARD 2 usedOptions for forward APIs:", usedOptions);
       // ✅ IMPORTANT: Use updatedParams (with reset arrays) for forward APIs
       if (!usedOptions.includes("hscode")) promises.push(getHSCodeList(updatedParams));
       if (!usedOptions.includes("country")) promises.push(getForeignCountryList(updatedParams));
@@ -719,7 +728,10 @@ const handleCard2Change = async (selectedItems, type) => {
 
 // ✅ FIXED: handleCard3Change - Card 3 Handler
 const handleCard3Change = async (selectedItems, type) => {
-  console.log("Card 3 change called type:", type, "selectedItems:", selectedItems);
+     console.log(`Card 2 ${type} selection changed:`, selectedItems);
+  console.log("mySelectedOptions",mySelectedOptions);
+  console.log("cardSelectFor :",cardSelectFor);
+  console.log("searchParams before update:", searchParams);
   
   // ✅ BUILD: Complete parameters with Cards 1-3 only
   const updatedParams = {
@@ -778,6 +790,9 @@ const handleCard3Change = async (selectedItems, type) => {
     ...(type === "exporter" && { exporterList: selectedItems })
   };
 
+  console.log("Updated params for Card 3 change:", updatedParams);
+  
+  // ✅ UPDATE: Set searchParams with reset forward arrays
   setSearchParams(updatedParams);
   
   // Clear forward cards
@@ -802,8 +817,10 @@ const handleCard3Change = async (selectedItems, type) => {
 
     try {
       const usedOptions = [card1ImportExport, card2Select, type].filter(Boolean);
+      console.log("CARD 3 card1ImportExport, card2Select, type :", card1ImportExport, card2Select, type);
+      console.log("CARD 3 usedOptions:", usedOptions);
       const promises = [];
-
+      console.log("CARD 3 usedOptions for forward APIs:", usedOptions); 
       // ✅ Use updatedParams for forward APIs
       if (!usedOptions.includes("hscode")) promises.push(getHSCodeList(updatedParams));
       if (!usedOptions.includes("country")) promises.push(getForeignCountryList(updatedParams));
@@ -1552,23 +1569,7 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
         setCardSelect(value);
         setSearchTerm(""); // Clear search when changing selection
           
-
-      /*   switch(cardIndex){
-          case 2:
-            setCardSelectFor({...cardSelectFor, myCard2: value ,myCard3:"",myCard4:"",myCard5:""});
-            break;
-          case 3:
-            setCardSelectFor({...cardSelectFor, myCard3: value, myCard4:"",myCard5:""});
-            break;
-          case 4:
-            setCardSelectFor({...cardSelectFor, myCard4: value, myCard5:""});
-            break;
-          case 5:
-            setCardSelectFor({...cardSelectFor, myCard5: value});
-            break;
-         }
-         */
-       
+      
   setCardSelectFor(prev => {
     const next = { ...prev };
 

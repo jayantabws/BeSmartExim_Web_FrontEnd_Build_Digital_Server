@@ -82,7 +82,7 @@ const [apiLoading, setApiLoading] = useState(false);
 const [apiError, setApiError] = useState(null);
 
 const fetchSearchQuery = () => {
-   console.log('fetchSearchQuery start, search_id=', search_id);
+ //  console.log('fetchSearchQuery start, search_id=', search_id);
   if (search_id) {
     props.loadingStart()
     let queryBuilderSuggestionList = []
@@ -92,7 +92,7 @@ const fetchSearchQuery = () => {
       params: { searchId: search_id }
     })
       .then(res => {
-        console.log('fetchSearchQuery response:', res);
+       // console.log('fetchSearchQuery response:', res);
         if (res.data.queryList) {
           let sParams = res.data.queryList[0].userSearchQuery;
           setSelectedCountry(sParams.countryCode || '');
@@ -131,7 +131,7 @@ const fetchSearchQuery = () => {
           setQueryBuilderSearchValue(queryBuilderSuggestionList)
           handleSearch(sParams);    
           sParams.tradeType == "IMPORT" ? getTradingCountryList("I") : getTradingCountryList("E")  
-          console.log("Search Params set in Relative Performance page: ", sParams); 
+         // console.log("Search Params set in Relative Performance page: ", sParams); 
         }
       })
       .catch(err => {
@@ -142,7 +142,7 @@ const fetchSearchQuery = () => {
 
 // ✅ FIXED: Complete determineHsCodeDropdown function
 const determineHsCodeDropdown = (sParams) => {
-   console.log('determineHsCodeDropdown called with sParams:', sParams);
+  // console.log('determineHsCodeDropdown called with sParams:', sParams);
    
    // Check if we have search values to work with
  /*  if (!sParams.searchValue || sParams.searchValue.length === 0) {
@@ -180,17 +180,17 @@ const determineHsCodeDropdown = (sParams) => {
        sParams.searchValue && sParams.searchValue.length > 0) {
      
      const firstHsCode = sParams.searchValue[0];
-     console.log(' Search By HS_CODE/PRODUCT with searchValue:', sParams.searchValue);
-     console.log('First HS Code:', firstHsCode, 'Length:', firstHsCode.length);
+   //  console.log(' Search By HS_CODE/PRODUCT with searchValue:', sParams.searchValue);
+   //  console.log('First HS Code:', firstHsCode, 'Length:', firstHsCode.length);
 
       if ((firstHsCode.length === 4 || firstHsCode.length === 2) && (sParams.searchBy === 'HS_CODE')) {
-       console.log('4444444222222222 HHSSSS 4/2-digit HS code detected, showing 2-digit list');
+     //  console.log('4444444222222222 HHSSSS 4/2-digit HS code detected, showing 2-digit list');
        setHsCodeDropdownListType("2Digits");
         getHSCode4digitList(sParams);
       // getHSCode2digitList(sParams);
        return;
      } else {
-       console.log('888888888 PRODUCTCCCC 8-digit HS code detected, showing 4-digit list');
+     //  console.log('888888888 PRODUCTCCCC 8-digit HS code detected, showing 4-digit list');
        setHsCodeDropdownListType("4Digits");
        getHSCode4digitList(sParams);
        return;
@@ -226,7 +226,7 @@ const determineHsCodeDropdown = (sParams) => {
    }
    
    // Default case - show 4-digit HS codes
-   console.log('Default case, showing 4-digit HS codes');
+ //  console.log('Default case, showing 4-digit HS codes');
    setHsCodeDropdownListType("4Digits");
    getHSCode4digitList(sParams);
 };
@@ -235,10 +235,10 @@ const determineHsCodeDropdown = (sParams) => {
 // ✅ UPDATED: handleHsCodeChange function with API call
 const handleHsCodeChange = async (newHsCode) => {
   if (newHsCode) {
-    console.log("HS Code changed to:", newHsCode);
+   // console.log("HS Code changed to:", newHsCode);
     setSelectedHsCode(newHsCode);
-    console.log("Selected hsCodeDropdownListType:", hsCodeDropdownListType);
-    console.log("Current Search Params:", searchParams);
+   // console.log("Selected hsCodeDropdownListType:", hsCodeDropdownListType);
+   // console.log("Current Search Params:", searchParams);
     // Build API payload
     let hsCode4DigitList = [];
    let hsCodeList = [];
@@ -285,11 +285,12 @@ const handleHsCodeChange = async (newHsCode) => {
       // numberOfRecords: 20
     };
     
-    console.log("API Payload for HS Code:", apiPayload);
+   // console.log("API Payload for HS Code:", apiPayload);
     
     // Start loading
     props.loadingStart();
     
+    /*Hs Code API Call */
     try {
       // Call monthwise API
       const response = await Axios({
@@ -300,9 +301,29 @@ const handleHsCodeChange = async (newHsCode) => {
           "Content-Type": "application/json"
         }
       });
+
+      //CALL 2 :Industry Graph API
+
+      const industryGraphParams={
+        exImp:searchParams.tradeType==="EXPORT" ? "export" : "import",
+        fromDate:searchParams.fromDate,
+        toDate:searchParams.toDate,
+        hsCode: newHsCode,
+      }
+
+     console.log("Industry Graph API Params:", industryGraphParams);
+
+      const industryResponse=await Axios({
+        method:"GET",
+        url:`/search-management/industrygraph`,
+        params: industryGraphParams,
+        headers:{
+          "Content-Type": "application/json"
+        }
+      });
+     console.log("Industry Graph API Response:", industryResponse.data);
       
-      console.log("API Response:", response.data.monthwiseList);
-      
+      console.log("HS CODE API Response:", response.data.monthwiseList);
       // Update search params with response data
       setSearchParams({
         ...searchParams,
@@ -313,6 +334,11 @@ const handleHsCodeChange = async (newHsCode) => {
       });
 
       setHsCodeGraphApiResponse(response.data.monthwiseList);
+      setIndustryExportGraphApiResponse(industryResponse.data);
+
+
+      /*Industry Export Api Call */
+     
       
     } catch (error) {
       console.error("Error fetching HS Code data:", error);
@@ -326,6 +352,7 @@ const handleHsCodeChange = async (newHsCode) => {
         lastUpdated: new Date().toISOString()
       });
       setHsCodeGraphApiResponse(null);
+      setIndustryExportGraphApiResponse(null);
     } finally {
       props.loadingStop();
     }
@@ -390,6 +417,7 @@ const handleHsCodeChange = async (newHsCode) => {
   const [hsCodeList, setHsCodeList] = useState([]);
   const [hsCodeDataArray, setHsCodeDataArray] = useState([]);
   const [hsCodeGraphApiResponse, setHsCodeGraphApiResponse] = useState([]); 
+  const [industryExportGraphApiResponse, setIndustryExportGraphApiResponse] = useState([]);
 
   /*11/1/2025 */
 
@@ -426,7 +454,7 @@ const data = [
 
 
   const handleSearch = (values) => {
-    console.log("Search Values:", values);
+   // console.log("Search Values:", values);
     var params = [];
     params["tradeType"] = values.tradeType;
     params["searchBy"] = values.searchBy;
@@ -598,7 +626,7 @@ const data = [
             hsList.push(specificItem);
           })
         }
-        console.log("HS Code 4 digit List: ", hsList);
+       // console.log("HS Code 4 digit List: ", hsList);
         setHsCodeDropdownList(hsList);
         setHsCode4digitDataArray(hsList);
       })
@@ -1374,7 +1402,7 @@ const data = [
   useEffect(() => {
     fetchSearchQuery()
     if (searchParams && searchParams.tradeType) {
-      console.log('searchParams changed - fetching lists', searchParams);
+     // console.log('searchParams changed - fetching lists', searchParams);
      // getImporterList(searchParams);
     
      // getExporterList(searchParams);
@@ -1890,8 +1918,9 @@ const data = [
 
       {/* Table */}
        <RelativePerformanceGraph 
-         hsCodeGraphApiResponse={hsCodeGraphApiResponse}
-         selectedHsCode={selectedHsCode}
+          hsCodeGraphApiResponse={hsCodeGraphApiResponse}
+          industryExportGraphApiResponse={industryExportGraphApiResponse}
+          selectedHsCode={selectedHsCode}
        />
     </div>
 
