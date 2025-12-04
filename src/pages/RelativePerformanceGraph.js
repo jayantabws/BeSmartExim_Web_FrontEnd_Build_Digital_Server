@@ -42,13 +42,13 @@ export default function ExportMarketCharts({ hsCodeGraphApiResponse, selectedHsC
     industryMap.set(item.monthName, item.monthValue);
   });
   
-  console.log("Industry Map:", industryMap);
-  console.log("Industry Data:" , industryData);
-  console.log("HS Data:", hsData);
+ // console.log("Industry Map:", industryMap);
+ // console.log("Industry Data:" , industryData);
+  //console.log("HS Data:", hsData);
 
   hsData.forEach(hsItem => {
     const industryAmount = industryMap.get(hsItem.month_name) || 0;
-    console.log(`Calculating for hscode month: ${hsItem.month_name}, HS Amount: ${hsItem.value_usd}, Industry Amount: ${industryAmount}`);
+   // console.log(`Calculating for hscode month: ${hsItem.month_name}, HS Amount: ${hsItem.value_usd}, Industry Amount: ${industryAmount}`);
     let sharePercentage = 0;
     if (industryAmount > 0 && hsItem.value_usd > 0) {
       sharePercentage = (hsItem.value_usd / industryAmount) * 100;
@@ -60,7 +60,7 @@ export default function ExportMarketCharts({ hsCodeGraphApiResponse, selectedHsC
     });
   });
 
-   console.log("Calculated Market Share Data:", shareData);
+  // console.log("Calculated Market Share Data:", shareData);
   return shareData;
 };
 
@@ -102,7 +102,7 @@ const calculateMarketSharePercentage = (hsCodeGraphApiResponse, industryExportGr
   return (
     <div className="max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
       <h1 className="text-2xl font-semibold text-center mb-6">
-        Export & Market Dashboard (Live Sample Data)
+        Export & Market Dashboard 
       </h1>
 
       <div className="grid md:grid-cols-3 gap-6">
@@ -141,6 +141,7 @@ const calculateMarketSharePercentage = (hsCodeGraphApiResponse, industryExportGr
 
         {/* Industry Export Chart */}
         <div className="bg-white rounded-2xl shadow-sm p-4">
+          
           <h2 className="text-lg font-medium mb-2 text-green-600">Industry Export</h2>
 
             {data?.industry?.length > 0 ? (

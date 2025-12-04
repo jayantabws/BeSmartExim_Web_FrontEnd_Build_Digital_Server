@@ -71,7 +71,7 @@ const [active, setActive] = useState("relativePerformance");
 
 const [selectedCountry, setSelectedCountry] = useState("");
 const [hsCodeDropdownList, setHsCodeDropdownList] = useState([]); 
-const [hsCodeDropdownListType, setHsCodeDropdownListType] = useState("4Digits"); // "4Digits" or "2Digits"
+const [hsCodeDropdownListType, setHsCodeDropdownListType] = useState(4); // 4 or 2
 // Add this with your existing states
 const [selectedHsCode, setSelectedHsCode] = useState("");
 
@@ -140,95 +140,31 @@ const fetchSearchQuery = () => {
   }
 }
 
-// ✅ FIXED: Complete determineHsCodeDropdown function
+// Complete determineHsCodeDropdown function
+// ✅ UPDATED: Pass digit value directly
 const determineHsCodeDropdown = (sParams) => {
-  // console.log('determineHsCodeDropdown called with sParams:', sParams);
-   
-   // Check if we have search values to work with
- /*  if (!sParams.searchValue || sParams.searchValue.length === 0) {
-     console.log('No search values found, checking other fields...');
-     
-     // Check hsCodeList as fallback
-     if (sParams.hsCodeList && sParams.hsCodeList.length > 0) {
-       const firstHsCode = sParams.hsCodeList[0];
-       if (firstHsCode.length === 8) {
-         setHsCodeDropdownListType("4Digits");
-         getHSCode4digitList(sParams);
-         return;
-       } else if (firstHsCode.length === 4 || firstHsCode.length === 2) {
-         setHsCodeDropdownListType("2Digits");
-        // getHSCode2digitList(sParams);
-         return;
-       }
-     }
-     
-     // Check hsCode4DigitList as fallback
-     if (sParams.hsCode4DigitList && sParams.hsCode4DigitList.length > 0) {
-       setHsCodeDropdownListType("2Digits");
-       //getHSCode2digitList(sParams);
-       return;
-     }
-     
-     // Default case
-     setHsCodeDropdownListType("4Digits");
-     getHSCode4digitList(sParams);
-     return;
-   }*/
-   
-   // Main logic for searchValue
-   if ((sParams.searchBy === 'HS_CODE' || sParams.searchBy === 'PRODUCT') && 
-       sParams.searchValue && sParams.searchValue.length > 0) {
-     
-     const firstHsCode = sParams.searchValue[0];
-   //  console.log(' Search By HS_CODE/PRODUCT with searchValue:', sParams.searchValue);
-   //  console.log('First HS Code:', firstHsCode, 'Length:', firstHsCode.length);
+  if ((sParams.searchBy === 'HS_CODE' || sParams.searchBy === 'PRODUCT') && 
+      sParams.searchValue && sParams.searchValue.length > 0) {
+    
+    const firstHsCode = sParams.searchValue[0];
 
-      if ((firstHsCode.length === 4 || firstHsCode.length === 2) && (sParams.searchBy === 'HS_CODE')) {
-     //  console.log('4444444222222222 HHSSSS 4/2-digit HS code detected, showing 2-digit list');
-       setHsCodeDropdownListType("2Digits");
-        getHSCode4digitList(sParams);
-      // getHSCode2digitList(sParams);
-       return;
-     } else {
-     //  console.log('888888888 PRODUCTCCCC 8-digit HS code detected, showing 4-digit list');
-       setHsCodeDropdownListType("4Digits");
-       getHSCode4digitList(sParams);
-       return;
-     }
-
-     /* if (firstHsCode.length === 8) {
-       console.log('8-digit HS code detected, showing 4-digit list');
-       setHsCodeDropdownListType("4Digits");
-       getHSCode4digitList(sParams);
-       return;
-     } else if (firstHsCode.length === 4 || firstHsCode.length === 2) {
-       console.log('4/2-digit HS code detected, showing 2-digit list');
-       setHsCodeDropdownListType("2Digits");
-        getHSCode4digitList(sParams);
-      // getHSCode2digitList(sParams);
-       return;
-     }  */
-
- 
-     
-    /* if (firstHsCode.length === 8) {
-       console.log('8-digit HS code detected, showing 4-digit list');
-       setHsCodeDropdownListType("4Digits");
-       getHSCode4digitList(sParams);
-       return;
-     } else if (firstHsCode.length === 4 || firstHsCode.length === 2) {
-       console.log('4/2-digit HS code detected, showing 2-digit list');
-       setHsCodeDropdownListType("2Digits");
-        getHSCode4digitList(sParams);
-      // getHSCode2digitList(sParams);
-       return;
-     }  */
-   }
+    if ((firstHsCode.length === 4 || firstHsCode.length === 2) && (sParams.searchBy === 'HS_CODE')) {
+     // console.log('4/2-digit HS code detected, showing 2-digit list');
+      setHsCodeDropdownListType(2);
+      getHscode4Digit2DigitApi(sParams, 2); // ✅ Pass digit directly
+      return;
+    } else {
+    // console.log('8-digit HS code detected, showing 4-digit list');
+      setHsCodeDropdownListType(4);
+      getHscode4Digit2DigitApi(sParams, 4); // ✅ Pass digit directly
+      return;
+    }
+  }
    
-   // Default case - show 4-digit HS codes
- //  console.log('Default case, showing 4-digit HS codes');
-   setHsCodeDropdownListType("4Digits");
-   getHSCode4digitList(sParams);
+  // Default case
+//  console.log('Default case, showing 4-digit HS codes');
+  setHsCodeDropdownListType(4);
+  getHscode4Digit2DigitApi(sParams, 4); // ✅ Pass digit directly
 };
 
 
@@ -237,19 +173,7 @@ const handleHsCodeChange = async (newHsCode) => {
   if (newHsCode) {
    // console.log("HS Code changed to:", newHsCode);
     setSelectedHsCode(newHsCode);
-   // console.log("Selected hsCodeDropdownListType:", hsCodeDropdownListType);
-   // console.log("Current Search Params:", searchParams);
-    // Build API payload
-    let hsCode4DigitList = [];
-   let hsCodeList = [];
 
-    if (hsCodeDropdownListType === "4Digits") {
-      hsCode4DigitList = [newHsCode];
-      hsCodeList = [];
-    } else {
-      hsCodeList = [newHsCode];
-      hsCode4DigitList = [];
-    }
     const apiPayload = {
       searchType: "TRADE",
       searchId: search_id,
@@ -273,16 +197,9 @@ const handleHsCodeChange = async (newHsCode) => {
       cityDestinationList: cityDestinationList || searchParams.cityDestinationList || [],
       shipModeList: shipmentModeList || searchParams.shipmentModeList || [],
       stdUnitList: stdUnitList || searchParams.stdUnitList || [],
-      hsCode4DigitList: hsCode4DigitList || [],
+      hsCode4DigitList: [newHsCode] || [],
       hsCodeList: hsCodeList || [],
-      // Add selected HS code to appropriate list
-      // ...(hsCodeDropdownListType === "4Digits" ? 
-      //   { hsCode4DigitList: [newHsCode] } : 
-      //   { hsCodeList: [newHsCode] }
-      // ),
-      
-      // pageNumber: 0,
-      // numberOfRecords: 20
+   
     };
     
    // console.log("API Payload for HS Code:", apiPayload);
@@ -301,7 +218,9 @@ const handleHsCodeChange = async (newHsCode) => {
           "Content-Type": "application/json"
         }
       });
-
+     
+      console.log("HS Code Graph Api Payload:", apiPayload);  
+         console.log("HS CODE API Response:", response.data.monthwiseList);
       //CALL 2 :Industry Graph API
 
       const industryGraphParams={
@@ -310,9 +229,6 @@ const handleHsCodeChange = async (newHsCode) => {
         toDate:searchParams.toDate,
         hsCode: newHsCode,
       }
-
-     console.log("Industry Graph API Params:", industryGraphParams);
-
       const industryResponse=await Axios({
         method:"GET",
         url:`/search-management/industrygraph`,
@@ -321,9 +237,10 @@ const handleHsCodeChange = async (newHsCode) => {
           "Content-Type": "application/json"
         }
       });
-     console.log("Industry Graph API Response:", industryResponse.data);
+       console.log("Industry Graph Api Payload:", industryGraphParams);  
+      console.log("Industry Graph API Response:", industryResponse.data);
       
-      console.log("HS CODE API Response:", response.data.monthwiseList);
+   
       // Update search params with response data
       setSearchParams({
         ...searchParams,
@@ -419,28 +336,9 @@ const handleHsCodeChange = async (newHsCode) => {
   const [hsCodeGraphApiResponse, setHsCodeGraphApiResponse] = useState([]); 
   const [industryExportGraphApiResponse, setIndustryExportGraphApiResponse] = useState([]);
 
-  /*11/1/2025 */
-
-  const [filterType, setFilterType] = useState("Value");
 
 
-const data = [
-    { month: "Jan", hsExport: 120, industryExport: 1000 },
-    { month: "Feb", hsExport: 150, industryExport: 1100 },
-    { month: "Mar", hsExport: 170, industryExport: 1150 },
-    { month: "Apr", hsExport: 160, industryExport: 1120 },
-    { month: "May", hsExport: 200, industryExport: 1250 },
-    { month: "Jun", hsExport: 220, industryExport: 1300 },
-    { month: "Jul", hsExport: 210, industryExport: 1280 },
-    { month: "Aug", hsExport: 250, industryExport: 1400 },
-    { month: "Sep", hsExport: 240, industryExport: 1380 },
-    { month: "Oct", hsExport: 260, industryExport: 1450 },
-    { month: "Nov", hsExport: 280, industryExport: 1500 },
-    { month: "Dec", hsExport: 300, industryExport: 1550 },
-  ];
 
-    const calculateMarketShare = (hs, industry) =>
-    ((hs / industry) * 100).toFixed(1) + "%";
 
   const handleModal = (rowData,columns)  => {
     setShowModal(true)
@@ -635,157 +533,71 @@ const data = [
         setHsCode4digitDataArray([]);
       });
   }
-/*
-  const getShipmentModeList = (params) => {
-    const postData = {
-      "searchType": "TRADE",
-      "tradeType": params.tradeType,
-      "fromDate": params.fromDate,
-      "toDate": params.toDate,
-      "searchBy": params.searchBy,
-      "searchValue": params.searchValue,
-      "countryCode": params.countryCode,
-      "pageNumber": 0,
-      "numberOfRecords": 20,
-      "matchType": params.matchType,
-      "portOriginList": params.portOriginList,
-      "portDestinationList":  params.portDestinationList,
-      "hsCodeList":  params.hsCodeList,
-      "hsCode4DigitList":  params.hsCode4DigitList,
-      "exporterList":  params.exporterList,
-      "importerList":  params.importerList,
-      "cityOriginList":  params.cityOriginList,
-      "cityDestinationList":  params.cityDestinationList,
-      "searchId": search_id,
-      "queryBuilder": params.queryBuilder,
-      "shipModeList": params.shipmentModeList,
-      "stdUnitList": params.stdUnitList
-    }
-    props.loadingStart()
-    Axios({
-      method: "POST",
-      url: `/search-management/listshipmentmode`,
-      data: JSON.stringify(postData),
+
+
+const getHscode4Digit2DigitApi = async (params,digitValue=null) => {
+  try {
+    props.loadingStart();
+    
+    const res = await Axios({
+      method: "GET",
+      url: `/search-management/hscodelist`,
+      params: {
+        exImp: params.tradeType === "EXPORT" ? "export" : "import",
+        digit: digitValue ? digitValue : hsCodeDropdownListType,
+      },
       headers: {
         "Content-Type": "application/json"
       }
-    })
-      .then(res => {
-        let icList = [];
-        if (res.data.shipmentModeList) {
-          res.data.shipmentModeList.forEach((item) => {
-            let specificItem = { "value": item.ship_mode, "label": item.ship_mode };
-            icList.push(specificItem);
-          })
-        }
-        setShipmentModeDataArray(icList);
-      })
-      .catch(err => {
-        // console.log("Err");
-        setShipmentModeDataArray([]);
-      });
-  }
-  */
-  /* IMPORTANT  16/09/2025*/
-  /*
-  const getImporterList = (params) => {
+    });
 
-    const postData = {
-      "searchType": "TRADE",
-      "tradeType": params.tradeType,
-      "fromDate": params.fromDate,
-      "toDate": params.toDate,
-      "searchBy": params.searchBy,
-      "searchValue": params.searchValue,
-      "countryCode": params.countryCode,
-      "pageNumber": 0,
-      "numberOfRecords": 20,
-      "matchType": params.matchType,
-      "portOriginList": params.portOriginList,
-      "portDestinationList":  params.portDestinationList,
-      "hsCodeList":  params.hsCodeList,
-      "hsCode4DigitList":  params.hsCode4DigitList,
-      "exporterList":  params.exporterList,
-      "importerList":  params.importerList,
-      "cityOriginList":  params.cityOriginList,
-      "cityDestinationList":  params.cityDestinationList,
-      "searchId": search_id,
-      "queryBuilder": params.queryBuilder,
-      "shipModeList": params.shipmentModeList,
-      "stdUnitList": params.stdUnitList
-    }
-    props.loadingStart()
-    Axios({
-      method: "POST",
-      url: `/search-management/listimporters`,
-      data: JSON.stringify(postData),
-      headers: {
-        "Content-Type": "application/json"
+    // console.log("Pay load for HS Code List API:", {
+    //   exImp: params.tradeType === "EXPORT" ? "export" : "import",
+    //   digit: digitValue,
+    // });
+
+   // console.log("API Response:", res.data);
+  
+
+    // ✅ SIMPLE: Process the response
+    let hsList = [];
+    const dataArray = res.data || [];
+
+    // Handle if data is directly an array or nested
+    const hsCodeData = Array.isArray(dataArray) ? dataArray : (dataArray.list || dataArray.data || []);
+
+    hsCodeData.forEach((item) => {
+      const code = item.hsCode ;
+      const count = item.shipment_count || 0;
+      
+      if (code) {
+        hsList.push({
+          value: code,
+          label: `${code} [${count}]`
+        });
       }
-    })
-      .then(res => {
-      //  console.log("importer data ============= ", res.data.importersList);
-        let importersList = [];
-        if (res.data.importersList) {
-          res.data.importersList.forEach((item) => {
-            let specificItem = { "value": item.importer_name, "label": item.importer_name+" ["+item.shipment_count+"]" };
-            importersList.push(specificItem);
-          })
-          setImporterDataArray(importersList)
-        }
+    });
 
-        let data = [];
-            let others = {};
-            let total = {};
-            let quantity = 0
-            let share = 0;
-            let shipment_count = 0
-            let value_inr = 0;
-            let value_usd = 0
-            let total_quantity = 0
-            let total_share = 0
-            let total_shipment_count = 0
-            let total_value_inr = 0
-            let total_value_usd = 0
-
-            res.data.importersList.forEach((item,index) => {
-              if(index < 10){
-                data.push(item);
-              }
-             
-            })
-            if( res.data.importersList.length >= 10){
-              others = {
-                importer_name : 'OTHERS',
-                quantity : res.data.totalQuantityTop10,
-                share : res.data.valueShareTop10,
-                shipment_count : res.data.shipmentCountTop10,
-                value_inr : res.data.totalValueINRTop10,
-                value_usd : res.data.totalValueUSDTop10
-              }
-              data.push(others)
-            }
-            total = {
-              importer_name : 'TOTAL',
-              quantity : res.data.totalQuantity,
-              share : res.data.valueShare,
-              shipment_count : res.data.shipmentCount,
-              value_inr : res.data.totalValueINR,
-              value_usd : res.data.totalValueUSD
-            }
-        
-            data.push(total)
-            setImporterDataLT(data)
-        //console.log("importer data list ============= ", data );
-        setImporterDataList(res.data);
-        setPendingImport(false);
-      })
-      .catch(err => {
-        // console.log("Err");
-        setPendingImport(false);
-      });
+   // console.log(`Loaded ${hsList.length} HS codes`);
+    
+    // ✅ SIMPLE: Update dropdown
+    setHsCodeDropdownList(hsList);
+    
+    if (hsCodeDropdownListType === 4) {
+      setHsCode4digitDataArray(hsList);
+    } else {
+      setHsCodeDataArray(hsList);
+    }
+    
+  } catch (error) {
+    console.error("Error:", error);
+    setHsCodeDropdownList([]);
+  } finally {
+    props.loadingStop();
   }
-  */
+}
+
+
 
   const getTradingCountryList = (params) => {
     props.loadingStart()
@@ -808,304 +620,6 @@ const data = [
         setTradeCountryList([])
       });
   }
-/*
-  const getExporterList = (params) => {
-    const postData = {
-      "searchType": "TRADE",
-      "tradeType": params.tradeType,
-      "fromDate": params.fromDate,
-      "toDate": params.toDate,
-      "searchBy": params.searchBy,
-      "searchValue": params.searchValue,
-      "countryCode": params.countryCode,
-      "pageNumber": 0,
-      "numberOfRecords": 20,
-      "matchType": params.matchType,
-      "portOriginList": params.portOriginList,
-      "portDestinationList":  params.portDestinationList,
-      "hsCodeList":  params.hsCodeList,
-      "hsCode4DigitList":  params.hsCode4DigitList,
-      "exporterList":  params.exporterList,
-      "importerList":  params.importerList,
-      "cityOriginList":  params.cityOriginList,
-      "cityDestinationList":  params.cityDestinationList,
-      "searchId": search_id,
-      "queryBuilder": params.queryBuilder,
-      "stdUnitList": params.stdUnitList
-    }
-    props.loadingStart()
-    Axios({
-      method: "POST",
-      url: `/search-management/listexporters`,
-      data: JSON.stringify(postData),
-      headers: {
-        "Content-Type": "application/json"
-      }
-    })
-      .then(res => {
-
-        let exportersList = [];
-        if (res.data.exportersList) {
-          res.data.exportersList.forEach((item) => {
-            let specificItem = { "value": item.exporter_name, "label": item.exporter_name+" ["+item.shipment_count+"]" };
-            exportersList.push(specificItem);
-          })
-          setExporterDataArray(exportersList)
-        }
-
-        let data = [];
-        let others = {};
-        let total = {};
-        let quantity = 0
-        let share = 0;
-        let shipment_count = 0
-        let value_inr = 0;
-        let value_usd = 0
-        let total_quantity = 0
-        let total_share = 0
-        let total_shipment_count = 0
-        let total_value_inr = 0
-        let total_value_usd = 0
-
-        res.data.exportersList.forEach((item,index) => {
-          if(index < 10){
-            data.push(item);
-          }
-          
-       
-        })
-        if(res.data.exportersList.length  >= 10){
-          others = {
-            exporter_name : 'OTHERS',
-            quantity : res.data.totalQuantityTop10,
-            share : res.data.valueShareTop10,
-            shipment_count : res.data.shipmentCountTop10,
-            value_inr : res.data.totalValueINRTop10,
-            value_usd : res.data.totalValueUSDTop10
-          } 
-
-        data.push(others)
-        }
-        total = {
-          exporter_name : 'TOTAL',
-          quantity : res.data.totalQuantity,
-          share : res.data.valueShare,
-          shipment_count : res.data.shipmentCount,
-          value_inr : res.data.totalValueINR,
-          value_usd : res.data.totalValueUSD
-        }
-
-        data.push(total)
-        setExportertDataLT(data)
-
-        setExporterDataList(res.data);
-        setPendingExport(false);
-        
-      })
-      .catch(err => {
-        // console.log("Err");
-        setPendingExport(false);
-      });
-  }
-*/
-
-/*
-  const getIndianPortList = (params) => {
-    const postData = {
-      "searchType": "TRADE",
-      "tradeType": params.tradeType,
-      "fromDate": params.fromDate,
-      "toDate": params.toDate,
-      "searchBy": params.searchBy,
-      "searchValue": params.searchValue,
-      "countryCode": params.countryCode,
-      "pageNumber": 0,
-      "numberOfRecords": 20,
-      "matchType": params.matchType,
-      "portOriginList": params.portOriginList,
-      "portDestinationList":  params.portDestinationList,
-      "hsCodeList":  params.hsCodeList,
-      "hsCode4DigitList":  params.hsCode4DigitList,
-      "exporterList":  params.exporterList,
-      "importerList":  params.importerList,
-      "cityOriginList":  params.cityOriginList,
-      "cityDestinationList":  params.cityDestinationList,
-      "searchId": search_id,
-      "queryBuilder": params.queryBuilder,
-      "shipModeList": params.shipmentModeList,
-      "stdUnitList": params.stdUnitList
-    }
-    props.loadingStart()
-    Axios({
-      method: "POST",
-      url: `/search-management/listindianports`,
-      data: JSON.stringify(postData),
-      headers: {
-        "Content-Type": "application/json"
-      }
-    })
-      .then(res => {
-        
-        let portsList = [];
-        if (res.data.portsList) {
-          res.data.portsList.forEach((item) => {
-            let specificItem = { "value": item.port_name, "label": item.port_name+" ["+item.shipment_count+"]" };
-            portsList.push(specificItem);
-          })
-        }
-        setPortOriginDataArray(portsList);
-
-        let data = [];
-        let others = {};
-        let total = {};
-        let quantity = 0
-        let share = 0;
-        let shipment_count = 0
-        let value_inr = 0;
-        let value_usd = 0
-        let total_quantity = 0
-        let total_share = 0
-        let total_shipment_count = 0
-        let total_value_inr = 0
-        let total_value_usd = 0
-
-        res.data.portsList.forEach((item,index) => {
-          if(index < 10){
-            data.push(item);
-          }
-          
-        })
-        if(res.data.portsList.length >= 10){
-          others = {
-            port_name : 'OTHERS',
-            quantity : res.data.totalQuantityTop10,
-            share : res.data.valueShareTop10,
-            shipment_count : res.data.shipmentCountTop10,
-            value_inr : res.data.totalValueINRTop10,
-            value_usd : res.data.totalValueUSDTop10,
-            country : 'India'
-          }
-          data.push(others)
-        }
-        total = {
-          port_name : 'TOTAL',
-          quantity : res.data.totalQuantity,
-          share : res.data.valueShare,
-          shipment_count : res.data.shipmentCount,
-          value_inr : res.data.totalValueINR,
-          value_usd : res.data.totalValueUSD
-        }
-
-        data.push(total)
-        setIndianPortDataLT(data)
-
-        setIndianPortDataList(res.data);
-        setPendingIndPort(false);
-      })
-      .catch(err => {
-        // console.log("Err");
-        setPendingIndPort(false);
-      });
-  }
-*/
-/*
-  const getForeignPortList = (params) => {
-    const postData = {
-      "searchType": "TRADE",
-      "tradeType": params.tradeType,
-      "fromDate": params.fromDate,
-      "toDate": params.toDate,
-      "searchBy": params.searchBy,
-      "searchValue": params.searchValue,
-      "countryCode": params.countryCode,
-      "pageNumber": 0,
-      "numberOfRecords": 20,
-      "matchType": params.matchType,
-      "portOriginList": params.portOriginList,
-      "portDestinationList":  params.portDestinationList,
-      "hsCodeList":  params.hsCodeList,
-      "hsCode4DigitList":  params.hsCode4DigitList,
-      "exporterList":  params.exporterList,
-      "importerList":  params.importerList,
-      "cityOriginList":  params.cityOriginList,
-      "cityDestinationList":  params.cityDestinationList,
-      "searchId": search_id,
-      "queryBuilder": params.queryBuilder,
-      "shipModeList": params.shipmentModeList,
-      "stdUnitList": params.stdUnitList
-    }
-    props.loadingStart()
-    Axios({
-      method: "POST",
-      url: `/search-management/listforeignports`,
-      data: JSON.stringify(postData),
-      headers: {
-        "Content-Type": "application/json"
-      }
-    })
-      .then(res => {
-        let portsList = [];
-        if (res.data.portsList) {
-          res.data.portsList.forEach((item) => {
-            let specificItem = { "value": item.port_name, "label": item.port_name+"["+item.shipment_count+"]" };
-            portsList.push(specificItem);
-          })
-        }
-        setPortDestinationDataArray(portsList);
-
-        let data = [];
-        let others = {};
-        let total = {};
-        let quantity = 0
-        let share = 0;
-        let shipment_count = 0
-        let value_inr = 0;
-        let value_usd = 0
-        let total_quantity = 0
-        let total_share = 0
-        let total_shipment_count = 0
-        let total_value_inr = 0
-        let total_value_usd = 0
-
-        res.data.portsList.forEach((item,index) => {
-          if(index < 10){
-            data.push(item);
-          }
-         
-        })
-        if(res.data.portsList.length >= 10){
-          others = {
-            port_name : 'OTHERS',
-            quantity : res.data.totalQuantityTop10,
-            share : res.data.valueShareTop10,
-            shipment_count : res.data.shipmentCountTop10,
-            value_inr : res.data.totalValueINRTop10,
-            value_usd : res.data.totalValueUSDTop10,
-            country : 'Foreign'
-          }
-          data.push(others)
-        }
-        total = {
-          port_name : 'TOTAL',
-          quantity : res.data.totalQuantity,
-          share : res.data.valueShare,
-          shipment_count : res.data.shipmentCount,
-          value_inr : res.data.totalValueINR,
-          value_usd : res.data.totalValueUSD
-        }
-
-        data.push(total)
-        setForPortDataLT(data)
-
-        setForPortDataList(res.data);
-        setPendingForPort(false);
-      })
-      .catch(err => {
-        // console.log("Err");
-        setPendingForPort(false);
-      });
-  }
-*/
   const getHSCodeList = (params) => {
     const postData = {
       "searchType": "TRADE",
@@ -1202,202 +716,6 @@ const data = [
         setPendingHSCode(false);
       });
   }
-
-  /*
-  const getForeignCountryList = (params) => {
-    const postData = {
-      "searchType": "TRADE",
-      "tradeType": params.tradeType,
-      "fromDate": params.fromDate,
-      "toDate": params.toDate,
-      "searchBy": params.searchBy,
-      "searchValue": params.searchValue,
-      "countryCode": params.countryCode,
-      "pageNumber": 0,
-      "numberOfRecords": 20,
-      "matchType": params.matchType,
-      "portOriginList": params.portOriginList,
-      "portDestinationList":  params.portDestinationList,
-      "hsCodeList":  params.hsCodeList,
-      "hsCode4DigitList":  params.hsCode4DigitList,
-      "exporterList":  params.exporterList,
-      "importerList":  params.importerList,
-      "cityOriginList":  params.cityOriginList,
-      "cityDestinationList":  params.cityDestinationList,
-      "searchId": search_id,
-      "queryBuilder": params.queryBuilder,
-      "shipModeList": params.shipmentModeList,
-      "stdUnitList": params.stdUnitList
-    }
-    props.loadingStart()
-    Axios({
-      method: "POST",
-      url: `/search-management/listforeigncountries`,
-      data: JSON.stringify(postData),
-      headers: {
-        "Content-Type": "application/json"
-      }
-    })
-      .then(res => {
-
-        let fcList = [];
-        if (res.data.countriesList) {
-          res.data.countriesList.forEach((item) => {
-            let specificItem = { "value": item.country_name, "label": item.country_name+" ["+item.shipment_count+"]" };
-            fcList.push(specificItem);
-          })
-        }
-        setCountryOriginList(fcList);
-
-        let data = [];
-        let others = {};
-        let total = {};
-        let quantity = 0
-        let share = 0;
-        let shipment_count = 0
-        let value_inr = 0;
-        let value_usd = 0
-        let total_quantity = 0
-        let total_share = 0
-        let total_shipment_count = 0
-        let total_value_inr = 0
-        let total_value_usd = 0
-
-        res.data.countriesList.forEach((item,index) => {
-          if(index < 10){
-            data.push(item);
-          }
-         
-        })
-        if(res.data.countriesList.length >= 10){
-          others = {
-            country_name : 'OTHERS',
-            quantity : res.data.totalQuantityTop10,
-            share : res.data.valueShareTop10,
-            shipment_count : res.data.shipmentCountTop10,
-            value_inr : res.data.totalValueINRTop10,
-            value_usd : res.data.totalValueUSDTop10
-          }
-          data.push(others)
-        }
-        total = {
-          country_name : 'TOTAL',
-          quantity : res.data.totalQuantity,
-          share : res.data.valueShare,
-          shipment_count : res.data.shipmentCount,
-          value_inr : res.data.totalValueINR,
-          value_usd : res.data.totalValueUSD
-        }
-
-        data.push(total)
-        setCountryDataLT(data)
-
-        setCountryDataList(res.data);
-        setPendingCountry(false);
-      })
-      .catch(err => {
-        // console.log("Err");
-        setPendingCountry(false);
-      });
-  }
-  */
- /*
-  const getCityList = (params) => {
-    const postData = {
-      "searchType": "TRADE",
-      "tradeType": params.tradeType,
-      "fromDate": params.fromDate,
-      "toDate": params.toDate,
-      "searchBy": params.searchBy,
-      "searchValue": params.searchValue,
-      "countryCode": params.countryCode,
-      "pageNumber": 0,
-      "numberOfRecords": 20,
-      "matchType": params.matchType,
-      "portOriginList": params.portOriginList,
-      "portDestinationList":  params.portDestinationList,
-      "hsCodeList":  params.hsCodeList,
-      "hsCode4DigitList":  params.hsCode4DigitList,
-      "exporterList":  params.exporterList,
-      "importerList":  params.importerList,
-      "cityOriginList":  params.cityOriginList,
-      "cityDestinationList":  params.cityDestinationList,
-      "searchId": search_id,
-      "queryBuilder": params.queryBuilder,
-      "shipModeList": params.shipmentModeList,
-      "stdUnitList": params.stdUnitList
-    }
-    props.loadingStart()
-    Axios({
-      method: "POST",
-      url: `/search-management/listindiancities`,
-      data: JSON.stringify(postData),
-      headers: {
-        "Content-Type": "application/json"
-      }
-    })
-      .then(res => {
-        let icList = [];
-        if (res.data.citiesList) {
-          res.data.citiesList.forEach((item) => {
-            let specificItem = { "value": item.city_name, "label": item.city_name+" ["+item.shipment_count+"]" };
-            icList.push(specificItem);
-          })
-        }
-        setCountryDestinationList(icList);
-
-        let data = [];
-        let others = {};
-        let total = {};
-        let quantity = 0
-        let share = 0;
-        let shipment_count = 0
-        let value_inr = 0;
-        let value_usd = 0
-        let total_quantity = 0
-        let total_share = 0
-        let total_shipment_count = 0
-        let total_value_inr = 0
-        let total_value_usd = 0
-
-        res.data.citiesList.forEach((item,index) => {
-          if(index < 10){
-            data.push(item);
-          }
-         
-        })
-        if(res.data.citiesList.length >= 10){
-          others = {
-            city_name : 'OTHERS',
-            quantity : res.data.totalQuantityTop10,
-            share : res.data.valueShareTop10,
-            shipment_count : res.data.shipmentCountTop10,
-            value_inr : res.data.totalValueINRTop10,
-            value_usd : res.data.totalValueUSDTop10
-          }
-          data.push(others)
-        }
-        total = {
-          city_name : 'TOTAL',
-          quantity : res.data.totalQuantity,
-          share : res.data.valueShare,
-          shipment_count : res.data.shipmentCount,
-          value_inr : res.data.totalValueINR,
-          value_usd : res.data.totalValueUSD
-        }
-
-        data.push(total)
-        setCityDataLT(data)
-
-        setCityDataList(res.data);
-        setPendingCity(false);
-      })
-      .catch(err => {
-        // console.log("Err");
-        fsetPendingCity(false);
-      });
-  }
-      */
 
   useEffect(() => {
     fetchSearchQuery()
@@ -1784,14 +1102,7 @@ const data = [
  
       {/* Button 1 */}
       <div className="col-lg-2 col-md-3 mb-3">
-        {/* <button
-          className={`btn w-100 py-3 ${
-            active === "importer" ? "btn-warning" : "btn-primary"
-          }`}
-          onClick={() => setActive("importer")}
-        >
-          Nexus
-        </button> */}
+       
 
           <Link  className={`btn w-100 py-3 ${
             active === "indepth" ? "btn-warning" : "btn-primary"
@@ -1871,10 +1182,10 @@ const data = [
 
 
    
-    </div>
+   </div>
 
       <div className="container my-4">
-      <h4 className="fw-bold mb-3">Relative Performance of HS Code 8708</h4>
+      <h4 className="fw-bold mb-3">Relative Performance of HS Code {selectedHsCode ? selectedHsCode : null}  </h4>
 
       {/* Filters */}
       <div className="row g-3 align-items-end mb-4">
@@ -1892,7 +1203,7 @@ const data = [
           </select>
         </div>
         <div className="col-md-6">
-          <label className="form-label fw-semibold">HS Code  {hsCodeDropdownListType ==='2Digits' ? '2-digit' : '4-digit'}</label>
+          <label className="form-label fw-semibold">HS Code - {hsCodeDropdownListType ? hsCodeDropdownListType + ' Digit': ''}</label>
           <select className="form-select form-control" value={selectedHsCode}
           onChange={(e)=>{
                 const newHsCode=e.target.value;
