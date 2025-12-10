@@ -1,6 +1,7 @@
 
 export const columnListImportGlobal = [
-    { key: 'ctry_name', label: 'Source Country', width: 150 },
+   // { key: 'ctry_name', label: 'Source Country', width: 150 },
+   { key: 'ctry_name', label: 'Destination Country', width: 150 },
     // { key: 'id', label: 'Sl', width: 100 },
 	{ key: 'be_date', label: 'Date', width: 100 },
 	{ key: 'hs_code', label: 'HSCODE', width: 100 },
@@ -34,7 +35,8 @@ export const columnListImportGlobal = [
 
 
 export const columnListImportDownloadGlobal = [
-    { key: 'ctry_name', label: 'Source Country', width: 150 },
+   // { key: 'ctry_name', label: 'Source Country', width: 150 },
+    { key: 'ctry_name', label: 'Destination Country', width: 150 },
     { key: 'id', label: 'Sl', width: 100 },
 	{ key: 'be_date', label: 'Date', width: 100 },
 	{ key: 'hs_code', label: 'HSCODE', width: 100 },
