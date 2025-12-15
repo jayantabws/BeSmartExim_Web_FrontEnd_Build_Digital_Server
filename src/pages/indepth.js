@@ -56,35 +56,6 @@ const validateForm = Yup.object().shape({
 
 
 
-/* 11/11/2025 */
-/*
-const conditionalRowStyles = [
-  {
-    when: row => (row.importer_name == "OTHERS" || row.exporter_name == "OTHERS" || row.port_name == "OTHERS" 
-    || row.hscode == "OTHERS" || row.country_name == "OTHERS" || row.port_name == "OTHERS" || row.city_name == "OTHERS"),
-    style: {
-          backgroundColor: 'rgba(63, 195, 128, 0.9)',
-          color: 'white',
-          cursor: 'pointer',
-          '&:hover': {
-            cursor: 'pointer',
-          },
-        },
-  },
-  {
-    when: row => (row.importer_name == "TOTAL" || row.exporter_name == "TOTAL" || row.port_name == "TOTAL" 
-    || row.hscode == "TOTAL" || row.country_name == "TOTAL" || row.port_name == "TOTAL" || row.city_name == "TOTAL"),
-    style: {
-          backgroundColor: 'rgba(242, 38, 19, 0.9)',
-          color: 'white',
-          '&:hover': {
-            cursor: 'pointer',
-          },
-        },
-  }
-
-]  */
-
 
 
 
@@ -96,31 +67,7 @@ const importerForExport = props.location.state ? props.location.state.importerFo
 const exporterForImport = props.location.state ? props.location.state.exporterForImport : null ;
   const [active, setActive] = useState("indepth");
 
-/* 11/11/2025 */
-// const [tooltipContent, setTooltipContent] = useState("");
-// const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 })
 
-/* 11/11/2025 */
-/*
-const showTooltip = (row, event ) => {
-
-// console.log("row ================= ", row)
-  // console.log("event ================= ", event.target.textContent)
-  if ((row.importer_name == "OTHERS" || row.exporter_name == "OTHERS" || row.port_name == "OTHERS" 
-    || row.hscode == "OTHERS" || row.country_name == "OTHERS" || row.port_name == "OTHERS" || row.city_name == "OTHERS") || 
-    (row.importer_name == "TOTAL" || row.exporter_name == "TOTAL" || row.port_name == "TOTAL" 
-    || row.hscode == "TOTAL" || row.country_name == "TOTAL" || row.port_name == "TOTAL" || row.city_name == "TOTAL") )
-    {
-      setTooltipContent("")
-      setTooltipPosition({ top: 0, left: 0 });
-    }
-    else
-    {
-      setTooltipContent(event.target.textContent)
-      setTooltipPosition({ top: event.clientY, left: event.clientX+30 });
-    }
-};
- */
 
 const fetchSearchQuery = () => {
   // console.log('fetchSearchQuery start, search_id=', search_id);
@@ -178,7 +125,7 @@ const fetchSearchQuery = () => {
 
   const history = useHistory();
 
-  const [toggle, setToggle] = useState(false);
+  
   const [pendingImport, setPendingImport] = useState(true);
   const [pendingExport, setPendingExport] = useState(true);
   const [searchParams, setSearchParams] = useState({});
@@ -198,7 +145,7 @@ const fetchSearchQuery = () => {
   const [searchValue, setSearchValue] = useState();
   const [minDate, setMinDate] = useState(new Date());
   const [maxDate, setMaxDate] = useState(new Date());
-  const [monthWise, setMonthWiseList] = useState([]);
+
 //  const [monthWiseDataList, setMonthWiseDataList] = useState([]);
   const [queryBuilderSearchValue, setQueryBuilderSearchValue] = useState([]);
   const [importerDataLT, setImporterDataLT] = useState([]);
@@ -301,1468 +248,100 @@ useEffect(() => {
  // console.log(" totalShipmentCount changed:", totalShipmentCount);
 }, [totalShipmentCount]);
 
+const resetAllRecords=()=>{
+  window.location.reload();
+}
 
 
-// ...Indepth Search Table code...
-const [indepthParams, setIndepthParams] = useState(null); // payload passed to IndepthSearchTable
-
-const buildFinalParams = () => {
-  const p = { ...(searchParams || {}) };
-  // ✅ Add searchId from the search_id variable
-  p.searchId = search_id; // Add this line
-  
-  // card1: exporter/importer - if items are objects map to id/name expected by API
-  if (card1ImportExport === "exporter") {
-    p.exporterList = Array.isArray(selectedExporters) ? selectedExporters.map(x => (x && x.id) ? x.id : x) : [];
-    p.importerList = [];
-  } else {
-    p.importerList = Array.isArray(selectedImporters) ? selectedImporters.map(x => (x && x.id) ? x.id : x) : [];
-    p.exporterList = [];
-  }
-
-  const applyCard = (selectValue, items) => {
-   // console.log("Applying card", selectValue, items);
-    const list = Array.isArray(items) ? items.map(x => (x && x.id) ? x.id : x) : [];
-    //console.log("Mapped list for", selectValue, list);
-    switch (selectValue) {
-      case "hscode": p.hsCodeList = list; break;
-      case "country": p.countryList = list; break;
-      case "port": 
-      //Port assign based on trade type
-      if(p.tradeType==="EXPORT"){
-         p.portOriginList=list; //Export :foreign ports are origin
-         p.portDestinationList=p.portDestinationList ||  []; //Keep existing destination ports
-      }else{
-          p.portDestinationList=list; //Import :indian ports are destination
-          p.portOriginList=p.portOriginList ||  []; //Keep existing origin ports
-      }
-      break;
-      case "importer": p.importerList = list; break;
-      case "exporter": p.exporterList = list; break;
-      default: break;
-    }
-  };
-
-  applyCard(card2Select, selectedCard2Items);
-  applyCard(card3Select, selectedCard3Items);
-  applyCard(card4Select, selectedCard4Items);
-  applyCard(card5Select, selectedCard5Items);
-
-  // ensure arrays exist
-  p.hsCode4DigitList = p.hsCode4DigitList || [];
-  p.cityOriginList = p.cityOriginList || [];
-  p.cityDestinationList = p.cityDestinationList || [];
-
-  //Ensure both ports lists exist
-  p.portOriginList = p.portOriginList || [];
-  p.portDestinationList = p.portDestinationList || [];
-
-  p.shipmentModeList = p.shipmentModeList || [];
-  p.stdUnitList = p.stdUnitList || [];
-  p.queryBuilder = p.queryBuilder || [];
-  p.countryCode = p.countryCode || []; // if used
-//console.log("Final indepth params:", p);
-  return p;
-};
-// ...Indepth Search Table code end...
-
-
-
-// Helper: get API data for each card type
-const getCardApiData = (type) => {
-  switch (type) {
-    case "hscode":
-      return hsCodeDataList.hscodesList || [];
-    case "importer":
-      return importerDataList.importersList || [];
-    case "exporter":
-      return exporterDataList.exportersList || [];
-    case "country":
-      return countryDataList.countriesList || [];
-    case "port":
-      return indianPortDataList.portsList || [];
-    default:
-      return [];
-  }
-};
-
-// Helper: get label for each card type
-const getCardLabel = (type, item) => {
-  switch (type) {
-    case "hscode":
-      return `${item.hscode} [$${item.value_usd}]`;
-    case "importer":
-      return `${item.importer_name} [$${item.value_usd}]`;
-    case "exporter":
-      return `${item.exporter_name} [$${item.value_usd}]`;
-    case "country":
-      return `${item.country_name} [$${item.value_usd}]`;
-    case "port":
-      return `${item.port_name} [$${item.value_usd}]`;
-    default:
-      return "";
-  }
-};
-
-// Helper: filter data based on search term
-const getFilteredCardData = (type, searchTerm = "") => {
-  const data = getCardApiData(type);
-  
-  if (!searchTerm.trim()) {
-    return data; // Return all data if no search term
-  }
-  return data.filter(item => {
-    const label = getCardLabel(type, item);
-    return label.toLowerCase().includes(searchTerm.toLowerCase());
-  });
-};
-
-const isOptionSelectedElsewhere = (option, currentCardIndex) => {
-  const allSelected = [card2Select, card3Select, card4Select, card5Select];
-  return allSelected.some((val, idx) => val === option && (idx !== currentCardIndex - 2));
-};
-
-/*Reset All Payload or Array beyond current  */
-
-const resetAllPayloadBeyondCurrentCard = (cardIndex) => {
-  // Get all card types that come after current card
-  const newCard = [];
-  for (let i = cardIndex + 1; i <= 5; i++) {
-    const value = cardSelectFor[`myCard${i}`];
-    if (value !== "") newCard.push(value);
-  }
-  
- // console.log("MY NEW CARD TO RESET ================== ", newCard);
- // console.log("BEFORE reset - searchParams:", searchParams);
-  
-  // Create a copy of current searchParams
-  const updatedParams = { ...searchParams };
-  
-  // Reset each type found in forward cards
-  if (newCard.includes("exporter")) {
-   // console.log("RESET EXPORTER LIST");
-    setExporterList([]);
-    // ✅ FIX: Properly update searchParams state
-    updatedParams.exporterList = [];
-  }
-  if (newCard.includes("importer")) {
-  //  console.log("RESET IMPORTER LIST");
-    setImporterList([]);
-    updatedParams.importerList = [];
-  }
-  if (newCard.includes("hscode")) {
-   // console.log("RESET HSCODE LIST");
-    setHsCodeList([]);
-    updatedParams.hsCodeList = [];
-  }
-  if (newCard.includes("country")) {
-   // console.log("RESET COUNTRY/CITY LISTS");
-    setCityDestinationList([]);
-    setCityOriginList([]);
-    
-    // Reset based on tradeType
-    if (searchParams.tradeType === "EXPORT") {
-      updatedParams.cityDestinationList = [];
-    } else {
-      updatedParams.cityOriginList = [];
-    }
-  }
-  if (newCard.includes("port")) {
-   // console.log("RESET PORT LISTS");
-    setPortOriginList([]);
-    setPortDestinationList([]);
-    
-    // Reset based on tradeType
-    if (searchParams.tradeType === "EXPORT") {
-      updatedParams.portOriginList = [];
-    } else {
-      updatedParams.portDestinationList = [];
-    }
-  }
-  
-  // ✅ CRITICAL: Update the searchParams state with all changes
-  setSearchParams(updatedParams);
- // console.log("AFTER reset - searchParams:", updatedParams);
-  
-  // Also clear the UI selections for forward cards
-  resetForwardCardSelections(cardIndex);
-};
-
-// Helper function to clear UI selections
-const resetForwardCardSelections = (cardIndex) => {
-  switch(cardIndex) {
-    case 1:
-      setSelectedCard2Items([]);
-      setSelectedCard3Items([]);
-      setSelectedCard4Items([]);
-      setSelectedCard5Items([]);
-      break;
-    case 2:
-      setSelectedCard3Items([]);
-      setSelectedCard4Items([]);
-      setSelectedCard5Items([]);
-      break;
-    case 3:
-      setSelectedCard4Items([]);
-      setSelectedCard5Items([]);
-      break;
-    case 4:
-      setSelectedCard5Items([]);
-      break;
-    default:
-      break;
-  }
-};
-
-// ✅ FIXED: handleSelectionChange - Card 1 Handler
-const handleSelectionChange = async (selectedItems, type) => {
-  console.log(`Card 1 ${type} selection changed:`, selectedItems);
-  console.log("mySelectedOptions",mySelectedOptions);
-  console.log("cardSelectFor :",cardSelectFor);
-  console.log("searchParams before update:", searchParams);
-
-  if (searchParams) {
-    // ✅ BUILD: Complete fresh parameters for Card 1 only
-    const updatedParams = {
-      ...searchParams,
-      // ✅ RESET: Clear ALL forward arrays first
-      hsCodeList: [],
-      hsCode4DigitList: [],
-      cityOriginList: [],
-      cityDestinationList: [],
-      portOriginList: [],
-      portDestinationList: [],
-      countryList: [],
-      shipmentModeList: [],
-      stdUnitList: [],
-      queryBuilder: [],
-      
-      // ✅ SET: Only Card 1 selection
-      ...(type === 'exporter' && { 
-        exporterList: selectedItems,
-        importerList: [] // Explicitly clear opposite
-      }),
-      ...(type === 'importer' && { 
-        importerList: selectedItems,
-        exporterList: [] // Explicitly clear opposite
-      })
-    };
-    
-    // ✅ UPDATE: Set searchParams with reset arrays
-    setSearchParams(updatedParams);
-    console.log("searchParams after update:", updatedParams);
-    // ✅ CLEAR: Reset all forward card UI states
-    setSelectedCard2Items([]);
-    setSelectedCard3Items([]);
-    setSelectedCard4Items([]);
-    setSelectedCard5Items([]);
-    setCard2Select("");
-    setCard3Select("");
-    setCard4Select("");
-    setCard5Select("");
-    
-    // Call APIs with completely clean parameters
-    Promise.all([
-      getValueForParams(updatedParams, 1),
-      getTotalShipmentCount(updatedParams)
-    ]).then(results => {
-    //  console.log('Card 1 value and shipment updated with clean params');
-    }).catch(err => {
-      //console.error('Error fetching Card 1 data:', err);
-    });
-
-    // Forward refresh with reset arrays
-    if (selectedItems.length > 0) {
-      setCard2Loading(true);
-      setCard3Loading(true);
-      setCard4Loading(true);
-      setCard5Loading(true);
-      props.loadingStart();
-
-      // ✅ IMPORTANT: Use updatedParams (with reset arrays) for forward APIs
-      let updatePromises = [
-        getIndianPortList(updatedParams),
-        getHSCodeList(updatedParams),
-        getForeignCountryList(updatedParams),
-        getHSCode4digitList(updatedParams),
-        getShipmentModeList(updatedParams),
-        getStdUnitList(updatedParams)
-      ];
-
-      if (type !== 'importer') {
-        updatePromises.push(getImporterList(updatedParams));
-      }
-      if (type !== 'exporter') {
-        updatePromises.push(getExporterList(updatedParams));
-      }
-
-      await Promise.all(updatePromises).finally(() => {
-        setTimeout(() => {
-          setCard2Loading(false);
-          setCard3Loading(false);
-          setCard4Loading(false);
-          setCard5Loading(false);
-          props.loadingStop();
-        }, 1500);
-      });
-    } else {
-      // Clear dependent cards when Card 1 is empty
-      setSelectedCard2Items([]);
-      setSelectedCard3Items([]);
-      setSelectedCard4Items([]);
-      setSelectedCard5Items([]);
-    }
-  }
-};
-// ✅ FIXED: handleCard2Change - Card 2 Handler
-const handleCard2Change = async (selectedItems, type) => {
-   console.log(`Card 2 ${type} selection changed:`, selectedItems);
-  console.log("mySelectedOptions",mySelectedOptions);
-  console.log("cardSelectFor :",cardSelectFor);
-  console.log("searchParams before update:", searchParams);
-  
-  // ✅ BUILD: Complete parameters with Card 1 + Card 2 only
-  const updatedParams = {
-    ...searchParams,
-    // ✅ RESET: Clear Cards 3-5 arrays first
-    hsCode4DigitList: [],
-    shipmentModeList: [],
-    stdUnitList: [],
-    countryList: [],
-    
-    // ✅ PRESERVE: Card 1 selection
-    ...(card1ImportExport === "exporter" && { 
-      exporterList: selectedExporters, 
-      importerList: [] 
-    }),
-    ...(card1ImportExport === "importer" && { 
-      importerList: selectedImporters, 
-      exporterList: [] 
-    }),
-    
-    // ✅ RESET: All forward arrays to empty
-    hsCodeList: [],
-    cityOriginList: [],
-    cityDestinationList: [],
-    portOriginList: [],
-    portDestinationList: [],
-    
-    // ✅ SET: Card 2 selection only
-    ...(type === "hscode" && { hsCodeList: selectedItems }),
-    ...(type === "country" && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { cityDestinationList: selectedItems } : 
-        { cityOriginList: selectedItems })
-    }),
-    ...(type === "port" && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { portOriginList: selectedItems } : 
-        { portDestinationList: selectedItems })
-    }),
-    ...(type === "importer" && { importerList: selectedItems }),
-    ...(type === "exporter" && { exporterList: selectedItems })
-  };
-
-  // ✅ UPDATE: Set searchParams with reset forward arrays
-  setSearchParams(updatedParams);
-  console.log("searchParams card 2 after update:", updatedParams);
-  
-  // ✅ CLEAR: Reset forward card UI states
-  setSelectedCard3Items([]);
-  setSelectedCard4Items([]);
-  setSelectedCard5Items([]);
-  setCard3Select("");
-  setCard4Select("");
-  setCard5Select("");
-  
-  // Call value and shipment APIs
-  await Promise.all([
-    getValueForParams(updatedParams, 2),
-    getTotalShipmentCount(updatedParams)
-  ]);
-
-  if (selectedItems.length === 0) {
-    setCard3Loading(true);
-    setCard4Loading(true);
-    setCard5Loading(true);
-    forwardRefreshFromCard(2);
-  } else {
-    setCard3Loading(true);
-    setCard4Loading(true);
-    setCard5Loading(true);
-    props.loadingStart();
-
-    try {
-      // Get available forward options (not selected in Cards 1-2)
-      const usedOptions = [card1ImportExport, type].filter(Boolean);
-      console.log("CARD 2 card1ImportExport, type :", card1ImportExport, type);
-      console.log("CARD 2 usedOptions:", usedOptions);
-      const promises = [];
-       console.log("CARD 2 usedOptions for forward APIs:", usedOptions);
-      // ✅ IMPORTANT: Use updatedParams (with reset arrays) for forward APIs
-      if (!usedOptions.includes("hscode")) promises.push(getHSCodeList(updatedParams));
-      if (!usedOptions.includes("country")) promises.push(getForeignCountryList(updatedParams));
-      if (!usedOptions.includes("port")) promises.push(getIndianPortList(updatedParams));
-      if (!usedOptions.includes("importer")) promises.push(getImporterList(updatedParams));
-      if (!usedOptions.includes("exporter")) promises.push(getExporterList(updatedParams));
-      
-      // Always refresh supporting lists with reset arrays
-      promises.push(getHSCode4digitList(updatedParams));
-      promises.push(getShipmentModeList(updatedParams));
-      promises.push(getStdUnitList(updatedParams));
-
-      await Promise.all(promises);
-      console.log("Card 2 -> forward cards updated with completely reset arrays");
-    } catch (err) {
-      console.error("Error updating from Card 2:", err);
-    } finally {
-      setTimeout(() => {
-        setCard3Loading(false);
-        setCard4Loading(false);
-        setCard5Loading(false);
-        props.loadingStop();
-      }, 1500);
-    }
-  }
-};
-
-// ✅ FIXED: handleCard3Change - Card 3 Handler
-const handleCard3Change = async (selectedItems, type) => {
-     console.log(`Card 2 ${type} selection changed:`, selectedItems);
-  console.log("mySelectedOptions",mySelectedOptions);
-  console.log("cardSelectFor :",cardSelectFor);
-  console.log("searchParams before update:", searchParams);
-  
-  // ✅ BUILD: Complete parameters with Cards 1-3 only
-  const updatedParams = {
-    ...searchParams,
-    // ✅ RESET: Cards 4-5 arrays first
-    hsCode4DigitList: [],
-    shipmentModeList: [],
-    stdUnitList: [],
-    countryList: [],
-    
-    // ✅ PRESERVE: Card 1 selection
-    ...(card1ImportExport === "exporter" && { 
-      exporterList: selectedExporters, 
-      importerList: [] 
-    }),
-    ...(card1ImportExport === "importer" && { 
-      importerList: selectedImporters, 
-      exporterList: [] 
-    }),
-    
-    // ✅ RESET: All arrays to empty first
-    hsCodeList: [],
-    cityOriginList: [],
-    cityDestinationList: [],
-    portOriginList: [],
-    portDestinationList: [],
-    
-    // ✅ APPLY: Card 2 selection if exists and different from Card 3
-    ...(card2Select === "hscode" && type !== "hscode" && { hsCodeList: selectedCard2Items }),
-    ...(card2Select === "country" && type !== "country" && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { cityDestinationList: selectedCard2Items } : 
-        { cityOriginList: selectedCard2Items })
-    }),
-    ...(card2Select === "port" && type !== "port" && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { portOriginList: selectedCard2Items } : 
-        { portDestinationList: selectedCard2Items })
-    }),
-    ...(card2Select === "importer" && type !== "importer" && { importerList: selectedCard2Items }),
-    ...(card2Select === "exporter" && type !== "exporter" && { exporterList: selectedCard2Items }),
-    
-    // ✅ SET: Card 3 selection
-    ...(type === "hscode" && { hsCodeList: selectedItems }),
-    ...(type === "country" && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { cityDestinationList: selectedItems } : 
-        { cityOriginList: selectedItems })
-    }),
-    ...(type === "port" && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { portOriginList: selectedItems } : 
-        { portDestinationList: selectedItems })
-    }),
-    ...(type === "importer" && { importerList: selectedItems }),
-    ...(type === "exporter" && { exporterList: selectedItems })
-  };
-
-  console.log("Updated params for Card 3 change:", updatedParams);
-  
-  // ✅ UPDATE: Set searchParams with reset forward arrays
-  setSearchParams(updatedParams);
-  
-  // Clear forward cards
-  setSelectedCard4Items([]);
-  setSelectedCard5Items([]);
-  setCard4Select("");
-  setCard5Select("");
-  
-  await Promise.all([
-    getValueForParams(updatedParams, 3),
-    getTotalShipmentCount(updatedParams)
-  ]);
-  
-  if (selectedItems.length === 0) {
-    setCard4Loading(true);
-    setCard5Loading(true);
-    forwardRefreshFromCard(3);
-  } else {
-    setCard4Loading(true);
-    setCard5Loading(true);
-    props.loadingStart();
-
-    try {
-      const usedOptions = [card1ImportExport, card2Select, type].filter(Boolean);
-      console.log("CARD 3 card1ImportExport, card2Select, type :", card1ImportExport, card2Select, type);
-      console.log("CARD 3 usedOptions:", usedOptions);
-      const promises = [];
-      console.log("CARD 3 usedOptions for forward APIs:", usedOptions); 
-      // ✅ Use updatedParams for forward APIs
-      if (!usedOptions.includes("hscode")) promises.push(getHSCodeList(updatedParams));
-      if (!usedOptions.includes("country")) promises.push(getForeignCountryList(updatedParams));
-      if (!usedOptions.includes("port")) promises.push(getIndianPortList(updatedParams));
-      if (!usedOptions.includes("importer")) promises.push(getImporterList(updatedParams));
-      if (!usedOptions.includes("exporter")) promises.push(getExporterList(updatedParams));
-
-      // Supporting lists
-      promises.push(getHSCode4digitList(updatedParams));
-      promises.push(getShipmentModeList(updatedParams));
-      promises.push(getStdUnitList(updatedParams));
-
-      await Promise.all(promises);
-      console.log("Card 3 -> forward cards updated with reset arrays");
-    } catch (err) {
-      console.error("Error updating from Card 3:", err);
-    } finally {
-      setTimeout(() => {
-        setCard4Loading(false);
-        setCard5Loading(false);
-        props.loadingStop();
-      }, 1500);
-    }
-  }
-};
-
-// ✅ FIXED: handleCard4Change - Card 4 Handler with proper forward array reset
-const handleCard4Change = async (selectedItems, type) => {
-  console.log("Card 4 change called type:", type, "selectedItems:", selectedItems);
-  
-  // ✅ BUILD: Complete parameters with Cards 1-4 only, reset Card 5 arrays
-  const updatedParams = {
-    ...searchParams,
-    
-    // ✅ RESET: Card 5 arrays first
-    hsCode4DigitList: [],
-    shipmentModeList: [],
-    stdUnitList: [],
-    countryList: [],
-    
-    // ✅ PRESERVE: Card 1 selection
-    ...(card1ImportExport === "exporter" && { 
-      exporterList: selectedExporters, 
-      importerList: [] 
-    }),
-    ...(card1ImportExport === "importer" && { 
-      importerList: selectedImporters, 
-      exporterList: [] 
-    }),
-    
-    // ✅ RESET: All arrays to empty first
-    hsCodeList: [],
-    cityOriginList: [],
-    cityDestinationList: [],
-    portOriginList: [],
-    portDestinationList: [],
-    
-    // ✅ APPLY: Card 2 selection if exists and different from Card 4
-    ...(card2Select === "hscode" && type !== "hscode" && selectedCard2Items.length > 0 && { 
-      hsCodeList: selectedCard2Items 
-    }),
-    ...(card2Select === "country" && type !== "country" && selectedCard2Items.length > 0 && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { cityDestinationList: selectedCard2Items } : 
-        { cityOriginList: selectedCard2Items })
-    }),
-    ...(card2Select === "port" && type !== "port" && selectedCard2Items.length > 0 && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { portOriginList: selectedCard2Items } : 
-        { portDestinationList: selectedCard2Items })
-    }),
-    ...(card2Select === "importer" && type !== "importer" && selectedCard2Items.length > 0 && { 
-      importerList: selectedCard2Items 
-    }),
-    ...(card2Select === "exporter" && type !== "exporter" && selectedCard2Items.length > 0 && { 
-      exporterList: selectedCard2Items 
-    }),
-    
-    // ✅ APPLY: Card 3 selection if exists and different from Card 4
-    ...(card3Select === "hscode" && type !== "hscode" && selectedCard3Items.length > 0 && { 
-      hsCodeList: selectedCard3Items 
-    }),
-    ...(card3Select === "country" && type !== "country" && selectedCard3Items.length > 0 && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { cityDestinationList: selectedCard3Items } : 
-        { cityOriginList: selectedCard3Items })
-    }),
-    ...(card3Select === "port" && type !== "port" && selectedCard3Items.length > 0 && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { portOriginList: selectedCard3Items } : 
-        { portDestinationList: selectedCard3Items })
-    }),
-    ...(card3Select === "importer" && type !== "importer" && selectedCard3Items.length > 0 && { 
-      importerList: selectedCard3Items 
-    }),
-    ...(card3Select === "exporter" && type !== "exporter" && selectedCard3Items.length > 0 && { 
-      exporterList: selectedCard3Items 
-    }),
-    
-    // ✅ SET: Card 4 selection (this will override if same type as previous cards)
-    ...(type === "hscode" && { hsCodeList: selectedItems }),
-    ...(type === "country" && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { cityDestinationList: selectedItems } : 
-        { cityOriginList: selectedItems })
-    }),
-    ...(type === "port" && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { portOriginList: selectedItems } : 
-        { portDestinationList: selectedItems })
-    }),
-    ...(type === "importer" && { importerList: selectedItems }),
-    ...(type === "exporter" && { exporterList: selectedItems })
-  };
-
-  // ✅ UPDATE: Set searchParams with reset Card 5 arrays
-  setSearchParams(updatedParams);
-  
-  // ✅ CLEAR: Reset Card 5 UI state
-  setSelectedCard5Items([]);
-  setCard5Select("");
-  
-  // Call value and shipment APIs
-  await Promise.all([
-    getValueForParams(updatedParams, 4),
-    getTotalShipmentCount(updatedParams)
-  ]);
-  
-  // ✅ FIX: Set loading states based on whether we have selections or not
-  if (selectedItems.length === 0) {
-    // If clearing card 4, set loading for card 5
-    setCard5Loading(true);
-    forwardRefreshFromCard(4);
-  } else {
-    // If selecting items in card 4, set loading for forward card
-    console.log("Fourth card mySelectedOptions", mySelectedOptions);
-    setCard5Loading(true);
-    props.loadingStart();
-
-    try {
-      // Get used options from Cards 1-4
-      const usedOptions = [card1ImportExport, card2Select, card3Select, type].filter(Boolean);
-      const promises = [];
-      
-      // ✅ IMPORTANT: Use updatedParams (with reset arrays) for forward APIs
-      if (!usedOptions.includes("hscode")) promises.push(getHSCodeList(updatedParams));
-      if (!usedOptions.includes("country")) promises.push(getForeignCountryList(updatedParams));
-      if (!usedOptions.includes("port")) promises.push(getIndianPortList(updatedParams));
-      if (!usedOptions.includes("importer")) promises.push(getImporterList(updatedParams));
-      if (!usedOptions.includes("exporter")) promises.push(getExporterList(updatedParams));
-
-      // Always refresh supporting lists with reset arrays
-      promises.push(getHSCode4digitList(updatedParams));
-      promises.push(getShipmentModeList(updatedParams));
-      promises.push(getStdUnitList(updatedParams));
-
-      await Promise.all(promises);
-      console.log("Card 4 -> forward card updated with reset arrays");
-    } catch (err) {
-      console.error("Error updating from Card 4:", err);
-    } finally {
-      setTimeout(() => {
-        setCard5Loading(false);
-        props.loadingStop();
-      }, 1500);
-    }
-  }
-};
-// ✅ FIXED: handleCard5Change - Card 5 Handler (no forward arrays to reset)
-const handleCard5Change = async (selectedItems, type) => {
-  console.log("Card 5 change called type:", type, "selectedItems:", selectedItems);
-
-  if (!searchParams) return;
-
-  // ✅ BUILD: Complete parameters with Cards 1-5 (no forward arrays to reset)
-  const updatedParams = {
-    ...searchParams,
-    
-    // ✅ PRESERVE: Card 1 selection
-    ...(card1ImportExport === "exporter" && { 
-      exporterList: selectedExporters, 
-      importerList: [] 
-    }),
-    ...(card1ImportExport === "importer" && { 
-      importerList: selectedImporters, 
-      exporterList: [] 
-    }),
-    
-    // ✅ RESET: All arrays to empty first
-    hsCodeList: [],
-    cityOriginList: [],
-    cityDestinationList: [],
-    portOriginList: [],
-    portDestinationList: [],
-    
-    // ✅ APPLY: Card 2 selection if exists and different from Card 5
-    ...(card2Select === "hscode" && type !== "hscode" && selectedCard2Items.length > 0 && { 
-      hsCodeList: selectedCard2Items 
-    }),
-    ...(card2Select === "country" && type !== "country" && selectedCard2Items.length > 0 && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { cityDestinationList: selectedCard2Items } : 
-        { cityOriginList: selectedCard2Items })
-    }),
-    ...(card2Select === "port" && type !== "port" && selectedCard2Items.length > 0 && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { portOriginList: selectedCard2Items } : 
-        { portDestinationList: selectedCard2Items })
-    }),
-    ...(card2Select === "importer" && type !== "importer" && selectedCard2Items.length > 0 && { 
-      importerList: selectedCard2Items 
-    }),
-    ...(card2Select === "exporter" && type !== "exporter" && selectedCard2Items.length > 0 && { 
-      exporterList: selectedCard2Items 
-    }),
-    
-    // ✅ APPLY: Card 3 selection if exists and different from Card 5
-    ...(card3Select === "hscode" && type !== "hscode" && selectedCard3Items.length > 0 && { 
-      hsCodeList: selectedCard3Items 
-    }),
-    ...(card3Select === "country" && type !== "country" && selectedCard3Items.length > 0 && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { cityDestinationList: selectedCard3Items } : 
-        { cityOriginList: selectedCard3Items })
-    }),
-    ...(card3Select === "port" && type !== "port" && selectedCard3Items.length > 0 && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { portOriginList: selectedCard3Items } : 
-        { portDestinationList: selectedCard3Items })
-    }),
-    ...(card3Select === "importer" && type !== "importer" && selectedCard3Items.length > 0 && { 
-      importerList: selectedCard3Items 
-    }),
-    ...(card3Select === "exporter" && type !== "exporter" && selectedCard3Items.length > 0 && { 
-      exporterList: selectedCard3Items 
-    }),
-    
-    // ✅ APPLY: Card 4 selection if exists and different from Card 5
-    ...(card4Select === "hscode" && type !== "hscode" && selectedCard4Items.length > 0 && { 
-      hsCodeList: selectedCard4Items 
-    }),
-    ...(card4Select === "country" && type !== "country" && selectedCard4Items.length > 0 && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { cityDestinationList: selectedCard4Items } : 
-        { cityOriginList: selectedCard4Items })
-    }),
-    ...(card4Select === "port" && type !== "port" && selectedCard4Items.length > 0 && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { portOriginList: selectedCard4Items } : 
-        { portDestinationList: selectedCard4Items })
-    }),
-    ...(card4Select === "importer" && type !== "importer" && selectedCard4Items.length > 0 && { 
-      importerList: selectedCard4Items 
-    }),
-    ...(card4Select === "exporter" && type !== "exporter" && selectedCard4Items.length > 0 && { 
-      exporterList: selectedCard4Items 
-    }),
-    
-    // ✅ SET: Card 5 selection (this will override if same type as previous cards)
-    ...(type === "hscode" && { hsCodeList: selectedItems }),
-    ...(type === "country" && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { cityDestinationList: selectedItems } : 
-        { cityOriginList: selectedItems })
-    }),
-    ...(type === "port" && {
-      ...(searchParams.tradeType === "EXPORT" ? 
-        { portOriginList: selectedItems } : 
-        { portDestinationList: selectedItems })
-    }),
-    ...(type === "importer" && { importerList: selectedItems }),
-    ...(type === "exporter" && { exporterList: selectedItems }),
-    
-    // ✅ ENSURE: Supporting arrays exist (no reset needed for Card 5)
-    hsCode4DigitList: searchParams.hsCode4DigitList || [],
-    shipmentModeList: searchParams.shipmentModeList || [],
-    stdUnitList: searchParams.stdUnitList || [],
-    countryList: searchParams.countryList || []
-  };
-
-  // ✅ UPDATE: Set searchParams with complete Card 1-5 parameters
-  setSearchParams(updatedParams);
-  
-  // No forward card UI states to reset for Card 5
-  
-  // ✅ FIX: Always call API for Card 5, don't set to zero
-  await Promise.all([
-    getValueForParams(updatedParams, 5),
-    getTotalShipmentCount(updatedParams)
-  ]);
-  
-  console.log("Fifth card mySelectedOptions", mySelectedOptions);
-  // No forward cards to refresh for Card 5
-};
-
-
-
-//  UPDATED: Reset Card 1 and all dependent cards to original state
-const resetToOriginalData = () => {
- // console.log("Resetting all cards");
-  
-  // ✅ SIMPLE FIX: Set to zero immediately
-  setCardValuesTotal(0);
-  setTotalShipmentCount(0);
-  
-  // Clear all selections
-  setCard2Select("");
-  setCard3Select("");
-  setCard4Select("");
-  setCard5Select("");
-  
-  setSelectedCard2Items([]);
-  setSelectedCard3Items([]);
-  setSelectedCard4Items([]);
-  setSelectedCard5Items([]);
-  
-  if (card1ImportExport === "exporter") {
-    setSelectedExporters([]);
-  } else {
-    setSelectedImporters([]);
-  }
-  
-  // Reset loading states
-  setCard1Loading(false);
-  setCard2Loading(false);
-  setCard3Loading(false);
-  setCard4Loading(false);
-  setCard5Loading(false);
-};
-
-
-
-
-
-
-// New helper: call /search-management/getvalue with updatedParams and assign to specific card
-const getValueForParams = (updatedParams, cardNumber) => {
-  if (!updatedParams) return 0;
-
-  const postData = {
-    searchType: "TRADE",
-    tradeType: updatedParams.tradeType,
-    fromDate: updatedParams.fromDate,
-    toDate: updatedParams.toDate,
-    searchBy: updatedParams.searchBy,
-    searchValue: updatedParams.searchValue,
-    countryCode: updatedParams.countryCode,
-    pageNumber: 0,
-    numberOfRecords: 20,
-    matchType: updatedParams.matchType,
-    portOriginList: updatedParams.portOriginList || [],
-    portDestinationList: updatedParams.portDestinationList || [],
-    hsCodeList: updatedParams.hsCodeList || [],
-    hsCode4DigitList: updatedParams.hsCode4DigitList || [],
-    exporterList: updatedParams.exporterList || [],
-    importerList: updatedParams.importerList || [],
-    cityOriginList: updatedParams.cityOriginList || [],
-    cityDestinationList: updatedParams.cityDestinationList || [],
-    searchId: search_id,
-    queryBuilder: updatedParams.queryBuilder || [],
-    shipModeList: updatedParams.shipmentModeList || [],
-    stdUnitList: updatedParams.stdUnitList || [],
-  };
-
- // console.log(`Payload getValueForParams called for card${cardNumber}`, postData);
-  
-  return Axios({
-    method: "POST",
-    url: `/search-management/getvalue`,
-    data: JSON.stringify(postData),
-    headers: { "Content-Type": "application/json" }
-  }).then(res => {  
-   // console.log(`getValueForParams response for card${cardNumber}:`, res);
-    var valueTotal = (res && res.data) ? res.data : 0;
-    
-    // ✅ FIX: Force state update with functional setState
-    setCardValuesTotal(prev => {
-    //  console.log(`Updating card value from ${prev} to ${valueTotal}`);
-      return valueTotal;
-    });
-    
-    //console.log(`Card ${cardNumber} value set:`, valueTotal);
-    return { valueTotal };
-  })
-  .catch(err => {
-    console.error(`getValueForParams error for card${cardNumber}:`, err);
-    // ✅ FIX: Also use functional setState for error case
-    setCardValuesTotal(prev => {
-    //  console.log(`Setting card value to 0 due to error, previous was ${prev}`);
-      return 0;
-    });
-    return { valueTotal: 0 };
-  });
-};
-
-const getTotalShipmentCount = (updatedParams) => {
-  if (!updatedParams) return 0; 
-  
-  const postData = {
-    searchType: "TRADE",
-    tradeType: updatedParams.tradeType,
-    fromDate: updatedParams.fromDate,
-    toDate: updatedParams.toDate,
-    searchBy: updatedParams.searchBy,
-    searchValue: updatedParams.searchValue,
-    countryCode: updatedParams.countryCode,
-    pageNumber: 0,
-    numberOfRecords: 20,
-    matchType: updatedParams.matchType,
-    portOriginList: updatedParams.portOriginList || [],
-    portDestinationList: updatedParams.portDestinationList || [],
-    hsCodeList: updatedParams.hsCodeList || [],
-    hsCode4DigitList: updatedParams.hsCode4DigitList || [],
-    exporterList: updatedParams.exporterList || [],
-    importerList: updatedParams.importerList || [],
-    cityOriginList: updatedParams.cityOriginList || [],
-    cityDestinationList: updatedParams.cityDestinationList || [],
-    searchId: search_id,
-    queryBuilder: updatedParams.queryBuilder || [],
-    shipModeList: updatedParams.shipmentModeList || [],
-    stdUnitList: updatedParams.stdUnitList || [],
-    countryList: updatedParams.countryList || []
-  };
-
-  return Axios({
-    method: "POST",
-    url: `/search-management/searchcount`,
-    data: JSON.stringify(postData),
-    headers: { "Content-Type": "application/json" }
-  })
-  .then(res => {
-    var valueshipmentdata = (res && res.data) ? res.data : 0;
-   // console.log("Shipment Count response:", res);
-    
-    // ✅ FIX: Force state update with functional setState
-    setTotalShipmentCount(prev => {
-     // console.log(`Updating shipment count from ${prev} to ${valueshipmentdata}`);
-      return valueshipmentdata;
-    });
-    
-    return { valueshipmentdata };
-  })
-  .catch(err => {
-    console.error("Shipment count error:", err);
-    // ✅ FIX: Also use functional setState for error case
-    setTotalShipmentCount(prev => {
-     // console.log(`Setting shipment count to 0 due to error, previous was ${prev}`);
-      return 0;
-    });
-    return { valueshipmentdata: 0 };
-  });
-};
 
 // Card rendering function
 // Special render function for Card 1 with import/export dropdown
-const RenderFirstCard = () => (
-  <div className="col mb-3">
-    {/* Import/Export Selection Dropdown */}
-    <select
-      className="form-select mb-2 form-control"
-      value={card1ImportExport}
-      onChange={(e) => {
-        const newValue = e.target.value;
-        setCard1ImportExport(newValue);
-        setCard1SearchTerm(""); // Clear search when switching type
-        
-        // Clear selections when switching type
-        setSelectedExporters([]);
-        setSelectedImporters([]);
-        
-        setCard1Loading(true);
-        setCard2Loading(true);
-        setCard3Loading(true);
-        setCard4Loading(true);
-        setCard5Loading(true);
-        
-        // Reset all other card selections when changing import/export
-        setCard2Select("");
-        setCard3Select("");
-        setCard4Select("");
-        setCard5Select("");
-        
-          if (newValue === 'exporter') {
-            setCardSelectFor({...cardSelectFor, myCard1: "exporter",myCard2:"",myCard3:"",myCard4:"",myCard5:""});
-            setMySelectedOptions({...mySelectedOptions, exporterSelect: 1});
-          } else if (newValue === 'importer') {
-            setCardSelectFor({...cardSelectFor, myCard1: "importer",myCard2:"",myCard3:"",myCard4:"",myCard5:""});
-            setMySelectedOptions({...mySelectedOptions, importerSelect: 1});
-          }
-        
-        // Simulate API call
-        setTimeout(() => {
-          setCard1Loading(false);
-          setCard2Loading(false);
-          setCard3Loading(false);
-          setCard4Loading(false);
-          setCard5Loading(false);
-        }, 1500);
-      }}
-    >
-      <option value="importer">Importer</option>
-      <option value="exporter">Exporter</option>
-    </select>
-    
-    <div className="card shadow-sm border-2">
-      <div className="card-header bg-primary text-white text-center fw-bold">
-        {card1ImportExport === "importer" ? "Importer" : "Exporter"}
-      </div>
-      <div className="card-body" style={{ height: "300px", overflowY: "auto", padding: "12px" }}>
+const ExporterCard = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-        {/* Enhanced Search Input */}
-        <div className="input-group mb-2">
-          <input 
-            type='text' 
-            className='form-control' 
-            placeholder={`Search ${card1ImportExport}s...`}
-            value={card1SearchTerm}
-            onChange={(e) => setCard1SearchTerm(e.target.value)}
-          />
-          {card1SearchTerm && (
-            <button 
-              className="btn btn-outline-secondary" 
-              type="button"
-              onClick={() => setCard1SearchTerm("")}
-              title="Clear search"
-            >
-              ✖
-            </button>
-          )}
-        </div>
+  // Filter exporters based on search term
+  const filteredData = exporterDataList.exportersList ? 
+    exporterDataList.exportersList.filter(item => 
+      item.exporter_name.toLowerCase().includes(searchTerm.toLowerCase())
+    ) : [];
 
-        {/* Show Selected Items Summary */}
-        {((card1ImportExport === "exporter" && selectedExporters.length > 0) || 
-          (card1ImportExport === "importer" && selectedImporters.length > 0)) && (
-          <div className="alert alert-info small p-2 mb-2">
-            <strong>Selected:</strong> {card1ImportExport === "exporter" 
-              ? selectedExporters.length : selectedImporters.length} items
-
-<button 
-  className="btn btn-sm btn-outline-danger ms-2"
-  onClick={() => {
-   // console.log("Card 1 Clear All clicked");
-    
-    //  Clear Card 1 selections immediately for UI feedback
-    if (card1ImportExport === "exporter") {
-      setSelectedExporters([]);
-    } else {
-      setSelectedImporters([]);
-    }
-    
-    //  Call resetToOriginalData to handle everything else
-    resetToOriginalData();
-  }}
->
-  Clear All
-</button>
-
-          </div>
-        )}
-        
-        {card1Loading ? (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-            <div className="loader"></div>
-          </div>
-        ) : (() => {
-          const filteredData = getFilteredCardData(card1ImportExport, card1SearchTerm);
-          
-          return filteredData.length > 0 ? (
-            <>
-              {/* Search Results Info */}
-              {card1SearchTerm && (
-                <div className="text-muted small mb-2">
-                  <i className="fas fa-info-circle me-1"></i>
-                  Found {filteredData.length} result(s) for "{card1SearchTerm}"
-                </div>
-              )}
-              
-              {/* Filtered Results with Checkboxes */}
-              {filteredData.map((item, i) => {
-                const itemValue = card1ImportExport === "exporter" ? item.exporter_name : item.importer_name;
-                const isSelected = card1ImportExport === "exporter" 
-                  ? selectedExporters.includes(itemValue)
-                  : selectedImporters.includes(itemValue);
-                
-                return (
-                  <div className="form-check mb-2 border-bottom" key={i}>
-                    <input
-                      type="checkbox"
-                      className="form-check-input"
-                      id={`card1-${itemValue}-${i}`}
-                      checked={isSelected}
-                   onChange={(e) => {
-  if (card1ImportExport === "exporter") {
+  const handleSelection = (item, isChecked) => {
     let newSelected;
-    if (e.target.checked) {
-      newSelected = [...selectedExporters, itemValue];
+    if (isChecked) {
+      newSelected = [...selectedItems, item.exporter_name];
     } else {
-      newSelected = selectedExporters.filter(exp => exp !== itemValue);
+      newSelected = selectedItems.filter(exp => exp !== item.exporter_name);
     }
+    setSelectedItems(newSelected);
+    
+    // Update global state
     setSelectedExporters(newSelected);
-     // Set loading for all dependent cards when Card 1 changes
+    
+    // Trigger forward card updates if selections exist
     if (newSelected.length > 0) {
       setCard2Loading(true);
       setCard3Loading(true);
       setCard4Loading(true);
       setCard5Loading(true);
-    }
-    
-    // ✅ Call API to update dependent data when exporters change
-    // This now handles both selection AND deselection
-    handleSelectionChange(newSelected, 'exporter');
-  } else {
-    let newSelected;
-    if (e.target.checked) {
-      newSelected = [...selectedImporters, itemValue];
-    } else {
-      newSelected = selectedImporters.filter(imp => imp !== itemValue);
-    }
-    setSelectedImporters(newSelected);
-    // Set loading for all dependent cards when Card 1 changes
-    if (newSelected.length > 0) {
-      setCard2Loading(true);
-      setCard3Loading(true);
-      setCard4Loading(true);
-      setCard5Loading(true);
-    }
-    
-    // ✅ Call API to update dependent data when importers change
-    // This now handles both selection AND deselection
-    handleSelectionChange(newSelected, 'importer');
-  }
-}}
-                    />
-                    <label
-                      className="form-check-label"
-                      htmlFor={`card1-${itemValue}-${i}`}
-                      style={{ fontSize: "16px" }}
-                    >
-                      {getCardLabel(card1ImportExport, item)}
-                    </label>
-                  </div>
-                );
-              })}
-            </>
-          ) : card1SearchTerm ? (
-            // No search results
-            <div className="text-center text-muted py-4">
-              <i className="fas fa-search" style={{ fontSize: "48px", opacity: 0.3 }}></i>
-              <div className="mt-2">
-                <strong>No results found</strong>
-              </div>
-              <div className="small">
-                Try adjusting your search term: "{card1SearchTerm}"
-              </div>
-            </div>
-          ) : (
-            // No data available
-            <div className="text-muted text-center" style={{marginTop: "100px", fontSize: "70px", fontWeight: "bold"}}>+</div>
-          );
-        })()}
-      </div>
-    </div>
-  </div>
-);
-
-
-
-//  NEW FUNCTION: Forward-only refresh from specific card
-const forwardRefreshFromCard = async (fromCardIndex) => {
-  if (!searchParams) return;
-  
-  // Build current params up to the card before the cleared one
-  let updatedParams = { ...searchParams };
-  
-  // Apply Card 1 (always preserved)
-  if (card1ImportExport === "exporter") {
-    updatedParams.exporterList = selectedExporters || [];
-    updatedParams.importerList = [];
-  } else {
-    updatedParams.importerList = selectedImporters || [];
-    updatedParams.exporterList = [];
-  }
-  
-  // Apply cards 2-5 only up to the card before the cleared one
-  const applyCard = (selectValue, items) => {
-    if (!selectValue || !items || items.length === 0) return;
-    switch (selectValue) {
-      case "hscode": updatedParams.hsCodeList = items; break;
-      case "country": updatedParams.countryList = items; break;
-      case "port": updatedParams.portDestinationList = items; break;
-      case "importer": updatedParams.importerList = items; break;
-      case "exporter": updatedParams.exporterList = items; break;
     }
   };
-  
-  // Apply cards that should remain (before the cleared card)
-  if (fromCardIndex >= 3) applyCard(card2Select, selectedCard2Items);
-  if (fromCardIndex >= 4) applyCard(card3Select, selectedCard3Items);
-  if (fromCardIndex >= 5) applyCard(card4Select, selectedCard4Items);
-  
-  setSearchParams(updatedParams);
-  
-  // ✅ FIX: Set loading states for all forward cards
-  if (fromCardIndex <= 2) setCard2Loading(true);
-  if (fromCardIndex <= 3) setCard3Loading(true);
-  if (fromCardIndex <= 4) setCard4Loading(true);
-  if (fromCardIndex <= 5) setCard5Loading(true);
-  
-  props.loadingStart();
-  
-  try {
-    // Get available options based on current selection state
-    const effectiveForward = Object.keys(mySelectedOptions).filter(key => mySelectedOptions[key] === 0);
-    const promises = [];
-    
-    if (effectiveForward.includes("hscode")) promises.push(getHSCodeList(updatedParams));
-    if (effectiveForward.includes("country")) promises.push(getForeignCountryList(updatedParams));
-    if (effectiveForward.includes("port")) promises.push(getForeignPortList(updatedParams));
-    if (effectiveForward.includes("importer")) promises.push(getImporterList(updatedParams));
-    if (effectiveForward.includes("exporter")) promises.push(getExporterList(updatedParams));
-    
-    await Promise.all(promises);
-   // console.log(`Forward refresh completed from card ${fromCardIndex}`);
-  } catch (err) {
-   // console.error("Error in forward refresh:", err);
-  } finally {
-    // ✅ FIX: Stop loading for all forward cards after a delay
-    setTimeout(() => {
-      if (fromCardIndex <= 2) setCard2Loading(false);
-      if (fromCardIndex <= 3) setCard3Loading(false);
-      if (fromCardIndex <= 4) setCard4Loading(false);
-      if (fromCardIndex <= 5) setCard5Loading(false);
-      props.loadingStop();
-    }, 1500);
-  }
-};
 
+  const clearAll = () => {
+    setSelectedItems([]);
+    setSelectedExporters([]);
+    setSearchTerm("");
+  };
 
-const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, bodyId, loading, searchTerm, setSearchTerm) => (
-  <div className="col mb-3">
-    <select
-      className="form-select mb-2 form-control"
-      value={cardSelect}
-      onChange={(e) => {
-        const value = e.target.value;
-        setCardSelect(value);
-        setSearchTerm(""); // Clear search when changing selection
+  return (
+    <div className="col mb-3">
+      <div className="card shadow-sm border-2">
+        <div className="card-header bg-primary text-white text-center fw-bold">
+          Indian Exporter
+        </div>
+        <div className="card-body" style={{ height: "300px", overflowY: "auto", padding: "12px" }}>
           
-      
-  setCardSelectFor(prev => {
-    const next = { ...prev };
-
-    switch (cardIndex) {
-      case 2:
-        next.myCard2 = value;
-        next.myCard3 = "";
-        next.myCard4 = "";
-        next.myCard5 = "";
-        break;
-      case 3:
-        next.myCard3 = value;
-        next.myCard4 = "";
-        next.myCard5 = "";
-        break;
-      case 4:
-        next.myCard4 = value;
-        next.myCard5 = "";
-        break;
-      case 5:
-        next.myCard5 = value;
-        break;
-    }
-
-    // Create state object only once
-    const newSelectedOptions = {
-      exporter: 0,
-      importer: 0,
-      hscode: 0,
-      country: 0,
-      port: 0
-    };
-
-    for (let i = 1; i <= 5; i++) {
-      const sel = next[`myCard${i}`];
-      if (sel) newSelectedOptions[sel] = 1;
-    }
-
-    // Update separately
-    setMySelectedOptions(newSelectedOptions);
-
-    return next;
-  });
-        /*   setMySelectedOptions({...mySelectedOptions, exporter: 0,importer:0,hscode:0,country:0,port:0});
-          */  
-        /*   for(let i=1;i<=5;i++){
-            const selectedCard = cardSelectFor[`myCard${i}`];
-            switch(selectedCard){
-              case 'exporter':
-                setMySelectedOptions({...mySelectedOptions, exporter: 1});
-                break;
-              case 'importer':
-                setMySelectedOptions({...mySelectedOptions, importer: 1});
-                break;
-              case 'hscode':
-                setMySelectedOptions({...mySelectedOptions, hscode: 1});
-                break;
-              case 'country':
-                setMySelectedOptions({...mySelectedOptions, country: 1});
-                break;
-              case 'port':
-                setMySelectedOptions({...mySelectedOptions, port: 1});
-                break;
-            }
-           // setMySelectedOptions({...mySelectedOptions, [selectedCard]: 1});
-
-           }   */
-        /*  if (value === 'exporter') {
-
-            setMySelectedOptions({...mySelectedOptions, exporter: 1});
-          } else if (value === 'importer') {
-            setMySelectedOptions({...mySelectedOptions, importer: 1});
-          }else if (value === 'hscode') {
-            setMySelectedOptions({...mySelectedOptions, hscode: 1});
-          } else if (value === 'country') {
-            setMySelectedOptions({...mySelectedOptions, country: 1});
-          } else if (value === 'port') {
-            setMySelectedOptions({...mySelectedOptions, port: 1});
-          }*/
-        
-        
-        // Clear selections when changing card type
-        if (cardIndex === 2) setSelectedCard2Items([]);
-        if (cardIndex === 3) setSelectedCard3Items([]);
-        if (cardIndex === 4) setSelectedCard4Items([]);
-        if (cardIndex === 5) setSelectedCard5Items([]);
-        
-        // Set loading true and fetch data for this card type
-        if (cardIndex === 2) setCard2Loading(true);
-        if (cardIndex === 3) setCard3Loading(true);
-        if (cardIndex === 4) setCard4Loading(true);
-        if (cardIndex === 5) setCard5Loading(true);
-
-     
-        // Simulate API call
-        setTimeout(() => {
-          if (cardIndex === 2) setCard2Loading(false);
-          if (cardIndex === 3) setCard3Loading(false);
-          if (cardIndex === 4) setCard4Loading(false);
-          if (cardIndex === 5) setCard5Loading(false);
-        }, 1000);   
-      }}
-      id={selectId}
-    >
-      <option value="">Select Variable</option>
-      <option value="hscode" disabled={isOptionSelectedElsewhere("hscode", cardIndex)}>HS Code</option>
-      <option value="port" disabled={isOptionSelectedElsewhere("port", cardIndex)}>Port</option>
-      <option value="country" disabled={isOptionSelectedElsewhere("country", cardIndex)}>Country</option>
-      <option value={card1ImportExport === "importer" ? "exporter" : "importer"} 
-              disabled={isOptionSelectedElsewhere(card1ImportExport === "importer" ? "exporter" : "importer", cardIndex)}>
-        {card1ImportExport === "importer" ? "Exporter" : "Importer"}
-      </option>
-    </select>
-    
-    <div className="card shadow-sm border-2">
-      <div className="card-header bg-primary text-white text-center fw-bold" id={`div_title${cardIndex}`}>
-        {cardSelect ? cardSelect.charAt(0).toUpperCase() + cardSelect.slice(1) : cardTitle}
-      </div>
-      <div className="card-body" style={{ height: "300px", overflowY: "auto", padding: "12px" }} id={bodyId}>
-        
-        {/* Search Input for Cards 2-5 */}
-        {cardSelect && (
+          {/* Search Input */}
           <div className="input-group mb-2">
             <input 
               type='text' 
               className='form-control' 
-              placeholder={`Search ${cardSelect}s...`}
+              placeholder="Search exporters..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             {searchTerm && (
-              <button
-                className="btn btn-outline-secondary"
+              <button 
+                className="btn btn-outline-secondary" 
                 type="button"
                 onClick={() => setSearchTerm("")}
+                title="Clear search"
               >
                 ✖
               </button>
             )}
           </div>
-        )}
-     
 
-{(() => {
-  let selectedItems = [];
-  if (cardIndex === 2) selectedItems = selectedCard2Items;
-  if (cardIndex === 3) selectedItems = selectedCard3Items;
-  if (cardIndex === 4) selectedItems = selectedCard4Items;
-  if (cardIndex === 5) selectedItems = selectedCard5Items;
-  
-  return selectedItems.length > 0 && (
-    <div className="alert alert-info small p-2 mb-2">
-      <strong>Selected:</strong> {selectedItems.length} items
-      <button 
-        className="btn btn-sm btn-outline-danger ms-2"
-        onClick={() => {
-          // ✅ Clear current card and all forward cards (not backward)
-          if (cardIndex === 2) {
-            setSelectedCard2Items([]);
-            setSelectedCard3Items([]);
-            setSelectedCard4Items([]);
-            setSelectedCard5Items([]);
-          } else if (cardIndex === 3) {
-            setSelectedCard3Items([]);
-            setSelectedCard4Items([]);
-            setSelectedCard5Items([]);
-          } else if (cardIndex === 4) {
-            setSelectedCard4Items([]);
-            setSelectedCard5Items([]);
-          } else if (cardIndex === 5) {
-            setSelectedCard5Items([]);
-          }
+          {/* Selected Items Summary */}
+          {selectedItems.length > 0 && (
+            <div className="alert alert-info small p-2 mb-2">
+              <strong>Selected:</strong> {selectedItems.length} items
+              <button 
+                className="btn btn-sm btn-outline-danger ms-2"
+                onClick={clearAll}
+              >
+                Clear All
+              </button>
+            </div>
+          )}
           
-          // ✅ Call forward refresh without affecting previous cards
-          forwardRefreshFromCard(cardIndex);
-        }}
-      >
-        Clear All
-      </button>
-    </div>
-  );
-})()}
-
-
-
-        {loading ? (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-            <div className="loader"></div>
-          </div>
-        ) : cardSelect ? (() => {
-          const filteredData = getFilteredCardData(cardSelect, searchTerm);
-          
-          return filteredData.length > 0 ? (
+          {/* Loading State */}
+          {pendingExport ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
+              <div className="loader"></div>
+            </div>
+          ) : (
             <>
               {/* Search Results Info */}
               {searchTerm && (
@@ -1772,461 +351,645 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
                 </div>
               )}
               
-              {/* Filtered Results with Working Checkboxes */}
-              {filteredData.map((item, i) => {
-                // Get current selection state for this card
-                let selectedItems = [];
-                let setSelectedItems = null;
-                
-                if (cardIndex === 2) {
-                  selectedItems = selectedCard2Items;
-                  setSelectedItems = setSelectedCard2Items;
-                } else if (cardIndex === 3) {
-                  selectedItems = selectedCard3Items;
-                  setSelectedItems = setSelectedCard3Items;
-                } else if (cardIndex === 4) {
-                  selectedItems = selectedCard4Items;
-                  setSelectedItems = setSelectedCard4Items;
-                } else if (cardIndex === 5) {
-                  selectedItems = selectedCard5Items;
-                  setSelectedItems = setSelectedCard5Items;
-                }
-                
-                // Get item value based on card type
-                const getItemValue = (type, item) => {
-                  switch (type) {
-                    case "hscode": return item.hscode;
-                    case "importer": return item.importer_name;
-                    case "exporter": return item.exporter_name;
-                    case "country": return item.country_name;
-                    case "port": return item.port_name;
-                    default: return "";
-                  }
-                };
-                
-                const itemValue = getItemValue(cardSelect, item);
-                const isSelected = selectedItems ? selectedItems.includes(itemValue) : false;
-                
-                return (
-                  <div className="form-check mb-2 border-bottom" key={i}>
-                    <input
-                      type="checkbox"
-                      className="form-check-input"
-                      id={`card${cardIndex}-item-${i}`}
-                      checked={isSelected}
-                      onChange={(e) => {
-                      //  console.log(`Checkbox clicked for card ${cardIndex}, item: ${itemValue}`);
-                        
-                        if (!setSelectedItems) return;
-                        
-                        let newSelected;
-                        if (e.target.checked) {
-                          newSelected = [...selectedItems, itemValue];
-                        } else {
-                          newSelected = selectedItems.filter(sel => sel !== itemValue);
-                        }
-                        setSelectedItems(newSelected);
-                        
-                       // console.log(`Card ${cardIndex} new selection:`, newSelected);
-                        
-                        // ✅ Call appropriate card function based on cardIndex
-                        if (cardIndex === 2) {
-                        //  console.log('Calling handleCard2Change');
-                          handleCard2Change(newSelected, cardSelect);
-                        } else if (cardIndex === 3) {
-                        //  console.log('Calling handleCard3Change');
-                          handleCard3Change(newSelected, cardSelect);
-                        } else if (cardIndex === 4) {
-                         // console.log('Calling handleCard4Change');
-                          handleCard4Change(newSelected, cardSelect);
-                        } else if (cardIndex === 5) {
-                          // console.log('Calling handleCard5Change');
-                          handleCard5Change(newSelected, cardSelect);
-                        }
-                      }}
-                    />
+              {/* Data List */}
+              {filteredData.length > 0 ? (
+                filteredData.map((item, i) => {
+                  const isSelected = selectedItems.includes(item.exporter_name);
+                  
+                  return (
+                    <div className="form-check mb-2 border-bottom" key={i}>
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        id={`exporter-${item.exporter_name}-${i}`}
+                        checked={isSelected}
+                        onChange={(e) => handleSelection(item, e.target.checked)}
+                      />
                     <label
-                      className="form-check-label"
-                      htmlFor={`card${cardIndex}-item-${i}`}
-                      style={{ fontSize: "16px" }}
-                    >
-                      {getCardLabel(cardSelect, item)}
-                    </label>
+  className={`form-check-label ${isSelected ? 'fw-bolder' : ''}`}
+  htmlFor={`exporter-${item.exporter_name}-${i}`}
+  style={{
+    fontSize: "16px",
+    fontWeight: isSelected ? 700 : 400
+  }}
+>
+  {item.exporter_name} [{item.shipment_count}]
+</label>
+                    </div>
+                  );
+                })
+              ) : searchTerm ? (
+                <div className="text-center text-muted py-4">
+                  <i className="fas fa-search" style={{ fontSize: "48px", opacity: 0.3 }}></i>
+                  <div className="mt-2">
+                    <strong>No results found</strong>
                   </div>
-                );
-              })}
-            </>
-          ) : searchTerm ? (
-            // No search results
-            <div className="text-center text-muted py-4">
-              <i className="fas fa-search" style={{ fontSize: "48px", opacity: 0.3 }}></i>
-              <div className="mt-2">
-                <strong>No results found</strong>
-              </div>
-              <div className="small">
-                Try adjusting your search term: "{searchTerm}"
-              </div>
-            </div>
-          ) : (
-            // Show all data when no search term - with same checkbox logic
-            getCardApiData(cardSelect).map((item, i) => {
-              let selectedItems = [];
-              let setSelectedItems = null;
-              
-              if (cardIndex === 2) {
-                selectedItems = selectedCard2Items;
-                setSelectedItems = setSelectedCard2Items;
-              } else if (cardIndex === 3) {
-                selectedItems = selectedCard3Items;
-                setSelectedItems = setSelectedCard3Items;
-              } else if (cardIndex === 4) {
-                selectedItems = selectedCard4Items;
-                setSelectedItems = setSelectedCard4Items;
-              } else if (cardIndex === 5) {
-                selectedItems = selectedCard5Items;
-                setSelectedItems = setSelectedCard5Items;
-              }
-              
-              const getItemValue = (type, item) => {
-                switch (type) {
-                  case "hscode": return item.hscode;
-                  case "importer": return item.importer_name;
-                  case "exporter": return item.exporter_name;
-                  case "country": return item.country_name;
-                  case "port": return item.port_name;
-                  default: return "";
-                }
-              };
-              
-              const itemValue = getItemValue(cardSelect, item);
-              const isSelected = selectedItems ? selectedItems.includes(itemValue) : false;
-              
-              return (
-                <div className="form-check mb-2 border-bottom" key={i}>
-                  <input
-                    type="checkbox"
-                    className="form-check-input"
-                    id={`card${cardIndex}-item-${i}`}
-                    checked={isSelected}
-                    onChange={(e) => {
-                    //  console.log(`Checkbox clicked for card ${cardIndex}, item: ${itemValue}`);
-                      
-                      if (!setSelectedItems) return;
-                      
-                      let newSelected;
-                      if (e.target.checked) {
-                        newSelected = [...selectedItems, itemValue];
-                      } else {
-                        newSelected = selectedItems.filter(sel => sel !== itemValue);
-                      }
-                      setSelectedItems(newSelected);
-                      
-                    //  console.log(`Card ${cardIndex} new selection:`, newSelected);
-                      
-                      // ✅ Call appropriate card function
-                      if (cardIndex === 2) {
-                      //  console.log('Calling handleCard2Change');
-                        handleCard2Change(newSelected, cardSelect);
-                      } else if (cardIndex === 3) {
-                      //  console.log('Calling handleCard3Change');
-                        handleCard3Change(newSelected, cardSelect);
-                      } else if (cardIndex === 4) {
-                        // console.log('Calling handleCard4Change');
-                        handleCard4Change(newSelected, cardSelect);
-                      } else if (cardIndex === 5) {
-                        // console.log('Calling handleCard5Change');
-                        handleCard5Change(newSelected, cardSelect);
-                      }
-                    }}
-                  />
-                  <label
-                    className="form-check-label"
-                    htmlFor={`card${cardIndex}-item-${i}`}
-                    style={{ fontSize: "16px" }}
-                  >
-                    {getCardLabel(cardSelect, item)}
-                  </label>
+                  <div className="small">
+                    Try adjusting your search term: "{searchTerm}"
+                  </div>
                 </div>
-              );
-            })
-          );
-        })() : (
-          <div className="text-muted text-center" style={{marginTop: "100px", fontSize: "70px", fontWeight: "bold"}}>+</div>
-        )}
+              ) : (
+                <div className="text-muted text-center" style={{marginTop: "100px", fontSize: "70px", fontWeight: "bold"}}>+</div>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
+
+
+const HsCodeCard = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [digitMode, setDigitMode] = useState(4); // 4 or 8 digit
+  const [loading, setLoading] = useState(false);
+
+  // Get appropriate data based on digit mode
+  const currentData = digitMode === 4 ? 
+    (hsCode4digitDataArray || []) : 
+    (hsCodeDataArray || []);
+
+  // Filter HS codes based on search term
+  const filteredData = currentData.filter(item => {
+    const code = digitMode === 4 ? item.value : item.value;
+    return code && code.toString().toLowerCase().includes(searchTerm.toLowerCase());
+  });
+
+  const handleSelection = (item, isChecked) => {
+    const itemValue = item.value;
+    let newSelected;
+    if (isChecked) {
+      newSelected = [...selectedItems, itemValue];
+    } else {
+      newSelected = selectedItems.filter(code => code !== itemValue);
+    }
+    setSelectedItems(newSelected);
+    
+    // Update appropriate global state based on digit mode
+    if (digitMode === 4) {
+      setHsCode4digitList(newSelected);
+    } else {
+      setHsCodeList(newSelected);
+    }
+  };
+
+  const clearAll = () => {
+    setSelectedItems([]);
+    setHsCode4digitList([]);
+    setHsCodeList([]);
+    setSearchTerm("");
+  };
+
+  const toggleDigitMode = (mode) => {
+    setDigitMode(mode);
+    setSelectedItems([]);
+    setSearchTerm("");
+    // Clear both lists when switching
+    setHsCode4digitList([]);
+    setHsCodeList([]);
+  };
+
+  return (
+    <div className="col mb-3">
+      <div className="card shadow-sm border-2">
+        <div className="card-header bg-primary text-white text-center fw-bold d-flex justify-content-between align-items-center">
+          <span>HS Code</span>
+          <div className="btn-group btn-group-sm">
+            <button 
+              className={`btn ${digitMode === 4 ? 'btn-light' : 'btn-outline-light'}`}
+              onClick={() => toggleDigitMode(4)}
+            >
+              4 Digit
+            </button>
+            <button 
+              className={`btn ${digitMode === 8 ? 'btn-light' : 'btn-outline-light'}`}
+              onClick={() => toggleDigitMode(8)}
+            >
+              8 Digit
+            </button>
+          </div>
+        </div>
+        <div className="card-body" style={{ height: "300px", overflowY: "auto", padding: "12px" }}>
+          
+          {/* Search Input */}
+          <div className="input-group mb-2">
+            <input 
+              type='text' 
+              className='form-control' 
+              placeholder={`Search ${digitMode} digit HS codes...`}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button 
+                className="btn btn-outline-secondary" 
+                type="button"
+                onClick={() => setSearchTerm("")}
+              >
+                ✖
+              </button>
+            )}
+          </div>
+
+          {/* Selected Items Summary */}
+          {selectedItems.length > 0 && (
+            <div className="alert alert-info small p-2 mb-2">
+              <strong>Selected:</strong> {selectedItems.length} items
+              <button 
+                className="btn btn-sm btn-outline-danger ms-2"
+                onClick={clearAll}
+              >
+                Clear All
+              </button>
+            </div>
+          )}
+          
+          {/* Loading State */}
+          {(pendingHSCode && digitMode === 8) ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
+              <div className="loader"></div>
+            </div>
+          ) : (
+            <>
+              {/* Search Results Info */}
+              {searchTerm && (
+                <div className="text-muted small mb-2">
+                  <i className="fas fa-info-circle me-1"></i>
+                  Found {filteredData.length} result(s) for "{searchTerm}"
+                </div>
+              )}
+              
+              {/* Data List */}
+              {filteredData.length > 0 ? (
+                filteredData.map((item, i) => {
+                  const itemValue = item.value;
+                  const isSelected = selectedItems.includes(itemValue);
+                  
+                  return (
+                    <div className="form-check mb-2 border-bottom" key={i}>
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        id={`hscode-${itemValue}-${i}`}
+                        checked={isSelected}
+                        onChange={(e) => handleSelection(item, e.target.checked)}
+                      />
+                   <label
+  className={`form-check-label ${isSelected ? "fw-bolder" : ""}`}
+  htmlFor={`hscode-${itemValue}-${i}`}
+  style={{
+    fontSize: "16px",
+    fontWeight: isSelected ? 700 : 400
+  }}
+>
+  {item.label}
+</label>
+
+                      
+                    </div>
+                  );
+                })
+              ) : searchTerm ? (
+                <div className="text-center text-muted py-4">
+                  <i className="fas fa-search" style={{ fontSize: "48px", opacity: 0.3 }}></i>
+                  <div className="mt-2">
+                    <strong>No results found</strong>
+                  </div>
+                  <div className="small">
+                    Try adjusting your search term: "{searchTerm}"
+                  </div>
+                </div>
+              ) : (
+                <div className="text-muted text-center" style={{marginTop: "100px", fontSize: "70px", fontWeight: "bold"}}>+</div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const PortCard = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Filter ports based on search term
+  const filteredData = indianPortDataList.portsList ? 
+    indianPortDataList.portsList.filter(item => 
+      item.port_name.toLowerCase().includes(searchTerm.toLowerCase())
+    ) : [];
+
+  const handleSelection = (item, isChecked) => {
+    let newSelected;
+    if (isChecked) {
+      newSelected = [...selectedItems, item.port_name];
+    } else {
+      newSelected = selectedItems.filter(port => port !== item.port_name);
+    }
+    setSelectedItems(newSelected);
+    
+    // Update global state - ports go to appropriate list based on trade type
+    if (searchParams && searchParams.tradeType === "EXPORT") {
+      setPortOriginList(newSelected);
+    } else {
+      setPortDestinationList(newSelected);
+    }
+  };
+
+  const clearAll = () => {
+    setSelectedItems([]);
+    setPortOriginList([]);
+    setPortDestinationList([]);
+    setSearchTerm("");
+  };
+
+  return (
+    <div className="col mb-3">
+      <div className="card shadow-sm border-2">
+        <div className="card-header bg-primary text-white text-center fw-bold">
+          Port
+        </div>
+        <div className="card-body" style={{ height: "300px", overflowY: "auto", padding: "12px" }}>
+          
+          {/* Search Input */}
+          <div className="input-group mb-2">
+            <input 
+              type='text' 
+              className='form-control' 
+              placeholder="Search ports..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button 
+                className="btn btn-outline-secondary" 
+                type="button"
+                onClick={() => setSearchTerm("")}
+              >
+                ✖
+              </button>
+            )}
+          </div>
+
+          {/* Selected Items Summary */}
+          {selectedItems.length > 0 && (
+            <div className="alert alert-info small p-2 mb-2">
+              <strong>Selected:</strong> {selectedItems.length} items
+              <button 
+                className="btn btn-sm btn-outline-danger ms-2"
+                onClick={clearAll}
+              >
+                Clear All
+              </button>
+            </div>
+          )}
+          
+          {/* Loading State */}
+          {pendingIndPort ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
+              <div className="loader"></div>
+            </div>
+          ) : (
+            <>
+              {/* Search Results Info */}
+              {searchTerm && (
+                <div className="text-muted small mb-2">
+                  <i className="fas fa-info-circle me-1"></i>
+                  Found {filteredData.length} result(s) for "{searchTerm}"
+                </div>
+              )}
+              
+              {/* Data List */}
+              {filteredData.length > 0 ? (
+                filteredData.map((item, i) => {
+                  const isSelected = selectedItems.includes(item.port_name);
+                  
+                  return (
+                    <div className="form-check mb-2 border-bottom" key={i}>
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        id={`port-${item.port_name}-${i}`}
+                        checked={isSelected}
+                        onChange={(e) => handleSelection(item, e.target.checked)}
+                      />
+                    <label
+  className={`form-check-label ${isSelected ? "fw-bolder" : ""}`}
+  htmlFor={`port-${item.port_name}-${i}`}
+  style={{
+    fontSize: "16px",
+    fontWeight: isSelected ? 700 : 400
+  }}
+>
+  {item.port_name} [{item.shipment_count}]
+</label>
+
+                    </div>
+                  );
+                })
+              ) : searchTerm ? (
+                <div className="text-center text-muted py-4">
+                  <i className="fas fa-search" style={{ fontSize: "48px", opacity: 0.3 }}></i>
+                  <div className="mt-2">
+                    <strong>No results found</strong>
+                  </div>
+                  <div className="small">
+                    Try adjusting your search term: "{searchTerm}"
+                  </div>
+                </div>
+              ) : (
+                <div className="text-muted text-center" style={{marginTop: "100px", fontSize: "70px", fontWeight: "bold"}}>+</div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CountryCard = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Filter countries based on search term
+  const filteredData = countryDataList.countriesList ? 
+    countryDataList.countriesList.filter(item => 
+      item.country_name.toLowerCase().includes(searchTerm.toLowerCase())
+    ) : [];
+
+  const handleSelection = (item, isChecked) => {
+    let newSelected;
+    if (isChecked) {
+      newSelected = [...selectedItems, item.country_name];
+    } else {
+      newSelected = selectedItems.filter(country => country !== item.country_name);
+    }
+    setSelectedItems(newSelected);
+    
+    // Update global state
+    setCountryOriginList(newSelected);
+  };
+
+  const clearAll = () => {
+    setSelectedItems([]);
+    setCountryOriginList([]);
+    setSearchTerm("");
+  };
+
+  return (
+    <div className="col mb-3">
+      <div className="card shadow-sm border-2">
+        <div className="card-header bg-primary text-white text-center fw-bold">
+          Country
+        </div>
+        <div className="card-body" style={{ height: "300px", overflowY: "auto", padding: "12px" }}>
+          
+          {/* Search Input */}
+          <div className="input-group mb-2">
+            <input 
+              type='text' 
+              className='form-control' 
+              placeholder="Search countries..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button 
+                className="btn btn-outline-secondary" 
+                type="button"
+                onClick={() => setSearchTerm("")}
+              >
+                ✖
+              </button>
+            )}
+          </div>
+
+          {/* Selected Items Summary */}
+          {selectedItems.length > 0 && (
+            <div className="alert alert-info small p-2 mb-2">
+              <strong>Selected:</strong> {selectedItems.length} items
+              <button 
+                className="btn btn-sm btn-outline-danger ms-2"
+                onClick={clearAll}
+              >
+                Clear All
+              </button>
+            </div>
+          )}
+          
+          {/* Loading State */}
+          {pendingCountry ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
+              <div className="loader"></div>
+            </div>
+          ) : (
+            <>
+              {/* Search Results Info */}
+              {searchTerm && (
+                <div className="text-muted small mb-2">
+                  <i className="fas fa-info-circle me-1"></i>
+                  Found {filteredData.length} result(s) for "{searchTerm}"
+                </div>
+              )}
+              
+              {/* Data List */}
+              {filteredData.length > 0 ? (
+                filteredData.map((item, i) => {
+                  const isSelected = selectedItems.includes(item.country_name);
+                  
+                  return (
+                    <div className="form-check mb-2 border-bottom" key={i}>
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        id={`country-${item.country_name}-${i}`}
+                        checked={isSelected}
+                        onChange={(e) => handleSelection(item, e.target.checked)}
+                      />
+                  <label
+  className={`form-check-label ${isSelected ? "fw-bolder" : ""}`}
+  htmlFor={`country-${item.country_name}-${i}`}
+  style={{
+    fontSize: "16px",
+    fontWeight: isSelected ? 700 : 400
+  }}
+>
+  {item.country_name} [{item.shipment_count}]
+</label>
+
+                    </div>
+                  );
+                })
+              ) : searchTerm ? (
+                <div className="text-center text-muted py-4">
+                  <i className="fas fa-search" style={{ fontSize: "48px", opacity: 0.3 }}></i>
+                  <div className="mt-2">
+                    <strong>No results found</strong>
+                  </div>
+                  <div className="small">
+                    Try adjusting your search term: "{searchTerm}"
+                  </div>
+                </div>
+              ) : (
+                <div className="text-muted text-center" style={{marginTop: "100px", fontSize: "70px", fontWeight: "bold"}}>+</div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ImportCard = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Filter importers based on search term
+  const filteredData = importerDataList.importersList ? 
+    importerDataList.importersList.filter(item => 
+      item.importer_name.toLowerCase().includes(searchTerm.toLowerCase())
+    ) : [];
+
+  const handleSelection = (item, isChecked) => {
+    let newSelected;
+    if (isChecked) {
+      newSelected = [...selectedItems, item.importer_name];
+    } else {
+      newSelected = selectedItems.filter(imp => imp !== item.importer_name);
+    }
+    setSelectedItems(newSelected);
+    
+    // Update global state
+    setSelectedImporters(newSelected);
+    setImporterList(newSelected);
+  };
+
+  const clearAll = () => {
+    setSelectedItems([]);
+    setSelectedImporters([]);
+    setImporterList([]);
+    setSearchTerm("");
+  };
+
+  return (
+    <div className="col mb-3">
+      <div className="card shadow-sm border-2">
+        <div className="card-header bg-primary text-white text-center fw-bold">
+          Importer Name
+        </div>
+        <div className="card-body" style={{ height: "300px", overflowY: "auto", padding: "12px" }}>
+          
+          {/* Search Input */}
+          <div className="input-group mb-2">
+            <input 
+              type='text' 
+              className='form-control' 
+              placeholder="Search importers..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button 
+                className="btn btn-outline-secondary" 
+                type="button"
+                onClick={() => setSearchTerm("")}
+              >
+                ✖
+              </button>
+            )}
+          </div>
+
+          {/* Selected Items Summary */}
+          {selectedItems.length > 0 && (
+            <div className="alert alert-info small p-2 mb-2">
+              <strong>Selected:</strong> {selectedItems.length} items
+              <button 
+                className="btn btn-sm btn-outline-danger ms-2"
+                onClick={clearAll}
+              >
+                Clear All
+              </button>
+            </div>
+          )}
+          
+          {/* Loading State */}
+          {pendingImport ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
+              <div className="loader"></div>
+            </div>
+          ) : (
+            <>
+              {/* Search Results Info */}
+              {searchTerm && (
+                <div className="text-muted small mb-2">
+                  <i className="fas fa-info-circle me-1"></i>
+                  Found {filteredData.length} result(s) for "{searchTerm}"
+                </div>
+              )}
+              
+              {/* Data List */}
+              {filteredData.length > 0 ? (
+                filteredData.map((item, i) => {
+                  const isSelected = selectedItems.includes(item.importer_name);
+                  
+                  return (
+                    <div className="form-check mb-2 border-bottom" key={i}>
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        id={`importer-${item.importer_name}-${i}`}
+                        checked={isSelected}
+                        onChange={(e) => handleSelection(item, e.target.checked)}
+                      />
+                  <label
+  className={`form-check-label ${isSelected ? "fw-bolder" : ""}`}
+  htmlFor={`importer-${item.importer_name}-${i}`}
+  style={{
+    fontSize: "16px",
+    fontWeight: isSelected ? 700 : 400
+  }}
+>
+  {item.importer_name} [{item.shipment_count}]
+</label>
+
+                    </div>
+                  );
+                })
+              ) : searchTerm ? (
+                <div className="text-center text-muted py-4">
+                  <i className="fas fa-search" style={{ fontSize: "48px", opacity: 0.3 }}></i>
+                  <div className="mt-2">
+                    <strong>No results found</strong>
+                  </div>
+                  <div className="small">
+                    Try adjusting your search term: "{searchTerm}"
+                  </div>
+                </div>
+              ) : (
+                <div className="text-muted text-center" style={{marginTop: "100px", fontSize: "70px", fontWeight: "bold"}}>+</div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
 /*18/09/2025 */
 
 
 
-/*
-  const monthWiseColumns = [
-    {
-      name: "Month Name",
-      selector: row => row.month_name,
-      sortable: false
-    },
-    {
-      name: "Total Quantity",
-      selector: row => row.quantity,
-      sortable: false,
-      conditionalCellStyles: [
-        {
-            when: row => stdUnitDataArray.length > 1 && stdUnitList.length == 0 ,
-            style: {
-              color: "transparent",
-              textShadow: "0 0 8px #000",
-            },
-        },
-      ]
-    },
-    {
-      name: "Shipment Count",
-      selector: row => row.shipment_count,
-      sortable: false
-    },
-    {
-      name: "Total Value (USD)",
-      selector: row => row.value_usd,
-      sortable: false
-    },
-  ];
-    */
-  /*Checking Working 17/09/2025 */
-  /*
-  const importerColumns = [
-    {
-      name: "Importer Name",
-      selector: row => row.importer_name,
-      sortable: false
-    },
-    {
-      name: "Total Quantity",
-      selector: row => row.quantity,
-      sortable: false,
-      conditionalCellStyles: [
-        {
-            when: row => stdUnitDataArray.length > 1 && stdUnitList.length == 0,
-            style: {
-              color: "transparent",
-              textShadow: "0 0 8px #000"
-            },
-        },
-      ]
-    },
-    {
-      name: "Shipment Count",
-      selector: row => row.shipment_count,
-      sortable: false
-    },
-    {
-      name: "Total Value (USD)",
-      selector: row => row.value_usd,
-      sortable: false
-    },
-    {
-      name: "Value Share %",
-      selector: row => row.share,
-      sortable: false,
-      // cell: d => <span>{d.genres.join(", ")}</span>
-    }
-  ];  */
-   /*Checking Working 17/09/2025 */
-   /*
-  const exporterColumns = [
-    {
-      name: "Exporter Name",
-      selector: row => row.exporter_name,
-      sortable: false
-    },
-    {
-      name: "Total Quantity",
-      selector: row => row.quantity,
-      sortable: false,
-      conditionalCellStyles: [
-        {
-            when: row => stdUnitDataArray.length > 1 && stdUnitList.length == 0,
-            style: {
-              color: "transparent",
-              textShadow: "0 0 8px #000"
-            },
-        },
-      ]
-    },
-    {
-      name: "Shipment Count",
-      selector: row => row.shipment_count,
-      sortable: false
-    },
-    {
-      name: "Total Value (USD)",
-      selector: row => row.value_usd,
-      sortable: false
-    },
-    {
-      name: "Value Share %",
-      selector: row => row.share,
-      sortable: false,
-    }
-  ];
-  */
-  /*Checking Working 17/09/2025 */
-  /*
-  const portColumns = [
-    {
-      name: "Port Name",
-      selector: row => row.port_name,
-      sortable: false
-    },
-    {
-      name: "Total Quantity",
-      selector: row => row.quantity,
-      sortable: false,
-      conditionalCellStyles: [
-        {
-            when: row => stdUnitDataArray.length > 1 && stdUnitList.length == 0,
-            style: {
-              color: "transparent",
-              textShadow: "0 0 8px #000"
-            },
-        },
-      ]
-    },
-    {
-      name: "Shipment Count",
-      selector: row => row.shipment_count,
-      sortable: false
-    },
-    {
-      name: "Total Value (USD)",
-      selector: row => row.value_usd,
-      sortable: false
-    },
-    {
-      name: "Value Share %",
-      selector: row => row.share,
-      sortable: false,
-    }
-  ];
-  */
-  /*Checking Working 17/09/2025 */
-  /*
-  const hsCodeColumns = [
-    {
-      name: "HS Code",
-      selector: row => row.hscode,
-      sortable: false
-    },
-    {
-      name: "Total Quantity",
-      selector: row => row.quantity,
-      sortable: false,
-      conditionalCellStyles: [
-        {
-            when: row => stdUnitDataArray.length > 1 && stdUnitList.length == 0,
-            style: {
-              color: "transparent",
-              textShadow: "0 0 8px #000"
-            },
-        },
-      ]
-    },
-    {
-      name: "Shipment Count",
-      selector: row => row.shipment_count,
-      sortable: false
-    },
-    {
-      name: "Total Value (USD)",
-      selector: row => row.value_usd,
-      sortable: false
-    },
-    {
-      name: "Value Share %",
-      selector: row => row.share,
-      sortable: false,
-    }
-  ];
-  */
-  /*Checking Working 17/09/2025 */
-  /*
-  const countryColumns = [
-    {
-      name: "Country Name",
-      selector: row => row.country_name,
-      sortable: false
-    },
-    {
-      name: "Total Quantity",
-      selector: row => row.quantity,
-      sortable: false,
-      conditionalCellStyles: [
-        {
-            when: row => stdUnitDataArray.length > 1 && stdUnitList.length == 0,
-            style: {
-              color: "transparent",
-              textShadow: "0 0 8px #000"
-            },
-        },
-      ]
-    },
-    {
-      name: "Shipment Count",
-      selector: row => row.shipment_count,
-      sortable: false
-    },
-    {
-      name: "Total Value (USD)",
-      selector: row => row.value_usd,
-      sortable: false
-    },
-    {
-      name: "Value Share %",
-      selector: row => row.share,
-      sortable: false,
-    }
-  ];
-  */
-  /*Checking Working 17/09/2025 */
-  /*
-  const cityColumns = [
-    {
-      name: "City Name",
-      selector: row => row.city_name,
-      sortable: false
-    },
-    {
-      name: "Total Quantity",
-      selector: row => row.quantity,
-      sortable: false,
-      conditionalCellStyles: [
-        {
-            when: row => stdUnitDataArray.length > 1 && stdUnitList.length == 0,
-            style: {
-              color: "transparent",
-              textShadow: "0 0 8px #000"
-            },
-        },
-      ]
-    },
-    {
-      name: "Shipment Count",
-      selector: row => row.shipment_count,
-      sortable: false
-    },
-    {
-      name: "Total Value (USD)",
-      selector: row => row.value_usd,
-      sortable: false
-    },
-    {
-      name: "Value Share %",
-      selector: row => row.share,
-      sortable: false,
-    }
-  ];*/
 
   const handleModal = (rowData,columns)  => {
     setShowModal(true)
@@ -2579,59 +1342,6 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
         setPendingImport(false);
       });
   }
-/*
-  const getMonthWiseList = (params) => {
-    const postData = {
-      "searchType": "TRADE",
-      "tradeType": params.tradeType,
-      "fromDate": params.fromDate,
-      "toDate": params.toDate,
-      "searchBy": params.searchBy,
-      "searchValue": params.searchValue,
-      "countryCode": params.countryCode,
-      "pageNumber": 0,
-      "numberOfRecords": 20,
-      "matchType": params.matchType,
-      "portOriginList": params.portOriginList,
-      "portDestinationList":  params.portDestinationList,
-      "hsCodeList":  params.hsCodeList,
-      "hsCode4DigitList":  params.hsCode4DigitList,
-      "exporterList":  params.exporterList,
-      "importerList":  params.importerList,
-      "cityOriginList":  params.cityOriginList,
-      "cityDestinationList":  params.cityDestinationList,
-      "searchId": search_id,
-      "queryBuilder": params.queryBuilder,
-      "shipModeList": params.shipmentModeList,
-      "stdUnitList": params.stdUnitList
-    }
-    props.loadingStart()
-    Axios({
-      method: "POST",
-      url: `/search-management/listmonthwise`,
-      data: JSON.stringify(postData),
-      headers: {
-        "Content-Type": "application/json"
-      }
-    })
-      .then(res => {
-
-        // let data = [];
-        // monthArray.map((month,index)=>{
-        //   res.data.monthwiseList.forEach((item,subindex) => {
-        //     let tempMnt = item.month_name.split("-")
-        //       if(tempMnt[0] == month){
-        //         data.push(item);
-        //       }
-        //   })
-        // })
-
-        setMonthWiseDataList(res.data.monthwiseList);
-      })
-      .catch(err => {
-        // console.log("Err");
-      });
-  }  */
 
   const getTradingCountryList = (params) => {
     props.loadingStart()
@@ -3325,320 +2035,6 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
     }
   }, []);
 
-/*  const monthWiseLabel = () => {
-    let labels = [];
-    monthWiseDataList.forEach((item) => {
-      labels.push(item.month_name);
-    }) 
-    return labels;
-  }  */
-  /*const MonthWiseData = () => {
-    let data = [];
-    let others = 0;
-    monthWiseDataList.forEach((item,index) => {
-      data.push(item.value_usd);    
-    })
-    data.push(others)
-    return data;
-  }  */
-
-/*  const importerLabel = () => {
-    let labels = [];
-    let tempImporterList = Object.assign(importerDataList)
-    tempImporterList.importersList.slice(0,10).forEach((item) => {
-      labels.push(item.importer_name);
-    })
-    if(importerDataList.importersList.length > 10){
-      labels.push("Others")
-    }  
-    return labels;
-  }  */
-/*  const importerData = () => {
-    let data = [];
-    let others = 0;
-    importerDataList.importersList.forEach((item,index) => {
-      if(index < 10){
-        data.push(item.value_usd);
-      }
-      // else{
-      //   others = others + item.value_usd
-      // }     
-    })
-    data.push(importerDataList.totalValueUSDTop10)
-    return data;
-  }  */
-
-/*  const importerDataPie = () => {
-    let data = [];
-    let others = 0;
-    importerDataList.importersList.forEach((item,index) => {
-      if(index < 10){
-        data.push(item.share);
-      }
-      // else{
-      //   others = others + item.share
-      // }     
-    })
-    data.push(importerDataList.valueShareTop10)
-    return data;
-  }  */
-
-
-  /*const exporterLabel = () => {
-
-    let labels = [];
-    let tempExporterList = Object.assign(exporterDataList)
-    tempExporterList.exportersList.slice(0,10).forEach((item,index) => {
-      labels.push(item.exporter_name);
-    })
-    if(exporterDataList.exportersList.length > 10){
-      labels.push("Others")
-    }  
-    return labels;
-  } */
-
-  /*const exporterData = () => {
-    let data = [];
-    let others = 0;
-    exporterDataList.exportersList.forEach((item,index) => {
-      if(index < 10){
-        data.push(item.value_usd);
-      }
-      // else{
-      //   others = others + item.value_usd
-      // }     
-    })
-    data.push(exporterDataList.totalValueUSDTop10)
-    return data;
-  }   */
-
-/*  const exporterDataPie = () => {
-    let data = [];
-    let others = 0;
-    exporterDataList.exportersList.forEach((item,index) => {
-      if(index < 10){
-        data.push(item.share);
-      }
-      // else{
-      //   others = others + item.share
-      // }     
-    })
-    data.push(exporterDataList.valueShareTop10)
-    return data;
-  }  */
-
-
-/*  const indPortLabel = () => {
-    let labels = [];
-    let tempIndianPortList = Object.assign(indianPortDataList)
-    tempIndianPortList.portsList.slice(0,10).forEach((item) => {
-      labels.push(item.port_name);
-    })
-    if(indianPortDataList.portsList.length > 10){
-      labels.push("Others")
-    }  
-    return labels;
-  }  */
-
-/*  const indPortData = () => {
-    let data = [];
-    let others = 0;
-    indianPortDataList.portsList.forEach((item,index) => {
-      if(index < 10){
-        data.push(item.value_usd);
-      }
-      // else{
-      //   others = others + item.value_usd
-      // }     
-    })
-    data.push(indianPortDataList.totalValueUSDTop10)
-    return data;
-  } */
-
-/*  const indianPortPie = () => {
-    let data = [];
-    let others = 0;
-    indianPortDataList.portsList.forEach((item,index) => {
-      if(index < 10){
-        data.push(item.share);
-      }
-      // else{
-      //   others = others + item.share
-      // }     
-    })
-    data.push(indianPortDataList.valueShareTop10)
-    return data;
-  }  */
-
-/*  const forPortLabel = () => {
-    let labels = [];
-    let tempForPortList = Object.assign(forPortDataList)
-    tempForPortList.portsList.slice(0,10).forEach((item) => {
-      labels.push(item.port_name);
-    })
-    if(forPortDataList.portsList.length > 10){
-      labels.push("Others")
-    }   
-    return labels;
-  }  */
-
-/*  const forPortData = () => {
-    let data = [];
-    let others = 0;
-    forPortDataList.portsList.forEach((item,index) => {
-      if(index < 10){
-        data.push(item.value_usd);
-      }
-      // else{
-      //   others = others + item.value_usd
-      // }    
-    })
-    data.push(forPortDataList.totalValueUSDTop10)
-    return data;
-  }  */
-
-/*  const foreignPortPie = () => {
-    let data = [];
-    let others = 0;
-    forPortDataList.portsList.forEach((item,index) => {
-      if(index < 10){
-        data.push(item.share);
-      }
-      // else{
-      //   others = others + item.share
-      // }     
-    })
-    data.push(forPortDataList.valueShareTop10)
-    return data;
-  }  */
-
-
-/*  const hsCodeLabel = () => {
-    let labels = [];
-    let tempHsCodeList = Object.assign(hsCodeDataList)
-    tempHsCodeList.hscodesList.slice(0,10).forEach((item) => {
-      labels.push(item.hscode);
-    })
-    if(hsCodeDataList.hscodesList.length > 10){
-      labels.push("Others")
-    }  
-    return labels;
-  }  */
-
-/*  const hsCodeData = () => {
-    let data = [];
-    let others = 0;
-    hsCodeDataList.hscodesList.forEach((item,index) => {
-      if(index < 10){
-        data.push(item.value_usd);
-      }
-      // else{
-      //   others = others + item.value_usd
-      // }     
-    })
-    data.push(hsCodeDataList.totalValueUSDTop10)
-    return data;
-  }  */
-/*
-  const hsCodePie = () => {
-    let data = [];
-    let others = 0;
-    hsCodeDataList.hscodesList.forEach((item,index) => {
-      if(index < 10){
-        data.push(item.share);
-      }
-      // else{
-      //   others = others + item.share
-      // }     
-    })
-    data.push(hsCodeDataList.valueShareTop10)
-    return data;
-  }  */
-
-/*  const countryLabel = () => {
-    let labels = [];
-    let tempCountryList = Object.assign(countryDataList)
-    tempCountryList.countriesList.slice(0,10).forEach((item) => {
-      labels.push(item.country_name);
-    })
-    if(countryDataList.countriesList.length > 10){
-      labels.push("Others")
-    }  
-    return labels;
-  }  */
-
-/*  const countryData = () => {
-    let data = [];
-    let others = 0;
-    countryDataList.countriesList.forEach((item,index) => {
-      if(index < 10){
-        data.push(item.value_usd);
-      }
-      // else{
-      //   others = others + item.value_usd
-      // }     
-    })
-    data.push(countryDataList.totalValueUSDTop10)
-    return data;
-  }   */
-
-/*  const countryDataPie = () => {
-    let data = [];
-    let others = 0;
-    countryDataList.countriesList.forEach((item,index) => {
-      if(index < 10){
-        data.push(item.share);
-      }
-      // else{
-      //   others = others + item.share
-      // }     
-    })
-    data.push(countryDataList.valueShareTop10)
-    return data;
-  }  */
-
-
-/*  const cityLabel = () => {
-    let labels = [];
-    let tempcityList = Object.assign(cityDataList)
-    tempcityList.citiesList.slice(0,10).forEach((item) => {
-      labels.push(item.city_name);
-    })
-    if(cityDataList.citiesList.length > 10){
-      labels.push("Others")
-    }  
-    return labels;
-  }  */
-
-/*  const cityData = () => {
-    let data = [];
-    let others = 0;
-    cityDataList.citiesList.forEach((item,index) => {
-      if(index < 10){
-        data.push(item.value_usd);
-      }
-      // else{
-      //   others = others + item.value_usd
-      // }     
-    })
-    data.push(cityDataList.totalValueUSDTop10)
-    return data;
-  }  */
-/*
-  const cityDataPie = () => {
-    let data = [];
-    let others = 0;
-    cityDataList.citiesList.forEach((item,index) => {
-      if(index < 10){
-        data.push(item.share);
-      }
-      // else{
-      //   others = others + item.share
-      // }     
-    })
-    data.push(cityDataList.valueShareTop10)
-    return data;
-  }  */
 
   const setMaxMinDate = (text,tradeType) => {
     let tempRow = tradeCountryList.filter((item) => item.shortcode.toLowerCase().includes(text.toLowerCase()))
@@ -3778,32 +2174,6 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
       />
     )
   }
-/*
-  const onDataRowClicked = (row,index) =>{
-
-    if(row.hasOwnProperty("importer_name") && row.importer_name == "OTHERS"){
-      handleModal(importerDataList.importersList,importerColumns)
-    }
-    else if(row.hasOwnProperty("exporter_name") && row.exporter_name == "OTHERS"){
-      handleModal(exporterDataList.exportersList,exporterColumns)
-    }
-    else if(row.hasOwnProperty("hscode") && row.hscode == "OTHERS"){
-      handleModal(hsCodeDataList.hscodesList,hsCodeColumns)
-    }
-    else if(row.hasOwnProperty("country_name") && row.country_name == "OTHERS"){
-      handleModal(countryDataList.countriesList,countryColumns)
-    }
-    else if(row.hasOwnProperty("city_name") && row.city_name == "OTHERS"){
-      handleModal(cityDataList.citiesList,cityColumns)
-    }
-    else if(row.hasOwnProperty("port_name") && row.port_name == "OTHERS" && row.country == 'India'){
-      handleModal(indianPortDataList.portsList,portColumns)
-    }
-    else if(row.hasOwnProperty("port_name") && row.port_name == "OTHERS" && row.country == 'Foreign'){
-      handleModal(forPortDataList.portsList,portColumns)
-    }
-  }    */
-
  
 
   return (
@@ -4145,25 +2515,34 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
   </div>
 
 </div>
+<div className="row mb-3">
+  <div className="col-12">
+    <div className="d-flex justify-content-end">
+      
+      <button
+        type="button"
+        className="btn btn-outline-danger px-3 py-2"
+        onClick={resetAllRecords}
+      >
+        Reset All
+      </button>
+
+    </div>
+  </div>
+</div>
 
 
-  
+
+
+
+
 <div className="row mb-4">
    {/* Card 1 - Dynamic Import/Export */}
-   {RenderFirstCard()}
-
-   {/* Card 2 */}
-   {RenderCard(card2Select, setCard2Select, 2, "Select Variable", "select2", "div_body2", card2Loading, card2SearchTerm, setCard2SearchTerm)}
-   
-   {/* Card 3 */}
-   {RenderCard(card3Select, setCard3Select, 3, "Select Variable", "select3", "div_body3", card3Loading, card3SearchTerm, setCard3SearchTerm)}
-   
-   {/* Card 4 */}
-   {RenderCard(card4Select, setCard4Select, 4, "Select Variable", "select4", "div_body4", card4Loading, card4SearchTerm, setCard4SearchTerm)}
-   
-   {/* Card 5 */}
-   {RenderCard(card5Select, setCard5Select, 5, "Select Variable", "select5", "div_body5", card5Loading, card5SearchTerm, setCard5SearchTerm)}
-
+   {ExporterCard()}
+   {HsCodeCard()}
+   {PortCard()}
+   {CountryCard()}
+   {ImportCard()}
 
 </div>
 
@@ -4181,10 +2560,31 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
     <button
   className="btn btn-success btn-lg fw-bold shadow-sm px-4 py-2"
   onClick={() => {
-    const payload = buildFinalParams();
-  //  console.log("Indepth payload:", payload); // useful while debugging
-    setIndepthParams(payload);
+    // Build final parameters from all card selections
+    const payload = {
+      ...searchParams,
+      exporterList: selectedExporters || [],
+      importerList: importerList || [],
+      hsCodeList: hsCodeList || [],
+      hsCode4DigitList: hsCode4DigitList || [],
+      portOriginList: portOriginList || [],
+      portDestinationList: portDestinationList || [],
+      countryList: countryOriginList || [],
+      searchId: search_id
+    };
+    
+    console.log("Card system payload:", payload);
+    // setIndepthParams(payload);
     setShowTable(true);
+    
+    // Show success message
+    Swal.fire({
+      title: 'Data Loaded!',
+      text: 'Your search parameters have been applied successfully.',
+      icon: 'success',
+      timer: 1500,
+      showConfirmButton: false
+    });
   }}
 >
   {showTable ? "Refresh Data" : "Show Data"}
@@ -4193,15 +2593,15 @@ const RenderCard = (cardSelect, setCardSelect, cardIndex, cardTitle, selectId, b
   </div>
 </div>
 
-{showTable && indepthParams && (
+{/* {showTable && indepthParams && (
   <IndepthSearchTable
-    params={indepthParams}
+    //params={indepthParams}
     filteredColumn={[]} // or pass desired column keys
     initialPage={1}
     initialLimit={20}
     onRowClick={(row) => { console.log("row clicked", row); }}
   />
-)}
+)} */}
 
 
 
