@@ -1208,7 +1208,7 @@ const getHscode4Digit2DigitApi = async (params,digitValue=null) => {
         </div>
         <div className="col-md-6">
           <label className="form-label fw-semibold">HS Code - {hsCodeDropdownListType ? hsCodeDropdownListType + ' Digit': ''}</label>
-          {JSON.stringify(hsCodeDropdownList)}
+          {/* {JSON.stringify(hsCodeDropdownList)} */}
           <select className="form-select form-control" value={selectedHsCode}
           onChange={(e)=>{
                 const newHsCode=e.target.value;
