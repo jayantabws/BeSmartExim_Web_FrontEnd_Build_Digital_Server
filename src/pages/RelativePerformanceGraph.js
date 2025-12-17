@@ -119,10 +119,10 @@ const calculateMarketSharePercentage = (hsCodeGraphApiResponse, industryExportGr
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="month" />
         {/* <YAxis /> */}
-        <YAxis
-                tickFormatter={(value) => `${(value / 1_000_000).toFixed(1)}M`}
-                domain={['dataMin - 5000000', 'dataMax + 5000000']}
-              />
+      <YAxis
+  tickFormatter={(value) => `${(value / 1_000_000).toFixed(1)}M`}
+  domain={[0, 'dataMax + 5000000']}
+/>
         <Tooltip formatter={(v) => (v ? v.toLocaleString() : '0')} />
         <Legend />
         <Line
@@ -153,10 +153,10 @@ const calculateMarketSharePercentage = (hsCodeGraphApiResponse, industryExportGr
             <LineChart data={data.industry} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
-                      <YAxis
-                tickFormatter={(value) => `${(value / 1_000_000).toFixed(1)}M`}
-                domain={['dataMin - 5000000', 'dataMax + 5000000']}
-              />
+             <YAxis
+  tickFormatter={(value) => `${(value / 1_000_000).toFixed(1)}M`}
+  domain={[0, 'dataMax + 5000000']}
+/>
 
                <Tooltip formatter={(value) => `${value.toLocaleString()} USD`} />
               <Legend />
