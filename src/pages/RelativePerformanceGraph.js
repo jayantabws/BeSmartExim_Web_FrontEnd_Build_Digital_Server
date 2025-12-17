@@ -80,11 +80,11 @@ const formatMonthYear = (dateStr) => {
         Export & Market Dashboard 
       </h1> */}
 
-<h3 className="text-2xl font-semibold text-center mb-6">Relative Performance of HS Code {selectedHsCode ? selectedHsCode : null}  </h3>
+<h3 className="text-2xl text-center mb-6" style={{fontWeight:'bold'}} >Relative Performance of HS Code {selectedHsCode ? selectedHsCode : null}  </h3>
     <div className="grid md:grid-cols-3 gap-6">
         {/* HS Code Export Chart */}
         <div className="bg-white rounded-2xl shadow-sm p-4">
-          <h2 className="text-lg font-medium mb-2 text-indigo-600">
+          <h2 className="text-lg font-medium mb-2 text-indigo-600 py-3">
           <span style={{fontWeight:'bold'}}> HS Code Export </span>  <span style={{color:'#0000FF',fontWeight:'normal',fontStyle:'normal',fontSize:'20px'}} >({formatMonthYear(searchParams.fromDate)} to {formatMonthYear(searchParams.toDate)})</span>
           </h2>
           {data?.hs?.length > 0 ? (
@@ -144,7 +144,7 @@ const formatMonthYear = (dateStr) => {
 
         {/* Industry Export Chart */}
         <div className="bg-white rounded-2xl shadow-sm p-4">
-          <h2 className="text-lg font-medium mb-2 text-green-600">
+          <h2 className="text-lg font-medium mb-2 text-green-600 py-3">
               <span style={{fontWeight:'bold'}}> Industry Export </span>  <span style={{color:'#0000FF',fontWeight:'normal',fontStyle:'normal',fontSize:'20px'}} >({formatMonthYear(searchParams.fromDate)} to {formatMonthYear(searchParams.toDate)})</span>
           </h2>
           {data?.industry?.length > 0 ? (
@@ -205,7 +205,7 @@ const formatMonthYear = (dateStr) => {
 
         {/* Market Share Chart */}
         <div className="bg-white rounded-2xl shadow-sm p-4">
-          <h2 className="text-lg mb-2">
+          <h2 className="text-lg mb-2 py-3">
            
               
           <span style={{fontWeight:'bold'}}> Relative Strength (in %) </span>  <span style={{color:'#0000FF',fontWeight:'normal',fontStyle:'normal',fontSize:'20px'}} >({formatMonthYear(searchParams.fromDate)} to {formatMonthYear(searchParams.toDate)})</span>
