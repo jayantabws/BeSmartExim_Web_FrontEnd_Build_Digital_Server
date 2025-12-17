@@ -12,7 +12,7 @@ import {
 
 // const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-export default function ExportMarketCharts({ hsCodeGraphApiResponse, selectedHsCode,industryExportGraphApiResponse }) {
+export default function ExportMarketCharts({ hsCodeGraphApiResponse, selectedHsCode,industryExportGraphApiResponse,searchParams }) {
  // console.log("Received hsCodeGraphApiResponse:", hsCodeGraphApiResponse,selectedHsCode);
   const [data, setData] = useState({ hs: [], industry: [], market: [] });
 
@@ -33,7 +33,7 @@ export default function ExportMarketCharts({ hsCodeGraphApiResponse, selectedHsC
    // console.log("data after calculation:", data);
   }, [hsCodeGraphApiResponse, selectedHsCode, industryExportGraphApiResponse]);
 
-
+console.log("searchParams data with HS Response:", searchParams);
   const calculateMarketSharePercentage = (hsData, industryData) => {
   const shareData = [];
 
@@ -64,140 +64,202 @@ export default function ExportMarketCharts({ hsCodeGraphApiResponse, selectedHsC
   return shareData;
 };
 
-
-/*
-const calculateMarketSharePercentage = (hsCodeGraphApiResponse, industryExportGraphApiResponse) => {
-  const shareData = [];
-
-  // Step 1: Create a map of industry month → amount for fast lookup
-  const industryMap = new Map();
-  industryExportGraphApiResponse.forEach(item => {
-    industryMap.set(item.month, item.amount);
-  });
-
-  console.log("Industry Map:", industryMap);
-
-  // Step 2: Loop through HS data & calculate percentage
-  hsCodeGraphApiResponse.forEach(hsItem => {
-    const industryAmount = industryMap.get(hsItem.month) || 0;
-
-    let sharePercentage = 0;
-    if (industryAmount > 0 && hsItem.amount > 0) {
-      sharePercentage = (hsItem.amount / industryAmount) * 100;
-    }
-
-    shareData.push({
-      month: hsItem.month,
-      amount: Math.round(sharePercentage * 100) / 100
-    });
-  });
-
-  console.log("Calculated Market Share Data:", shareData);
-  return shareData;
-};  */
+const formatMonthYear = (dateStr) => {
+  const d = new Date(dateStr);
+  const month = d.toLocaleString('en-US', { month: 'short' });
+  const year = String(d.getFullYear()).slice(-2);
+  return `${month}'${year}`;
+};
 
 
 
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-2xl font-semibold text-center mb-6">
+      {/* <h1 className="text-2xl font-semibold text-center mb-6">
         Export & Market Dashboard 
-      </h1>
+      </h1> */}
 
-      <div className="grid md:grid-cols-3 gap-6">
+<h3 className="text-2xl font-semibold text-center mb-6">Relative Performance of HS Code {selectedHsCode ? selectedHsCode : null}  </h3>
+    <div className="grid md:grid-cols-3 gap-6">
         {/* HS Code Export Chart */}
+        <div className="bg-white rounded-2xl shadow-sm p-4">
+          <h2 className="text-lg font-medium mb-2 text-indigo-600">
+          <span style={{fontWeight:'bold'}}> HS Code Export </span>  <span style={{color:'#0000FF',fontWeight:'normal',fontStyle:'normal',fontSize:'20px'}} >({formatMonthYear(searchParams.fromDate)} to {formatMonthYear(searchParams.toDate)})</span>
+          </h2>
+          {data?.hs?.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={data.hs} margin={{ top: 10, right: 20, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                
+                {/* X-Axis with label */}
+                <XAxis 
+                  dataKey="month" 
+                  // label={{ 
+                  //   value: 'Months',
+                  //   position: 'insideBottom',
+                  //   offset: -10,
+                  //   textAnchor: 'middle',
+                  //   style: { fontSize: '15px', fill: '#4F46E5',fontWeight:'bold' }
+                  // }}
+                />
+                
+                {/* Y-Axis with label */}
+                <YAxis
+                width={80}
+                  tickFormatter={(value) => `${(value / 1_000_000).toFixed(1)}M`}
+                  domain={[0, 'dataMax + 5000000']}
+                  label={{ 
+                    value: 'Value in USD',
+                    angle: -90,
+                    dx: -45,
+                    position: 'outsideLeft',
+                   // textAnchor: 'middle',
+                    style: { fontSize: '15px', fill: '#4F46E5',fontWeight:'bold' }
+                  }}
+                />
 
-     
 
 
-<div className="bg-white rounded-2xl shadow-sm p-4">
-  <h2 className="text-lg font-medium mb-2 text-indigo-600">HS Code Export</h2>
-  {data?.hs?.length > 0 ? (
-    <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={data.hs} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="month" />
-        {/* <YAxis /> */}
-      <YAxis
-  tickFormatter={(value) => `${(value / 1_000_000).toFixed(1)}M`}
-  domain={[0, 'dataMax + 5000000']}
-/>
-        <Tooltip formatter={(v) => (v ? v.toLocaleString() : '0')} />
-        <Legend />
-        <Line
-          type="monotone"
-          dataKey="amount"
-          stroke="#4F46E5"
-          name="Amount (USD)"
-          strokeWidth={3}
-          dot={{ r: 5 }}
-          activeDot={{ r: 8 }}
-        />
-      </LineChart>
-    </ResponsiveContainer>
-  ) : (
-    <p className="text-center col-span-3">No data available for the selected HS Code.</p>
-  )}
-</div>
-
-
+                
+                <Tooltip formatter={(v) => (v ? v.toLocaleString() : '0')} />
+                <Legend />
+                
+                {/* Line component following your style */}
+                <Line
+                  type="monotone"
+                  dataKey="amount"
+                  stroke="#4F46E5"
+                  name="Months"
+                  strokeWidth={3}
+                  dot={{ r: 5 }}
+                  activeDot={{ r: 8 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-center col-span-3">No data available for the selected HS Code.</p>
+          )}
+        </div>
 
         {/* Industry Export Chart */}
         <div className="bg-white rounded-2xl shadow-sm p-4">
-          
-          <h2 className="text-lg font-medium mb-2 text-green-600">Industry Export</h2>
+          <h2 className="text-lg font-medium mb-2 text-green-600">
+              <span style={{fontWeight:'bold'}}> Industry Export </span>  <span style={{color:'#0000FF',fontWeight:'normal',fontStyle:'normal',fontSize:'20px'}} >({formatMonthYear(searchParams.fromDate)} to {formatMonthYear(searchParams.toDate)})</span>
+          </h2>
+          {data?.industry?.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={data.industry} margin={{ top: 10, right: 20, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                
+                {/* X-Axis with label */}
+                <XAxis 
+                  dataKey="month" 
+                  // label={{ 
+                  //   value: 'Months',
+                  //   position: 'insideBottom',
+                  //   offset: -10,
+                  //   textAnchor: 'middle',
+                  //   style: { fontSize: '12px', fill: '#16A34A',fontWeight:'bold' }
+                  // }}
+                />
+                
+                {/* Y-Axis with label */}
+                <YAxis
+                  width={80}
+                  tickFormatter={(value) => `${(value / 1_000_000).toFixed(1)}M`}
+                  domain={[0, 'dataMax + 5000000']}
+                  label={{ 
+                    value: 'Value in USD',
+                    angle: -90,
+                    dx: -45,
+                    position: 'outsideLeft',
+                   // textAnchor: 'middle',
+                    style: { fontSize: '15px', fill: '#16A34A', fontWeight:'bold',marginRight:'10px' }
+                  }}
+                />
 
-            {data?.industry?.length > 0 ? (
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={data.industry} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-             <YAxis
-  tickFormatter={(value) => `${(value / 1_000_000).toFixed(1)}M`}
-  domain={[0, 'dataMax + 5000000']}
-/>
 
-               <Tooltip formatter={(value) => `${value.toLocaleString()} USD`} />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="amount"
-                stroke="#16A34A"
-                name="Amount (USD)"
-                strokeWidth={3}
-                dot={{ r: 5 }}
-                activeDot={{ r: 8 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-            ) : (
-              <p className="text-center col-span-3">No data available for Industry Export.</p>
-            )}
+
+              
+                
+                <Tooltip formatter={(value) => `${value.toLocaleString()} USD`} />
+                <Legend />
+                
+                {/* Line component following your style */}
+                <Line
+                  type="monotone"
+                  dataKey="amount"
+                  stroke="#16A34A"
+                  name="Months"
+                  strokeWidth={3}
+                  dot={{ r: 5 }}
+                  activeDot={{ r: 8 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-center col-span-3">No data available for Industry Export.</p>
+          )}
         </div>
 
         {/* Market Share Chart */}
         <div className="bg-white rounded-2xl shadow-sm p-4">
-          <h2 className="text-lg font-medium mb-2 text-amber-500">Relative Strength </h2>
+          <h2 className="text-lg mb-2">
+           
+              
+          <span style={{fontWeight:'bold'}}> Relative Strength (in %) </span>  <span style={{color:'#0000FF',fontWeight:'normal',fontStyle:'normal',fontSize:'20px'}} >({formatMonthYear(searchParams.fromDate)} to {formatMonthYear(searchParams.toDate)})</span>
+          </h2>
           {data?.market?.length > 0 ? (
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={data.market} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip formatter={(v) => v.toLocaleString()} />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="amount"
-                stroke="#D97706"
-                name="Share (%)"
-                strokeWidth={3}
-                dot={{ r: 5 }}
-                activeDot={{ r: 8 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={data.market} margin={{ top: 10, right: 20, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                
+                {/* X-Axis with label */}
+                <XAxis 
+                  dataKey="month" 
+                  // label={{ 
+                  //   value: 'Months',
+                  //   position: 'insideBottom',
+                  //   offset: -10,
+                  //   textAnchor: 'middle',
+                  //   style: { fontSize: '15px', fill: '#D97706' ,fontWeight:'bold'}
+                  // }}
+                />
+                
+                {/* Y-Axis with label */}
+                <YAxis 
+                 width={80}
+                  label={{ 
+                    value: 'Relation %',
+                    angle: -90,
+                     dx: -45,
+                    position: 'outsideLeft',
+                  //  textAnchor: 'middle',
+                    style: { fontSize: '15px', fill: '#D97706',fontWeight:'bold',marginRight:'10px' }
+                  }}
+                />
+
+
+                    
+
+                
+                
+                <Tooltip formatter={(v) => `${v.toLocaleString()}%`} />
+                <Legend />
+                
+                {/* Line component following your style */}
+                <Line
+                  type="monotone"
+                  dataKey="amount"
+                  stroke="#D97706"
+                  name="Months"
+                  strokeWidth={3}
+                  dot={{ r: 5 }}
+                  activeDot={{ r: 8 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           ) : (
             <p className="text-center col-span-3">No data available for Market Share.</p>
           )}

@@ -1189,7 +1189,8 @@ const getHscode4Digit2DigitApi = async (params,digitValue=null) => {
    </div>
 
       <div className="container my-4">
-      <h4 className="fw-bold mb-3">Relative Performance of HS Code {selectedHsCode ? selectedHsCode : null}  </h4>
+      {/* <h4 className="fw-bold mb-3">Relative Performance of HS Code {selectedHsCode ? selectedHsCode : null}  </h4> */}
+       <h3 className="fw-bold mb-3"> <span style={{fontWeight:'bolder'}}>Analysis Criteria</span>   </h3>
 
       {/* Filters */}
       <div className="row g-3 align-items-end mb-4">
@@ -1237,6 +1238,7 @@ const getHscode4Digit2DigitApi = async (params,digitValue=null) => {
           hsCodeGraphApiResponse={hsCodeGraphApiResponse}
           industryExportGraphApiResponse={industryExportGraphApiResponse}
           selectedHsCode={selectedHsCode}
+          searchParams={searchParams}
        />
     </div>
 
