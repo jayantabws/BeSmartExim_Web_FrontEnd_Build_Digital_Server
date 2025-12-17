@@ -97,8 +97,7 @@ const fetchSearchQuery = () => {
           let sParams = res.data.queryList[0].userSearchQuery;
           setSelectedCountry(sParams.countryCode || '');
 
-         // ✅ NEW: Determine HS Code dropdown type based on search
-            determineHsCodeDropdown(sParams);
+         
 
           initialValues = {
             ...initialValues,
@@ -129,6 +128,11 @@ const fetchSearchQuery = () => {
             })
           }
           setQueryBuilderSearchValue(queryBuilderSuggestionList)
+
+          // ✅ NEW: Determine HS Code dropdown type based on search
+            console.log('Calling determineHsCodeDropdown with sParams:', sParams);
+            determineHsCodeDropdown(sParams);
+
           handleSearch(sParams);    
           sParams.tradeType == "IMPORT" ? getTradingCountryList("I") : getTradingCountryList("E")  
          // console.log("Search Params set in Relative Performance page: ", sParams); 
@@ -163,8 +167,8 @@ const determineHsCodeDropdown = (sParams) => {
    
   // Default case
 //  console.log('Default case, showing 4-digit HS codes');
-  setHsCodeDropdownListType(4);
-  getHscode4Digit2DigitApi(sParams, 4); // ✅ Pass digit directly
+ // setHsCodeDropdownListType(4);
+ // getHscode4Digit2DigitApi(sParams, 4); // ✅ Pass digit directly
 };
 
 
@@ -1204,6 +1208,7 @@ const getHscode4Digit2DigitApi = async (params,digitValue=null) => {
         </div>
         <div className="col-md-6">
           <label className="form-label fw-semibold">HS Code - {hsCodeDropdownListType ? hsCodeDropdownListType + ' Digit': ''}</label>
+          {JSON.stringify(hsCodeDropdownList)}
           <select className="form-select form-control" value={selectedHsCode}
           onChange={(e)=>{
                 const newHsCode=e.target.value;
