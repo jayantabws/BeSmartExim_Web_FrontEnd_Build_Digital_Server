@@ -1224,6 +1224,7 @@ const HsCodeCard = () => {
   const [digitMode, setDigitMode] = useState(8); // 4 or 8 digit
   const [loading, setLoading] = useState(false);
 
+  console.log("HsCodeCard render - digitMode:", digitMode, "selectedItems:", selectedItems);
   // Get appropriate data based on digit mode
   const currentData = digitMode === 4 ? 
     (hsCode4digitDataArray || []) : 
@@ -1255,6 +1256,9 @@ const HsCodeCard = () => {
     setHsCodeList([]);
   };
 
+  const has4DigitSelections= hsCode4DigitList && hsCode4DigitList.length > 0;
+  const has8DigitSelections= hsCodeList && hsCodeList.length > 0;
+
   // Rest of HsCodeCard JSX remains the same...
   return (
     <div className="col mb-3">
@@ -1265,12 +1269,16 @@ const HsCodeCard = () => {
             <button 
               className={`btn ${digitMode === 4 ? 'btn-light' : 'btn-outline-light'}`}
               onClick={() => toggleDigitMode(4)}
+              disabled={has8DigitSelections}
+               title={has8DigitSelections ? "Clear 8-digit selections first" : "Switch to 4-digit mode"}
             >
               4 Digit
             </button>
             <button 
               className={`btn ${digitMode === 8 ? 'btn-light' : 'btn-outline-light'}`}
               onClick={() => toggleDigitMode(8)}
+              disabled={has4DigitSelections}
+               title={has4DigitSelections ? "Clear 4-digit selections first" : "Switch to 8-digit mode"}
             >
               8 Digit
             </button>
