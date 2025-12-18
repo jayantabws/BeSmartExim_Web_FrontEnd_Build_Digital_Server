@@ -223,20 +223,48 @@ const fetchSearchQuery = () => {
   const [totalShipmentCount, setTotalShipmentCount] = useState(0);
 
   const [mySelectedOptions, setMySelectedOptions] = useState({
-    exporter:1,
+    exporter:0,
     importer:0,
     hscode:0,
     country:0,
     port:0
   });
 
-  const [cardSelectFor, setCardSelectFor] = useState({
-     myCard1:"exporter",
-     myCard2:"",
-     myCard3:"",
-     myCard4:"",
-     myCard5:""
-  });
+// ...Indepth Search Table code...
+const [indepthParams, setIndepthParams] = useState(null); // payload passed to IndepthSearchTable
+
+const buildFinalParams = () => {
+  const p = { ...(searchParams || {}) };
+  // ✅ Add searchId from the search_id variable
+  p.searchId = search_id; // Add this line
+  
+  // card1: exporter/importer - if items are objects map to id/name expected by API
+  if (card1ImportExport === "exporter") {
+    p.exporterList = Array.isArray(selectedExporters) ? selectedExporters.map(x => (x && x.id) ? x.id : x) : [];
+    p.importerList = [];
+  } else {
+    p.importerList = Array.isArray(selectedImporters) ? selectedImporters.map(x => (x && x.id) ? x.id : x) : [];
+    p.exporterList = [];
+  }
+
+
+
+  // ensure arrays exist
+  p.hsCode4DigitList = p.hsCode4DigitList || [];
+  p.cityOriginList = p.cityOriginList || [];
+  p.cityDestinationList = p.cityDestinationList || [];
+
+  //Ensure both ports lists exist
+  p.portOriginList = p.portOriginList || [];
+  p.portDestinationList = p.portDestinationList || [];
+
+  p.shipmentModeList = p.shipmentModeList || [];
+  p.stdUnitList = p.stdUnitList || [];
+  p.queryBuilder = p.queryBuilder || [];
+  p.countryCode = p.countryCode || []; // if used
+//console.log("Final indepth params:", p);
+  return p;
+};
 
 
 
@@ -248,14 +276,807 @@ useEffect(() => {
  // console.log(" totalShipmentCount changed:", totalShipmentCount);
 }, [totalShipmentCount]);
 
-const resetAllRecords=()=>{
+
+const getValueForParams = (updatedParams, cardNumber) => {
+  if (!updatedParams) return 0;
+
+  const postData = {
+   
+    searchType: "TRADE",
+    tradeType: updatedParams.tradeType,
+    fromDate: updatedParams.fromDate,
+    toDate: updatedParams.toDate,
+    searchBy: updatedParams.searchBy,
+    searchValue: updatedParams.searchValue,
+    countryCode: updatedParams.countryCode,
+    pageNumber: 0,
+    numberOfRecords: 20,
+    matchType: updatedParams.matchType,
+    
+    // ✅ Use portOriginList and portDestinationList (countries are already in these)
+    portOriginList: updatedParams.portOriginList || [],
+    portDestinationList: updatedParams.portDestinationList || [],
+    
+    // Remove countryList since countries are in port lists
+    hsCodeList: updatedParams.hsCodeList || [],
+    hsCode4DigitList: updatedParams.hsCode4DigitList || [],
+    exporterList: updatedParams.exporterList || [],
+    importerList: updatedParams.importerList || [],
+    cityOriginList: updatedParams.cityOriginList || [],
+    cityDestinationList: updatedParams.cityDestinationList || [],
+    searchId: search_id,
+    queryBuilder: updatedParams.queryBuilder || [],
+    shipModeList: updatedParams.shipmentModeList || [],
+    stdUnitList: updatedParams.stdUnitList || [],
+  };
+
+ // console.log(`Payload getValueForParams called for card${cardNumber}`, postData);
+  console.log("Payload getValueForParams called:", postData);
+  return Axios({
+    method: "POST",
+    url: `/search-management/getvalue`,
+    data: JSON.stringify(postData),
+    headers: { "Content-Type": "application/json" }
+  }).then(res => {  
+   // console.log(`getValueForParams response for card${cardNumber}:`, res);
+    var valueTotal = (res && res.data) ? res.data : 0;
+    
+    // ✅ FIX: Force state update with functional setState
+    setCardValuesTotal(prev => {
+    //  console.log(`Updating card value from ${prev} to ${valueTotal}`);
+      return valueTotal;
+    });
+    
+    //console.log(`Card ${cardNumber} value set:`, valueTotal);
+    return { valueTotal };
+  })
+  .catch(err => {
+    console.error(`getValueForParams error for card${cardNumber}:`, err);
+    // ✅ FIX: Also use functional setState for error case
+    setCardValuesTotal(prev => {
+    //  console.log(`Setting card value to 0 due to error, previous was ${prev}`);
+      return 0;
+    });
+    return { valueTotal: 0 };
+  });
+};
+
+const getTotalShipmentCount = (updatedParams) => {
+  if (!updatedParams) return 0; 
+  
+   const postData = {
+    
+    searchType: "TRADE",
+    tradeType: updatedParams.tradeType,
+    fromDate: updatedParams.fromDate,
+    toDate: updatedParams.toDate,
+    searchBy: updatedParams.searchBy,
+    searchValue: updatedParams.searchValue,
+    countryCode: updatedParams.countryCode,
+    pageNumber: 0,
+    numberOfRecords: 20,
+    matchType: updatedParams.matchType,
+    
+    // ✅ Use portOriginList and portDestinationList (countries are already in these)
+    portOriginList: updatedParams.portOriginList || [],
+    portDestinationList: updatedParams.portDestinationList || [],
+    
+    // Remove countryList since countries are in port lists
+    hsCodeList: updatedParams.hsCodeList || [],
+    hsCode4DigitList: updatedParams.hsCode4DigitList || [],
+    exporterList: updatedParams.exporterList || [],
+    importerList: updatedParams.importerList || [],
+    cityOriginList: updatedParams.cityOriginList || [],
+    cityDestinationList: updatedParams.cityDestinationList || [],
+    searchId: search_id,
+    queryBuilder: updatedParams.queryBuilder || [],
+    shipModeList: updatedParams.shipmentModeList || [],
+    stdUnitList: updatedParams.stdUnitList || [],
+  };
+console.log("Payload getTotalShipmentCount called:", postData);
+  return Axios({
+    method: "POST",
+    url: `/search-management/searchcount`,
+    data: JSON.stringify(postData),
+    headers: { "Content-Type": "application/json" }
+  })
+  .then(res => {
+    var valueshipmentdata = (res && res.data) ? res.data : 0;
+   // console.log("Shipment Count response:", res);
+    
+    // ✅ FIX: Force state update with functional setState
+    setTotalShipmentCount(prev => {
+     // console.log(`Updating shipment count from ${prev} to ${valueshipmentdata}`);
+      return valueshipmentdata;
+    });
+    
+    return { valueshipmentdata };
+  })
+  .catch(err => {
+    console.error("Shipment count error:", err);
+    // ✅ FIX: Also use functional setState for error case
+    setTotalShipmentCount(prev => {
+     // console.log(`Setting shipment count to 0 due to error, previous was ${prev}`);
+      return 0;
+    });
+    return { valueshipmentdata: 0 };
+  });
+};
+
+
+// const resetAllRecords=()=>{
+//   window.location.reload();
+// }
+
+// Update handleExporterChange to include value and shipment count updates
+const handleExporterChange = async (item, isChecked, selectedItems, setSelectedItems) => {
+  console.log("Exporter change triggered:", item, isChecked);
+  
+  let newSelected;
+  if (isChecked) {
+    newSelected = [...selectedItems, item.exporter_name];
+  } else {
+    newSelected = selectedItems.filter(exp => exp !== item.exporter_name);
+  }
+  
+  setSelectedItems(newSelected);
+  setSelectedExporters(newSelected);
+  
+  // Update mySelectedOptions for exporter
+  const updatedOptions = {
+    ...mySelectedOptions,
+    exporter: newSelected.length > 0 ? 1 : 0
+  };
+  setMySelectedOptions(updatedOptions);
+  
+  // Build updated parameters for API calls
+  const updatedParams = {
+    ...searchParams,
+    exporterList: newSelected,
+    searchId: search_id
+  };
+  
+  // Call value and shipment count APIs immediately
+  // try {
+  //   await Promise.all([
+  //     getValueForParams(updatedParams, 1),
+  //     getTotalShipmentCount(updatedParams)
+  //   ]);
+  // } catch (error) {
+  //   console.error("Error updating values:", error);
+  // }
+  
+  // Call APIs for ALL cards that have value 0 (backtracking allowed)
+  if (newSelected.length > 0) {
+    try {
+      const params = {
+        ...updatedParams,
+        // Apply current selections with trade type logic
+        ...(portOriginList.length > 0 && searchParams.tradeType === "EXPORT" && {
+          portOriginList: portOriginList
+        }),
+        ...(portDestinationList.length > 0 && searchParams.tradeType === "IMPORT" && {
+          portDestinationList: portDestinationList
+        }),
+        ...(cityOriginList.length > 0 && searchParams.tradeType === "IMPORT" && {
+          cityOriginList: cityOriginList
+        }),
+        ...(cityDestinationList.length > 0 && searchParams.tradeType === "EXPORT" && {
+          cityDestinationList: cityDestinationList
+        })
+      };
+      
+      // Call APIs for all cards with value 0
+      const apiCalls = [];
+      const loadingStates = [];
+      
+      if (updatedOptions.hscode === 0) {
+        apiCalls.push(getHSCodeList(params), getHSCode4digitList(params));
+        loadingStates.push(() => setCard2Loading(true));
+      }
+      
+      if (updatedOptions.port === 0) {
+        apiCalls.push(getIndianPortList(params), getForeignPortList(params));
+        loadingStates.push(() => setCard3Loading(true));
+      }
+      
+      if (updatedOptions.country === 0) {
+        apiCalls.push(getForeignCountryList(params));
+        loadingStates.push(() => setCard4Loading(true));
+      }
+      
+      if (updatedOptions.importer === 0) {
+        apiCalls.push(getImporterList(params));
+        loadingStates.push(() => setCard5Loading(true));
+      }
+      
+      // Set loading states for cards that will be updated
+      loadingStates.forEach(setLoading => setLoading());
+      
+      // Call APIs for cards with value 0
+      if (apiCalls.length > 0) {
+         await Promise.allSettled(apiCalls);
+          setSearchParams(params); // ✅ CRITICAL: Update main searchParams state
+          getValueForParams(params, 1);
+          getTotalShipmentCount(params);
+      }
+      
+      // Reset loading states
+      setTimeout(() => {
+        if (updatedOptions.hscode === 0) setCard2Loading(false);
+        if (updatedOptions.port === 0) setCard3Loading(false);
+        if (updatedOptions.country === 0) setCard4Loading(false);
+        if (updatedOptions.importer === 0) setCard5Loading(false);
+      }, 1000);
+      
+    } catch (error) {
+      console.error("Error in exporter cascading update:", error);
+      // Reset all loading states on error
+      setCard2Loading(false);
+      setCard3Loading(false);
+      setCard4Loading(false);
+      setCard5Loading(false);
+    }
+  }
+};
+
+// Update handleHsCodeChange to include value and shipment count updates
+const handleHsCodeChange = async (item, isChecked, selectedItems, setSelectedItems, digitMode) => {
+  console.log("HSCode change triggered:", item, isChecked, "digitMode:", digitMode);
+  
+  const itemValue = item.value;
+  let newSelected;
+  if (isChecked) {
+    newSelected = [...selectedItems, itemValue];
+  } else {
+    newSelected = selectedItems.filter(code => code !== itemValue);
+  }
+  
+  setSelectedItems(newSelected);
+  
+  // Update appropriate global state based on digit mode
+  if (digitMode === 4) {
+    setHsCode4digitList(newSelected);
+  } else {
+    setHsCodeList(newSelected);
+  }
+  
+  // Update mySelectedOptions for hscode
+  const updatedOptions = {
+    ...mySelectedOptions,
+    hscode: newSelected.length > 0 ? 1 : 0
+  };
+  setMySelectedOptions(updatedOptions);
+  
+  // Build updated parameters for API calls
+  const updatedParams = {
+    ...searchParams,
+    ...(digitMode === 4 ? { hsCode4DigitList: newSelected } : { hsCodeList: newSelected }),
+    searchId: search_id
+  };
+  
+  // Call value and shipment count APIs immediately
+  // try {
+  //   await Promise.all([
+  //     getValueForParams(updatedParams, 2),
+  //     getTotalShipmentCount(updatedParams)
+  //   ]);
+  // } catch (error) {
+  //   console.error("Error updating values:", error);
+  // }
+  
+  // Call APIs for ALL cards that have value 0 (backtracking allowed)
+  if (newSelected.length > 0) {
+    try {
+      const params = {
+        ...updatedParams,
+        // Apply current selections with trade type logic
+        ...(selectedExporters.length > 0 && {
+          exporterList: selectedExporters
+        }),
+        ...(portOriginList.length > 0 && searchParams.tradeType === "EXPORT" && {
+          portOriginList: portOriginList
+        }),
+        ...(portDestinationList.length > 0 && searchParams.tradeType === "IMPORT" && {
+          portDestinationList: portDestinationList
+        }),
+        ...(cityOriginList.length > 0 && searchParams.tradeType === "IMPORT" && {
+          cityOriginList: cityOriginList
+        }),
+        ...(cityDestinationList.length > 0 && searchParams.tradeType === "EXPORT" && {
+          cityDestinationList: cityDestinationList
+        }),
+        // ...(countryOriginList.length > 0 && {
+        //   countryList: countryOriginList
+        // }),
+        ...(importerList.length > 0 && {
+          importerList: importerList
+        })
+      };
+      
+      // Call APIs for all cards with value 0 (including backwards)
+      const apiCalls = [];
+      const loadingStates = [];
+      
+      // Backtracking: Update exporter if no selections
+      if (updatedOptions.exporter === 0) {
+        apiCalls.push(getExporterList(params));
+        loadingStates.push(() => setCard1Loading(true));
+      }
+      
+      // Forward: Update subsequent cards
+      if (updatedOptions.port === 0) {
+        apiCalls.push(getIndianPortList(params), getForeignPortList(params));
+        loadingStates.push(() => setCard3Loading(true));
+      }
+      
+      if (updatedOptions.country === 0) {
+        apiCalls.push(getForeignCountryList(params));
+        loadingStates.push(() => setCard4Loading(true));
+      }
+      
+      if (updatedOptions.importer === 0) {
+        apiCalls.push(getImporterList(params));
+        loadingStates.push(() => setCard5Loading(true));
+      }
+      
+      // Set loading states for cards that will be updated
+      loadingStates.forEach(setLoading => setLoading());
+      
+      // Call APIs for cards with value 0
+      if (apiCalls.length > 0) {
+           setSearchParams(params);
+          await Promise.allSettled(apiCalls);
+          getValueForParams(params, 2);
+          getTotalShipmentCount(params);
+      }
+      
+      // Reset loading states
+      setTimeout(() => {
+        if (updatedOptions.exporter === 0) setCard1Loading(false);
+        if (updatedOptions.port === 0) setCard3Loading(false);
+        if (updatedOptions.country === 0) setCard4Loading(false);
+        if (updatedOptions.importer === 0) setCard5Loading(false);
+      }, 1000);
+      
+    } catch (error) {
+      console.error("Error in HSCode cascading update:", error);
+      // Reset all loading states on error
+      setCard1Loading(false);
+      setCard3Loading(false);
+      setCard4Loading(false);
+      setCard5Loading(false);
+    }
+  }
+};
+
+// Update handlePortChange to include value and shipment count updates
+const handlePortChange = async (item, isChecked, selectedItems, setSelectedItems) => {
+  console.log("Port change triggered:", item, isChecked);
+  
+  let newSelected;
+  if (isChecked) {
+    newSelected = [...selectedItems, item.port_name];
+  } else {
+    newSelected = selectedItems.filter(port => port !== item.port_name);
+  }
+  
+  setSelectedItems(newSelected);
+  
+  // Update global state - ports go to appropriate list based on trade type
+  if (searchParams && searchParams.tradeType === "EXPORT") {
+    setPortOriginList(newSelected);
+  } else {
+    setPortDestinationList(newSelected);
+  }
+  
+  // Update mySelectedOptions for port
+  const updatedOptions = {
+    ...mySelectedOptions,
+    port: newSelected.length > 0 ? 1 : 0
+  };
+  setMySelectedOptions(updatedOptions);
+  
+  // Build updated parameters for API calls
+  const updatedParams = {
+    ...searchParams,
+    // Apply trade type logic for ports
+    ...(searchParams.tradeType === "EXPORT" ? 
+      { portOriginList: newSelected } : 
+      { portDestinationList: newSelected }),
+    searchId: search_id
+  };
+  
+  // Call value and shipment count APIs immediately
+ /* try {
+    await Promise.all([
+      getValueForParams(updatedParams, 3),
+      getTotalShipmentCount(updatedParams)
+    ]);
+  } catch (error) {
+    console.error("Error updating values:", error);
+  } */
+  
+  // Call APIs for ALL cards that have value 0 (backtracking allowed)
+  if (newSelected.length > 0) {
+    try {
+      const params = {
+        ...updatedParams,
+        // Apply current selections with trade type logic
+        ...(selectedExporters.length > 0 && {
+          exporterList: selectedExporters
+        }),
+        ...(hsCodeList.length > 0 && {
+          hsCodeList: hsCodeList
+        }),
+        ...(hsCode4DigitList.length > 0 && {
+          hsCode4DigitList: hsCode4DigitList
+        }),
+        ...(cityOriginList.length > 0 && searchParams.tradeType === "IMPORT" && {
+          cityOriginList: cityOriginList
+        }),
+        ...(cityDestinationList.length > 0 && searchParams.tradeType === "EXPORT" && {
+          cityDestinationList: cityDestinationList
+        }),
+        // ...(countryOriginList.length > 0 && {
+        //   countryList: countryOriginList
+        // }),
+        ...(importerList.length > 0 && {
+          importerList: importerList
+        })
+      };
+      
+      // Call APIs for all cards with value 0 (including backwards)
+      const apiCalls = [];
+      const loadingStates = [];
+      
+      // Backtracking: Update previous cards if no selections
+      if (updatedOptions.exporter === 0) {
+        apiCalls.push(getExporterList(params));
+        loadingStates.push(() => setCard1Loading(true));
+      }
+      
+      if (updatedOptions.hscode === 0) {
+        apiCalls.push(getHSCodeList(params), getHSCode4digitList(params));
+        loadingStates.push(() => setCard2Loading(true));
+      }
+      
+      // Forward: Update subsequent cards
+      if (updatedOptions.country === 0) {
+        apiCalls.push(getForeignCountryList(params));
+        loadingStates.push(() => setCard4Loading(true));
+      }
+      
+      if (updatedOptions.importer === 0) {
+        apiCalls.push(getImporterList(params));
+        loadingStates.push(() => setCard5Loading(true));
+      }
+      
+      // Set loading states for cards that will be updated
+      loadingStates.forEach(setLoading => setLoading());
+      
+      // Call APIs for cards with value 0
+      if (apiCalls.length > 0) {
+
+        setSearchParams(params);  
+        await Promise.allSettled(apiCalls);
+
+         getValueForParams(params, 3);
+         getTotalShipmentCount(params);
+      }
+      
+      // Reset loading states
+      setTimeout(() => {
+        if (updatedOptions.exporter === 0) setCard1Loading(false);
+        if (updatedOptions.hscode === 0) setCard2Loading(false);
+        if (updatedOptions.country === 0) setCard4Loading(false);
+        if (updatedOptions.importer === 0) setCard5Loading(false);
+      }, 1000);
+      
+    } catch (error) {
+      console.error("Error in Port cascading update:", error);
+      // Reset all loading states on error
+      setCard1Loading(false);
+      setCard2Loading(false);
+      setCard4Loading(false);
+      setCard5Loading(false);
+    }
+  }
+};
+
+const handleCountryChange = async (item, isChecked, selectedItems, setSelectedItems) => {
+  console.log("Country change triggered:", item, isChecked);
+  
+  let newSelected;
+  if (isChecked) {
+    newSelected = [...selectedItems, item.country_name];
+  } else {
+    newSelected = selectedItems.filter(country => country !== item.country_name);
+  }
+  
+  setSelectedItems(newSelected);
+  setSelectedCard4Items(newSelected);
+  
+  // Update mySelectedOptions for country
+  const updatedOptions = {
+    ...mySelectedOptions,
+    country: newSelected.length > 0 ? 1 : 0
+  };
+  setMySelectedOptions(updatedOptions);
+  
+  // Build updated parameters for API calls
+  // Use country as port based on trade type
+  const updatedParams = {
+    ...searchParams,
+    searchId: search_id,
+    // ✅ Use country selection as port list based on trade type
+    ...(searchParams.tradeType === "EXPORT" ? 
+      { portOriginList: newSelected } : 
+      { portDestinationList: newSelected })
+  };
+  
+
+  
+  // Call APIs for ALL cards that have value 0 (backtracking allowed)
+  if (newSelected.length > 0) {
+    try {
+      const params = {
+        ...updatedParams,
+        // Apply current selections with trade type logic
+        ...(selectedExporters.length > 0 && {
+          exporterList: selectedExporters
+        }),
+        ...(hsCodeList.length > 0 && {
+          hsCodeList: hsCodeList
+        }),
+        ...(hsCode4DigitList.length > 0 && {
+          hsCode4DigitList: hsCode4DigitList
+        }),
+        ...(cityOriginList.length > 0 && searchParams.tradeType === "IMPORT" && {
+          cityOriginList: cityOriginList
+        }),
+        ...(cityDestinationList.length > 0 && searchParams.tradeType === "EXPORT" && {
+          cityDestinationList: cityDestinationList
+        }),
+        ...(importerList.length > 0 && {
+          importerList: importerList
+        })
+      };
+      
+      // Call APIs for all cards with value 0 (including backwards)
+      const apiCalls = [];
+      const loadingStates = [];
+      
+      // Backtracking: Update previous cards if no selections
+      if (updatedOptions.exporter === 0) {
+        apiCalls.push(getExporterList(params));
+        loadingStates.push(() => setCard1Loading(true));
+      }
+      
+      if (updatedOptions.hscode === 0) {
+        apiCalls.push(getHSCodeList(params), getHSCode4digitList(params));
+        loadingStates.push(() => setCard2Loading(true));
+      }
+      
+      // Forward: Update subsequent cards
+      if (updatedOptions.importer === 0) {
+        apiCalls.push(getImporterList(params));
+        loadingStates.push(() => setCard5Loading(true));
+      }
+      
+      // Set loading states for cards that will be updated
+      loadingStates.forEach(setLoading => setLoading());
+      
+      // Call APIs for cards with value 0
+      if (apiCalls.length > 0) {
+          // ✅ CRITICAL: Update the main searchParams state
+         setSearchParams(params);
+        await Promise.allSettled(apiCalls);
+      }
+      
+      // ✅ Now call value and shipment count APIs with UPDATED params
+      await getValueForParams(params, 4);
+      await getTotalShipmentCount(params);
+      
+      console.log("params selections:", params);
+      console.log("Updated mySelectedOptions:", updatedOptions);
+      
+      // Reset loading states
+      setTimeout(() => {
+        if (updatedOptions.exporter === 0) setCard1Loading(false);
+        if (updatedOptions.hscode === 0) setCard2Loading(false);
+        if (updatedOptions.importer === 0) setCard5Loading(false);
+      }, 1000);
+      
+    } catch (error) {
+      console.error("Error in Country cascading update:", error);
+      setCard1Loading(false);
+      setCard2Loading(false);
+      setCard5Loading(false);
+    }
+  } else {
+    // ✅ If no countries selected, still update values
+    await getValueForParams(updatedParams, 4);
+    await getTotalShipmentCount(updatedParams);
+  }
+};
+
+// Update handleImporterChange to include value and shipment count updates
+const handleImporterChange = async (item, isChecked, selectedItems, setSelectedItems) => {
+  console.log("Importer change triggered:", item, isChecked);
+  
+  let newSelected;
+  if (isChecked) {
+    newSelected = [...selectedItems, item.importer_name];
+  } else {
+    newSelected = selectedItems.filter(imp => imp !== item.importer_name);
+  }
+  
+  setSelectedItems(newSelected);
+  setSelectedImporters(newSelected);
+  setImporterList(newSelected);
+  
+  // Update mySelectedOptions for importer
+  const updatedOptions = {
+    ...mySelectedOptions,
+    importer: newSelected.length > 0 ? 1 : 0
+  };
+  setMySelectedOptions(updatedOptions);
+  
+  // Build updated parameters for API calls
+  const updatedParams = {
+    ...searchParams,
+    importerList: newSelected,
+    searchId: search_id
+  };
+  
+  // Call value and shipment count APIs immediately
+  /*
+  try {
+    await Promise.all([
+      getValueForParams(updatedParams, 5),
+      getTotalShipmentCount(updatedParams)
+    ]);
+  } catch (error) {
+    console.error("Error updating values:", error);
+  }  */
+
+  // Call APIs for ALL cards that have value 0 (backtracking allowed)
+  if (newSelected.length > 0) {
+    try {
+      const params = {
+        ...updatedParams,
+        // Apply current selections with trade type logic
+        ...(selectedExporters.length > 0 && {
+          exporterList: selectedExporters
+        }),
+        ...(hsCodeList.length > 0 && {
+          hsCodeList: hsCodeList
+        }),
+        ...(hsCode4DigitList.length > 0 && {
+          hsCode4DigitList: hsCode4DigitList
+        }),
+        ...(portOriginList.length > 0 && searchParams.tradeType === "EXPORT" && {
+          portOriginList: portOriginList
+        }),
+        ...(portDestinationList.length > 0 && searchParams.tradeType === "IMPORT" && {
+          portDestinationList: portDestinationList
+        }),
+        ...(cityOriginList.length > 0 && searchParams.tradeType === "IMPORT" && {
+          cityOriginList: cityOriginList
+        }),
+        ...(cityDestinationList.length > 0 && searchParams.tradeType === "EXPORT" && {
+          cityDestinationList: cityDestinationList
+        }),
+        // ...(countryOriginList.length > 0 && {
+        //   countryList: countryOriginList
+        // })
+      };
+      
+      // Call APIs for all cards with value 0 (only backwards since this is the last card)
+      const apiCalls = [];
+      const loadingStates = [];
+      
+      // Backtracking: Update all previous cards if no selections
+      if (updatedOptions.exporter === 0) {
+        apiCalls.push(getExporterList(params));
+        loadingStates.push(() => setCard1Loading(true));
+      }
+      
+      if (updatedOptions.hscode === 0) {
+        apiCalls.push(getHSCodeList(params), getHSCode4digitList(params));
+        loadingStates.push(() => setCard2Loading(true));
+      }
+      
+      if (updatedOptions.port === 0) {
+        apiCalls.push(getIndianPortList(params), getForeignPortList(params));
+        loadingStates.push(() => setCard3Loading(true));
+      }
+      
+      if (updatedOptions.country === 0) {
+        apiCalls.push(getForeignCountryList(params));
+        loadingStates.push(() => setCard4Loading(true));
+      }
+      
+      // Set loading states for cards that will be updated
+      loadingStates.forEach(setLoading => setLoading());
+      
+      // Call APIs for cards with value 0
+      if (apiCalls.length > 0) {
+        await Promise.allSettled(apiCalls);
+
+         getValueForParams(params, 5);
+         getTotalShipmentCount(params);
+      }
+      
+      // Reset loading states
+      setTimeout(() => {
+        if (updatedOptions.exporter === 0) setCard1Loading(false);
+        if (updatedOptions.hscode === 0) setCard2Loading(false);
+        if (updatedOptions.port === 0) setCard3Loading(false);
+        if (updatedOptions.country === 0) setCard4Loading(false);
+      }, 1000);
+      
+    } catch (error) {
+      console.error("Error in Importer cascading update:", error);
+      // Reset all loading states on error
+      setCard1Loading(false);
+      setCard2Loading(false);
+      setCard3Loading(false);
+      setCard4Loading(false);
+    }
+  }
+  
+  console.log("Importer selections updated:", newSelected);
+  console.log("Updated mySelectedOptions:", updatedOptions);
+};
+
+// Also add a reset function that resets values to 0
+// const resetAllRecords = () => {
+//   // Reset value and shipment count displays
+//   setCardValuesTotal(0);
+//   setTotalShipmentCount(0);
+  
+//   // Reset all selections
+//   setSelectedExporters([]);
+//   setSelectedImporters([]);
+//   setHsCodeList([]);
+//   setHsCode4DigitList([]);
+//   setPortOriginList([]);
+//   setPortDestinationList([]);
+//   setCountryOriginList([]);
+//   setImporterList([]);
+//   setSelectedCard4Items([]);
+  
+//   // Reset mySelectedOptions
+//   setMySelectedOptions({
+//     exporter: 0,
+//     importer: 0,
+//     hscode: 0,
+//     country: 0,
+//     port: 0
+//   });
+  
+//   window.location.reload();
+// };
+
+// Add useEffect to monitor all selections
+// useEffect(() => {
+//   debugCurrentSelections();
+// }, [mySelectedOptions, selectedExporters, hsCodeList, hsCode4DigitList, portOriginList, portDestinationList, countryOriginList, importerList]);
+
+// Update the resetAllRecords function to use the new reset function
+const resetAllRecords = () => {
+ // resetAllSelections();
   window.location.reload();
-}
+};
 
+// Add useEffect to monitor mySelectedOptions changes
+useEffect(() => {
+  console.log("mySelectedOptions changed:", mySelectedOptions);
+}, [mySelectedOptions]);
 
-
-// Card rendering function
-// Special render function for Card 1 with import/export dropdown
+// ExporterCard Component
 const ExporterCard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
@@ -267,31 +1088,20 @@ const ExporterCard = () => {
       item.exporter_name.toLowerCase().includes(searchTerm.toLowerCase())
     ) : [];
 
-  const handleSelection = (item, isChecked) => {
-    let newSelected;
-    if (isChecked) {
-      newSelected = [...selectedItems, item.exporter_name];
-    } else {
-      newSelected = selectedItems.filter(exp => exp !== item.exporter_name);
-    }
-    setSelectedItems(newSelected);
-    
-    // Update global state
-    setSelectedExporters(newSelected);
-    
-    // Trigger forward card updates if selections exist
-    if (newSelected.length > 0) {
-      setCard2Loading(true);
-      setCard3Loading(true);
-      setCard4Loading(true);
-      setCard5Loading(true);
-    }
+  const handleSelection = async (item, isChecked) => {
+    await handleExporterChange(item, isChecked, selectedItems, setSelectedItems);
   };
 
   const clearAll = () => {
     setSelectedItems([]);
     setSelectedExporters([]);
     setSearchTerm("");
+    
+    // Reset mySelectedOptions for exporter
+    setMySelectedOptions(prev => ({
+      ...prev,
+      exporter: 0
+    }));
   };
 
   return (
@@ -337,7 +1147,7 @@ const ExporterCard = () => {
           )}
           
           {/* Loading State */}
-          {pendingExport ? (
+          {pendingExport || card2Loading ? (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
               <div className="loader"></div>
             </div>
@@ -365,16 +1175,16 @@ const ExporterCard = () => {
                         checked={isSelected}
                         onChange={(e) => handleSelection(item, e.target.checked)}
                       />
-                    <label
-  className={`form-check-label ${isSelected ? 'fw-bolder' : ''}`}
-  htmlFor={`exporter-${item.exporter_name}-${i}`}
-  style={{
-    fontSize: "16px",
-    fontWeight: isSelected ? 700 : 400
-  }}
->
-  {item.exporter_name} [{item.shipment_count}]
-</label>
+                      <label
+                        className={`form-check-label ${isSelected ? 'fw-bolder' : ''}`}
+                        htmlFor={`exporter-${item.exporter_name}-${i}`}
+                        style={{
+                          fontSize: "16px",
+                          fontWeight: isSelected ? 700 : 400
+                        }}
+                      >
+                        {item.exporter_name} [{item.shipment_count}]
+                      </label>
                     </div>
                   );
                 })
@@ -399,11 +1209,11 @@ const ExporterCard = () => {
   );
 };
 
-
+// Update HsCodeCard to use handleHsCodeChange
 const HsCodeCard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
-  const [digitMode, setDigitMode] = useState(4); // 4 or 8 digit
+  const [digitMode, setDigitMode] = useState(8); // 4 or 8 digit
   const [loading, setLoading] = useState(false);
 
   // Get appropriate data based on digit mode
@@ -417,22 +1227,8 @@ const HsCodeCard = () => {
     return code && code.toString().toLowerCase().includes(searchTerm.toLowerCase());
   });
 
-  const handleSelection = (item, isChecked) => {
-    const itemValue = item.value;
-    let newSelected;
-    if (isChecked) {
-      newSelected = [...selectedItems, itemValue];
-    } else {
-      newSelected = selectedItems.filter(code => code !== itemValue);
-    }
-    setSelectedItems(newSelected);
-    
-    // Update appropriate global state based on digit mode
-    if (digitMode === 4) {
-      setHsCode4digitList(newSelected);
-    } else {
-      setHsCodeList(newSelected);
-    }
+  const handleSelection = async (item, isChecked) => {
+    await handleHsCodeChange(item, isChecked, selectedItems, setSelectedItems, digitMode);
   };
 
   const clearAll = () => {
@@ -451,6 +1247,7 @@ const HsCodeCard = () => {
     setHsCodeList([]);
   };
 
+  // Rest of HsCodeCard JSX remains the same...
   return (
     <div className="col mb-3">
       <div className="card shadow-sm border-2">
@@ -507,7 +1304,7 @@ const HsCodeCard = () => {
           )}
           
           {/* Loading State */}
-          {(pendingHSCode && digitMode === 8) ? (
+          {(pendingHSCode && digitMode === 8) || card4Loading ? (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
               <div className="loader"></div>
             </div>
@@ -536,18 +1333,16 @@ const HsCodeCard = () => {
                         checked={isSelected}
                         onChange={(e) => handleSelection(item, e.target.checked)}
                       />
-                   <label
-  className={`form-check-label ${isSelected ? "fw-bolder" : ""}`}
-  htmlFor={`hscode-${itemValue}-${i}`}
-  style={{
-    fontSize: "16px",
-    fontWeight: isSelected ? 700 : 400
-  }}
->
-  {item.label}
-</label>
-
-                      
+                      <label
+                        className={`form-check-label ${isSelected ? "fw-bolder" : ""}`}
+                        htmlFor={`hscode-${itemValue}-${i}`}
+                        style={{
+                          fontSize: "16px",
+                          fontWeight: isSelected ? 700 : 400
+                        }}
+                      >
+                        {item.label}
+                      </label>
                     </div>
                   );
                 })
@@ -572,6 +1367,7 @@ const HsCodeCard = () => {
   );
 };
 
+// Update PortCard to use handlePortChange
 const PortCard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
@@ -583,21 +1379,8 @@ const PortCard = () => {
       item.port_name.toLowerCase().includes(searchTerm.toLowerCase())
     ) : [];
 
-  const handleSelection = (item, isChecked) => {
-    let newSelected;
-    if (isChecked) {
-      newSelected = [...selectedItems, item.port_name];
-    } else {
-      newSelected = selectedItems.filter(port => port !== item.port_name);
-    }
-    setSelectedItems(newSelected);
-    
-    // Update global state - ports go to appropriate list based on trade type
-    if (searchParams && searchParams.tradeType === "EXPORT") {
-      setPortOriginList(newSelected);
-    } else {
-      setPortDestinationList(newSelected);
-    }
+  const handleSelection = async (item, isChecked) => {
+    await handlePortChange(item, isChecked, selectedItems, setSelectedItems);
   };
 
   const clearAll = () => {
@@ -607,6 +1390,7 @@ const PortCard = () => {
     setSearchTerm("");
   };
 
+  // Rest of PortCard JSX with updated loading check
   return (
     <div className="col mb-3">
       <div className="card shadow-sm border-2">
@@ -649,7 +1433,7 @@ const PortCard = () => {
           )}
           
           {/* Loading State */}
-          {pendingIndPort ? (
+          {pendingIndPort || card3Loading ? (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
               <div className="loader"></div>
             </div>
@@ -677,17 +1461,16 @@ const PortCard = () => {
                         checked={isSelected}
                         onChange={(e) => handleSelection(item, e.target.checked)}
                       />
-                    <label
-  className={`form-check-label ${isSelected ? "fw-bolder" : ""}`}
-  htmlFor={`port-${item.port_name}-${i}`}
-  style={{
-    fontSize: "16px",
-    fontWeight: isSelected ? 700 : 400
-  }}
->
-  {item.port_name} [{item.shipment_count}]
-</label>
-
+                      <label
+                        className={`form-check-label ${isSelected ? "fw-bolder" : ""}`}
+                        htmlFor={`port-${item.port_name}-${i}`}
+                        style={{
+                          fontSize: "16px",
+                          fontWeight: isSelected ? 700 : 400
+                        }}
+                      >
+                        {item.port_name} [{item.shipment_count}]
+                      </label>
                     </div>
                   );
                 })
@@ -712,6 +1495,7 @@ const PortCard = () => {
   );
 };
 
+// Update CountryCard to use handleCountryChange
 const CountryCard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
@@ -723,17 +1507,8 @@ const CountryCard = () => {
       item.country_name.toLowerCase().includes(searchTerm.toLowerCase())
     ) : [];
 
-  const handleSelection = (item, isChecked) => {
-    let newSelected;
-    if (isChecked) {
-      newSelected = [...selectedItems, item.country_name];
-    } else {
-      newSelected = selectedItems.filter(country => country !== item.country_name);
-    }
-    setSelectedItems(newSelected);
-    
-    // Update global state
-    setCountryOriginList(newSelected);
+  const handleSelection = async (item, isChecked) => {
+    await handleCountryChange(item, isChecked, selectedItems, setSelectedItems);
   };
 
   const clearAll = () => {
@@ -742,6 +1517,7 @@ const CountryCard = () => {
     setSearchTerm("");
   };
 
+  // Rest of CountryCard JSX with updated loading check
   return (
     <div className="col mb-3">
       <div className="card shadow-sm border-2">
@@ -784,7 +1560,7 @@ const CountryCard = () => {
           )}
           
           {/* Loading State */}
-          {pendingCountry ? (
+          {pendingCountry || card4Loading ? (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
               <div className="loader"></div>
             </div>
@@ -812,17 +1588,16 @@ const CountryCard = () => {
                         checked={isSelected}
                         onChange={(e) => handleSelection(item, e.target.checked)}
                       />
-                  <label
-  className={`form-check-label ${isSelected ? "fw-bolder" : ""}`}
-  htmlFor={`country-${item.country_name}-${i}`}
-  style={{
-    fontSize: "16px",
-    fontWeight: isSelected ? 700 : 400
-  }}
->
-  {item.country_name} [{item.shipment_count}]
-</label>
-
+                      <label
+                        className={`form-check-label ${isSelected ? "fw-bolder" : ""}`}
+                        htmlFor={`country-${item.country_name}-${i}`}
+                        style={{
+                          fontSize: "16px",
+                          fontWeight: isSelected ? 700 : 400
+                        }}
+                      >
+                        {item.country_name} [{item.shipment_count}]
+                      </label>
                     </div>
                   );
                 })
@@ -847,6 +1622,7 @@ const CountryCard = () => {
   );
 };
 
+// Update ImportCard to use handleImporterChange
 const ImportCard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
@@ -858,18 +1634,8 @@ const ImportCard = () => {
       item.importer_name.toLowerCase().includes(searchTerm.toLowerCase())
     ) : [];
 
-  const handleSelection = (item, isChecked) => {
-    let newSelected;
-    if (isChecked) {
-      newSelected = [...selectedItems, item.importer_name];
-    } else {
-      newSelected = selectedItems.filter(imp => imp !== item.importer_name);
-    }
-    setSelectedItems(newSelected);
-    
-    // Update global state
-    setSelectedImporters(newSelected);
-    setImporterList(newSelected);
+  const handleSelection = async (item, isChecked) => {
+    await handleImporterChange(item, isChecked, selectedItems, setSelectedItems);
   };
 
   const clearAll = () => {
@@ -879,6 +1645,7 @@ const ImportCard = () => {
     setSearchTerm("");
   };
 
+  // Rest of ImportCard JSX with updated loading check
   return (
     <div className="col mb-3">
       <div className="card shadow-sm border-2">
@@ -921,7 +1688,7 @@ const ImportCard = () => {
           )}
           
           {/* Loading State */}
-          {pendingImport ? (
+          {pendingImport || card5Loading ? (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
               <div className="loader"></div>
             </div>
@@ -949,17 +1716,16 @@ const ImportCard = () => {
                         checked={isSelected}
                         onChange={(e) => handleSelection(item, e.target.checked)}
                       />
-                  <label
-  className={`form-check-label ${isSelected ? "fw-bolder" : ""}`}
-  htmlFor={`importer-${item.importer_name}-${i}`}
-  style={{
-    fontSize: "16px",
-    fontWeight: isSelected ? 700 : 400
-  }}
->
-  {item.importer_name} [{item.shipment_count}]
-</label>
-
+                      <label
+                        className={`form-check-label ${isSelected ? "fw-bolder" : ""}`}
+                        htmlFor={`importer-${item.importer_name}-${i}`}
+                        style={{
+                          fontSize: "16px",
+                          fontWeight: isSelected ? 700 : 400
+                        }}
+                      >
+                        {item.importer_name} [{item.shipment_count}]
+                      </label>
                     </div>
                   );
                 })
@@ -983,8 +1749,6 @@ const ImportCard = () => {
     </div>
   );
 };
-
-
 
 /*18/09/2025 */
 
@@ -1054,6 +1818,9 @@ const ImportCard = () => {
       setStdUnitList(values.stdUnitList);
       params["stdUnitList"] = values.stdUnitList;
     }
+    if (values.countryList) {
+      params["countryList"] = values.countryList;
+    }
 
     setSearchParams(params);
     getImporterList(params);
@@ -1104,7 +1871,8 @@ const ImportCard = () => {
       "searchId": search_id,
       "queryBuilder": params.queryBuilder,
       "shipModeList": params.shipmentModeList,
-      "stdUnitList": params.stdUnitList
+      "stdUnitList": params.stdUnitList,
+      "countryList": params.countryList || []
     }
     props.loadingStart()
     Axios({
@@ -1124,12 +1892,12 @@ const ImportCard = () => {
           })
         }
         setStdUnitDataArray(icList);
-        props.loadingStop()
+        props.loadingStop();
       })
       .catch(err => {
         // console.log("Err");
         setStdUnitDataArray([]);
-        props.loadingStop()
+        props.loadingStop();
       });
   }
   /* IMPORTANT  16/09/2025*/
@@ -1156,7 +1924,8 @@ const ImportCard = () => {
       "searchId": search_id,
       "queryBuilder": params.queryBuilder,
       "shipModeList": params.shipmentModeList,
-      "stdUnitList": params.stdUnitList
+      "stdUnitList": params.stdUnitList,
+      "countryList": params.countryList || []
     }
     props.loadingStart()
     Axios({
@@ -1176,10 +1945,12 @@ const ImportCard = () => {
           })
         }
         setHsCode4digitDataArray(hsList);
+        props.loadingStop();
       })
       .catch(err => {
         // console.log("Err", err);
         setHsCode4digitDataArray([]);
+        props.loadingStop();
       });
   }
 
@@ -1206,7 +1977,8 @@ const ImportCard = () => {
       "searchId": search_id,
       "queryBuilder": params.queryBuilder,
       "shipModeList": params.shipmentModeList,
-      "stdUnitList": params.stdUnitList
+      "stdUnitList": params.stdUnitList,
+      "countryList": params.countryList || []
     }
     props.loadingStart()
     Axios({
@@ -1226,10 +1998,12 @@ const ImportCard = () => {
           })
         }
         setShipmentModeDataArray(icList);
+             props.loadingStop();
       })
       .catch(err => {
         // console.log("Err");
         setShipmentModeDataArray([]);
+             props.loadingStop();
       });
   }
 
@@ -1258,7 +2032,8 @@ const ImportCard = () => {
       "searchId": search_id,
       "queryBuilder": params.queryBuilder,
       "shipModeList": params.shipmentModeList,
-      "stdUnitList": params.stdUnitList
+      "stdUnitList": params.stdUnitList,
+      "countryList": params.countryList || []
     }
     props.loadingStart()
     Axios({
@@ -1336,10 +2111,12 @@ const ImportCard = () => {
         //console.log("importer data list ============= ", data );
         setImporterDataList(res.data);
         setPendingImport(false);
+             props.loadingStop();
       })
       .catch(err => {
         // console.log("Err");
         setPendingImport(false);
+             props.loadingStop();
       });
   }
 
@@ -1387,7 +2164,8 @@ const ImportCard = () => {
       "cityDestinationList":  params.cityDestinationList,
       "searchId": search_id,
       "queryBuilder": params.queryBuilder,
-      "stdUnitList": params.stdUnitList
+      "stdUnitList": params.stdUnitList,
+      "countryList": params.countryList || []
     }
     props.loadingStart()
     Axios({
@@ -1468,11 +2246,13 @@ const ImportCard = () => {
 
         setExporterDataList(res.data);
         setPendingExport(false);
+             props.loadingStop();
         
       })
       .catch(err => {
         // console.log("Err");
         setPendingExport(false);
+             props.loadingStop();
       });
   }
 
@@ -1499,7 +2279,8 @@ const ImportCard = () => {
       "searchId": search_id,
       "queryBuilder": params.queryBuilder,
       "shipModeList": params.shipmentModeList,
-      "stdUnitList": params.stdUnitList
+      "stdUnitList": params.stdUnitList,
+      "countryList": params.countryList || []
     }
     props.loadingStart()
     Axios({
@@ -1578,10 +2359,12 @@ const ImportCard = () => {
 
         setIndianPortDataList(res.data);
         setPendingIndPort(false);
+             props.loadingStop();
       })
       .catch(err => {
         // console.log("Err");
         setPendingIndPort(false);
+             props.loadingStop();
       });
   }
 
@@ -1608,7 +2391,8 @@ const ImportCard = () => {
       "searchId": search_id,
       "queryBuilder": params.queryBuilder,
       "shipModeList": params.shipmentModeList,
-      "stdUnitList": params.stdUnitList
+      "stdUnitList": params.stdUnitList,
+      "countryList": params.countryList || []
     }
     props.loadingStart()
     Axios({
@@ -1686,10 +2470,12 @@ const ImportCard = () => {
 
         setForPortDataList(res.data);
         setPendingForPort(false);
+             props.loadingStop();
       })
       .catch(err => {
         // console.log("Err");
         setPendingForPort(false);
+             props.loadingStop();
       });
   }
 
@@ -1716,7 +2502,8 @@ const ImportCard = () => {
       "searchId": search_id,
       "queryBuilder": params.queryBuilder,
       "shipModeList": params.shipmentModeList,
-      "stdUnitList": params.stdUnitList
+      "stdUnitList": params.stdUnitList,
+      "countryList": params.countryList || []
     }
     props.loadingStart()
     Axios({
@@ -1794,10 +2581,12 @@ const ImportCard = () => {
 
         setHSCodeDataList(res.data);
         setPendingHSCode(false);
+             props.loadingStop();
       })
       .catch(err => {
         // console.log("Err");
         setPendingHSCode(false);
+             props.loadingStop();
       });
   }
 
@@ -1824,7 +2613,8 @@ const ImportCard = () => {
       "searchId": search_id,
       "queryBuilder": params.queryBuilder,
       "shipModeList": params.shipmentModeList,
-      "stdUnitList": params.stdUnitList
+      "stdUnitList": params.stdUnitList,
+      "countryList": params.countryList || []
     }
     props.loadingStart()
     Axios({
@@ -1902,10 +2692,12 @@ const ImportCard = () => {
 
         setCountryDataList(res.data);
         setPendingCountry(false);
+             props.loadingStop();
       })
       .catch(err => {
         // console.log("Err");
         setPendingCountry(false);
+             props.loadingStop();
       });
   }
 
@@ -1932,7 +2724,8 @@ const ImportCard = () => {
       "searchId": search_id,
       "queryBuilder": params.queryBuilder,
       "shipModeList": params.shipmentModeList,
-      "stdUnitList": params.stdUnitList
+      "stdUnitList": params.stdUnitList,
+      "countryList": params.countryList || []
     }
     props.loadingStart()
     Axios({
@@ -2009,10 +2802,12 @@ const ImportCard = () => {
 
         setCityDataList(res.data);
         setPendingCity(false);
+             props.loadingStop();
       })
       .catch(err => {
         // console.log("Err");
         setPendingCity(false);
+             props.loadingStop();
       });
   }
 
@@ -2409,14 +3204,7 @@ const ImportCard = () => {
 
       {/* Button 2 */}
       <div className="col-lg-2 col-md-3 mb-3">
-        {/* <button
-          className={`btn w-100 py-3 ${
-            active === "exporter" ? "btn-warning" : "btn-primary"
-          }`}
-          onClick={() => setActive("exporter")}
-        >
-          Loream Ipsume 1
-        </button> */}
+    
 
               <Link  className={`btn w-100 py-3 ${
             active === "exporter" ? "btn-warning" : "btn-primary"
@@ -2477,16 +3265,6 @@ const ImportCard = () => {
           Loream Ipsume 5
         </button>
       
-              {/* <Link  className={`btn w-100 py-3 ${
-            active === "exporter" ? "btn-warning" : "btn-primary"
-          }`} to={{
-                  pathname: "/indepthTest",
-                  state: {
-                  search_id: search_id,
-                  importerForExport: props.location.state ? props.location.state.importerForExport : null,
-                  exporterForImport: props.location.state ? props.location.state.exporterForImport : null
-                  },
-              }}> Loream Performance </Link> */}
       </div>
 
 
@@ -2569,12 +3347,12 @@ const ImportCard = () => {
       hsCode4DigitList: hsCode4DigitList || [],
       portOriginList: portOriginList || [],
       portDestinationList: portDestinationList || [],
-      countryList: countryOriginList || [],
+    //  countryList: countryOriginList || [],
       searchId: search_id
     };
     
     console.log("Card system payload:", payload);
-    // setIndepthParams(payload);
+     setIndepthParams(payload);
     setShowTable(true);
     
     // Show success message
@@ -2593,15 +3371,15 @@ const ImportCard = () => {
   </div>
 </div>
 
-{/* {showTable && indepthParams && (
+{showTable && indepthParams && (
   <IndepthSearchTable
-    //params={indepthParams}
+    params={indepthParams}
     filteredColumn={[]} // or pass desired column keys
     initialPage={1}
     initialLimit={20}
     onRowClick={(row) => { console.log("row clicked", row); }}
   />
-)} */}
+)}
 
 
 
