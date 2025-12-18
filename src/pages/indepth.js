@@ -797,6 +797,13 @@ const handleCountryChange = async (item, isChecked, selectedItems, setSelectedIt
   setSelectedItems(newSelected);
   setSelectedCard4Items(newSelected);
   
+  // Update global state for city arrays based on trade type
+  if (searchParams && searchParams.tradeType === "EXPORT") {
+    setCityDestinationList(newSelected);
+  } else {
+    setCityOriginList(newSelected);
+  }
+  
   // Update mySelectedOptions for country
   const updatedOptions = {
     ...mySelectedOptions,
@@ -805,14 +812,15 @@ const handleCountryChange = async (item, isChecked, selectedItems, setSelectedIt
   setMySelectedOptions(updatedOptions);
   
   // Build updated parameters for API calls
-  // Use country as port based on trade type
   const updatedParams = {
     ...searchParams,
     searchId: search_id,
-    // ✅ Use country selection as port list based on trade type
+    // ✅ Use country selection as countryList parameter
+    countryList: newSelected,
+    // ✅ Also update city arrays based on trade type
     ...(searchParams.tradeType === "EXPORT" ? 
-      { portOriginList: newSelected } : 
-      { portDestinationList: newSelected })
+      { cityDestinationList: newSelected } : 
+      { cityOriginList: newSelected })
   };
   
 
@@ -832,11 +840,11 @@ const handleCountryChange = async (item, isChecked, selectedItems, setSelectedIt
         ...(hsCode4DigitList.length > 0 && {
           hsCode4DigitList: hsCode4DigitList
         }),
-        ...(cityOriginList.length > 0 && searchParams.tradeType === "IMPORT" && {
-          cityOriginList: cityOriginList
+        ...(newSelected.length > 0 && searchParams.tradeType === "IMPORT" && {
+          cityOriginList: newSelected
         }),
-        ...(cityDestinationList.length > 0 && searchParams.tradeType === "EXPORT" && {
-          cityDestinationList: cityDestinationList
+        ...(newSelected.length > 0 && searchParams.tradeType === "EXPORT" && {
+          cityDestinationList: newSelected
         }),
         ...(importerList.length > 0 && {
           importerList: importerList
