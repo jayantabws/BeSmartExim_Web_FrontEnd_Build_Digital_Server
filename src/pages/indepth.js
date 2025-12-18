@@ -1183,7 +1183,7 @@ const ExporterCard = () => {
                           fontWeight: isSelected ? 700 : 400
                         }}
                       >
-                        {item.exporter_name} [{item.shipment_count}]
+                        {item.exporter_name} [${item.value_usd}]
                       </label>
                     </div>
                   );
@@ -1341,7 +1341,7 @@ const HsCodeCard = () => {
                           fontWeight: isSelected ? 700 : 400
                         }}
                       >
-                        {item.label}
+                        {item.value}  [${item.value_usd}]
                       </label>
                     </div>
                   );
@@ -1469,7 +1469,7 @@ const PortCard = () => {
                           fontWeight: isSelected ? 700 : 400
                         }}
                       >
-                        {item.port_name} [{item.shipment_count}]
+                        {item.port_name} [${item.value_usd}]
                       </label>
                     </div>
                   );
@@ -1596,7 +1596,8 @@ const CountryCard = () => {
                           fontWeight: isSelected ? 700 : 400
                         }}
                       >
-                        {item.country_name} [{item.shipment_count}]
+                        {/* {item.country_name} [{item.shipment_count}] */}
+                         {item.country_name} [${item.value_usd}]
                       </label>
                     </div>
                   );
@@ -1724,7 +1725,8 @@ const ImportCard = () => {
                           fontWeight: isSelected ? 700 : 400
                         }}
                       >
-                        {item.importer_name} [{item.shipment_count}]
+                        {/* {item.importer_name} [{item.shipment_count}] */}
+                         {item.importer_name} [${item.value_usd}]
                       </label>
                     </div>
                   );
@@ -1940,7 +1942,7 @@ const ImportCard = () => {
         let hsList = [];
         if (res.data.hscodesList) {
           res.data.hscodesList.forEach((item) => {
-            let specificItem = { "value": item.hscode, "label": item.hscode+ " ["+item.shipment_count+"]"};
+            let specificItem = { "value": item.hscode, "label": item.hscode+ " ["+item.shipment_count+"]", "value_usd": item.value_usd  };
             hsList.push(specificItem);
           })
         }
@@ -2519,7 +2521,7 @@ const ImportCard = () => {
         let hscodesList = [];
           if (res.data.hscodesList) {
             res.data.hscodesList.forEach((item) => {
-              let specificItem = { "value": item.hscode, "label": item.hscode+" ["+item.shipment_count+"]" };
+              let specificItem = { "value": item.hscode, "label": item.hscode+" ["+item.shipment_count+"]","value_usd": item.value_usd };
               hscodesList.push(specificItem);
             })
             setHsCodeDataArray(hscodesList)
