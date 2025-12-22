@@ -2351,6 +2351,16 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
               filteredColumn.push(objColumns[x]);
             }
           }
+
+          // ✅ ADD: Force include essential columns even if null in first record for also display null columns
+          // for key: 'std_unit_rate_usd', label: 'Std. Unit Price $' , 'unit_rate_usd', 'value_usd'
+          /*const essentialColumns = ['std_unit_rate_usd'];
+          essentialColumns.forEach(col => {
+            if (!filteredColumn.includes(col) && objColumns.includes(col)) {
+              filteredColumn.push(col);
+            }
+          });  */
+
           setFilteredColumn(filteredColumn)
 
           setSearchId(res.data.searchId)

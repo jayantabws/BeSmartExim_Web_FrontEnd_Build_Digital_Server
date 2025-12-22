@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import SalesIQ from '../shared/ZohoPlugin';
+import ChatWidget from './ChatWidget';
 export default class Footer extends Component {
   
   render() {
@@ -8,7 +9,9 @@ export default class Footer extends Component {
       <>
         <footer className="footer">
           <p>Copyright 2022, All right reserved.</p>
-          <p><SalesIQ/></p>
+      
+
+          <ChatWidget/>
         </footer>
       </>
     );

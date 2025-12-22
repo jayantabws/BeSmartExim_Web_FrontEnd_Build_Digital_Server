@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext  } from 'react';
+import React, { useEffect, useState, useContext ,useRef } from 'react';
 import HistoryOrder from '../components/HistoryOrder';
 import MarketHistory from '../components/MarketHistory';
 import MarketNews from '../components/MarketNews';
@@ -13,6 +13,7 @@ import moment from 'moment';
 import AxiosACT from "../shared/AxiosACT";
 import AxiosUser from "../shared/AxiosUser";
 import Axios from "../shared/Axios";
+
 import {updateSubscriptionCount, updateDownloadArrayCount, setCountryList, setDataAccessDate,setDloadCountSubuser} from "../store/actions/data"
 import { connect } from "react-redux";
 import { loaderStart, loaderStop } from "../store/actions/loader";
@@ -22,6 +23,7 @@ const Exchange = (props) => {
   // const subscriptionDetails = useContext(SubscriptionContext);
 
   // console.log("subscriptionDetails ===== ", subscriptionDetails)
+  
   const history = useHistory();
   const userId = localStorage.getItem("userToken");
 
@@ -52,6 +54,8 @@ const Exchange = (props) => {
     getRecentSearchList();
     getSubscription();
   },[])
+
+  
 
   const getWorkspaceList = () => {
 

@@ -21,9 +21,9 @@ const validateForm = Yup.object().shape({
   password: Yup.string().required("Please enter password")
 });
 
-const Login = (props) => {
 
-  const [ip, setIp] = useState([]);
+const Login = (props) => {
+   const [ip, setIp] = useState([]);
   const [isMaintenance, setIsMaintenance] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [monthYear, setMonthYear] = useState("");
@@ -40,7 +40,8 @@ const Login = (props) => {
       });
   }
 
-  
+
+
 
   const handleSubmit = (values) => {
     // console.log("Values", values);
@@ -66,18 +67,21 @@ const Login = (props) => {
           localStorage.setItem("userToken", res.data.userid);
           sessionStorage.setItem("userToken", res.data.userid);
           localStorage.setItem("sessionID", res.data.sessionId);
-          history.push("/dashboard");
 
-          // if(res.data.uplineId != 0){
-          //   props.setDloadCountSubuser(
-          //   {download_count_subUser: res.data.downloadLimit,
-          //     }) 
-          // }
-          props.setUplineId(
-            {
-              uplineId: res.data.uplineId,
-            })
-          // window.location.reload(true)
+          // LoginSecondary({
+          //   youruserid: res.data.userid,
+          //   yourusername: res.data.email, 
+          //   yourname: res.data.firstname + " " + res.data.lastname ,
+          // });  
+
+         history.push("/dashboard");
+
+        
+          // props.setUplineId(
+          //   {
+          //     uplineId: res.data.uplineId,
+          //   })
+     
         } else {
           Swal.fire({
             title: 'Oops!',

@@ -11,7 +11,7 @@ import {Circles} from "react-loader-spinner";
 import { connect } from "react-redux";
 import { Modal } from 'react-bootstrap';
 import Loader from "../components/Loader"
-
+import axios from 'axios';
 
 const Header = (props) => {
 
@@ -25,7 +25,11 @@ const Header = (props) => {
   const userEmail = loggedUser.email;
   const userId_new = loggedUser.uplineId > 0 ? loggedUser.uplineId : loggedUser.userid
 
-
+const [session, setSession] = useState({
+        accessToken: null,
+        refreshToken: null,
+        userInfo: null,
+      });
   useEffect(() => {
 
     let el = document.querySelector('#darkTheme');
@@ -134,6 +138,47 @@ const Header = (props) => {
       });
   }
 
+  
+ const LogoutSecondary = async (refreshToken, accessToken) => {
+  try {
+    //debugger;
+    // Make the API call to logout on the server
+    const response = await fetch('http://88.198.61.70/api/auth/logout', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ 
+        token: refreshToken, accessToken: accessToken
+      }),
+    });
+
+    // Check if the request was successful
+    if (!response.ok) {
+      throw new Error(`Logout failed with status: ${response.status}`);
+    }
+
+    // Clean up session storage
+    sessionStorage.removeItem("chatSession");
+    sessionStorage.removeItem("socket_user");
+    sessionStorage.removeItem("user_Session");
+    
+    // Reset session state
+    
+    setSession({ accessToken: null, refreshToken: null, userInfo: null});
+    
+  } catch (error) {
+    console.error('Logout error:', error);
+    
+    // Even if API call fails, clean up local session
+    sessionStorage.removeItem("chatSession");
+    sessionStorage.removeItem("socket_user");
+    sessionStorage.removeItem("user_Session");
+    
+    setSession({ accessToken: null, refreshToken: null, userInfo: null});
+  }
+};
+
   const logoutUser = () => {
     let values = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : {}
     const postData = {
@@ -154,7 +199,9 @@ const Header = (props) => {
       localStorage.removeItem("user");
       localStorage.removeItem("sessionID");
       sessionStorage.removeItem("userToken");
-      props.logoutUser()
+      props.logoutUser();
+      let user_Session = localStorage.getItem("user_Session") ? JSON.parse(localStorage.getItem("user_Session")) : {}
+      LogoutSecondary(user_Session.refreshToken, user_Session.accessToken );
       history.push("/login");
       })
       .catch(err => {

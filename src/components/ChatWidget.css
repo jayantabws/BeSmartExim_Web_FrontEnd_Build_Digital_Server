@@ -1,0 +1,43 @@
+.chat-window {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 360px;
+  height: 520px;
+  z-index: 9999;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.chat-window.open {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.chat-window.closed {
+  transform: translateY(20px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chat-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 10px;
+}
+
+.chat-icon {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #1976d2;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
