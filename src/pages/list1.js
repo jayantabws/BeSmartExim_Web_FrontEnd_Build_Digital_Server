@@ -1336,6 +1336,25 @@ const List = (props) => {
 const exportToCSV = async () => {
   console.log("Export All Call");
 
+
+  /*22/12/2025 */
+
+    // Calculate total weightage for all records
+  const totalWeightage = totalRecord * countryWeightage;
+  
+  // Check against user's remaining download count
+  const userDownloadCount = loggedUser.uplineId > 0 ? props.download_count_subUser : props.download_count;
+  
+  if (totalWeightage > userDownloadCount) {
+    Swal.fire({
+      title: 'Alert!',
+      text: `You don't have enough download count. Available: ${userDownloadCount}, Required: ${totalWeightage}`,
+      icon: 'warning',
+      confirmButtonColor: '#3085d6',
+    });
+    return;
+  }
+
   // console.log("=== DOWNLOAD DEBUG ===");
   // console.log("Total records available:", totalRecord);
     
