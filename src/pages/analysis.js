@@ -4444,7 +4444,7 @@ const [notifyParty, setNotifyParty] = useState([]);
                 </div>
               </> : null}
 
-            {cityDataList.citiesList && cityDataList.citiesList.length > 0 ?
+            {/* {cityDataList.citiesList && cityDataList.citiesList.length > 0 ?
               <>
                 <h4>Top 10 Cities</h4>
                 <div className="row mb-4">
@@ -4454,7 +4454,7 @@ const [notifyParty, setNotifyParty] = useState([]);
                         <TabList>
                           <Tab>Pie</Tab>
                           <Tab>Bar</Tab>
-                          {/* <Tab>Line</Tab> */}
+                          <Tab>Line</Tab>
                         </TabList>
 
                         <TabPanel>
@@ -4463,9 +4463,9 @@ const [notifyParty, setNotifyParty] = useState([]);
                         <TabPanel>
                           <GraphBar barTitle={'Top 10 Cities'} labels={cityLabel()} data={cityData()} dataLabel="Total value (USD)" />
                         </TabPanel>
-                        {/* <TabPanel>
+                        <TabPanel>
                         <GraphLine barTitle={'Top 10 Cities'} labels={cityLabel()} data={cityData()} />
-                      </TabPanel> */}
+                      </TabPanel>
                       </Tabs>
                     ) : (
                       <div className="loaderBlock">
@@ -4515,7 +4515,7 @@ const [notifyParty, setNotifyParty] = useState([]);
                     )}
                   </div>
                 </div>
-              </> : null}
+              </> : null} */}
           </>
         ) : null}
 

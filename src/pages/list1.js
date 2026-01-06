@@ -389,8 +389,7 @@ let defaultCountry = []
 
 // --- country modal modification with count @sarbojitghosh22 3-5-2025 --- //
 const CountrySelector = ({ multiTradeCountryList, selectedTradeCountry, setFieldValue, values, setSelectedTradeCountry, setMaxMinDate,
-    hasSearchResults,    // ADD THIS PARAMETER
-  searchId            // ADD THIS PARAMETER
+    searchResult
  }) => {
 
   const [showModal, setShowModal] = useState(false);
@@ -429,6 +428,23 @@ const CountrySelector = ({ multiTradeCountryList, selectedTradeCountry, setField
       updatedTempSelectedCountries = [...tempSelectedCountries, shortcode];
     }
 
+// Check if this is a country change after first response
+  if (searchResult.length > 0) {
+    // Show confirmation dialog before reloading
+    const shouldReload = window.confirm(
+      "Changing countries will reset your search results and reload the page. Do you want to continue?"
+    );
+    
+    if (shouldReload) {
+      // If user confirms, reload the page
+      window.location.reload();
+      return; // Exit early since page will reload
+    } else {
+      // If user cancels, don't change the selection
+      return;
+    }
+  }
+
     // Update the state and form values
     setTempSelectedCountries(updatedTempSelectedCountries);
 
@@ -436,28 +452,7 @@ const CountrySelector = ({ multiTradeCountryList, selectedTradeCountry, setField
       updatedTempSelectedCountries.includes(country.value)
     );
 
-   
-  // Check if we should show confirmation before page reload
-  if (hasSearchResults && searchId) {
-    Swal.fire({
-      title: 'Reset Search Results?',
-      text: 'Changing countries will reset all search results and form data. Do you want to continue?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, Continue',
-      cancelButtonText: 'Cancel'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // User confirmed - reload the page
-        window.location.reload();
-      }
-      // If cancelled, do nothing - country selection remains unchanged
-    });
-  } else {
-
-      setSelectedTradeCountry(updatedSelectedCountries);
+    setSelectedTradeCountry(updatedSelectedCountries);
     setFieldValue("countryCode", updatedTempSelectedCountries);
     setFieldValue("fromDate", "");
     setFieldValue("toDate", "");
@@ -469,34 +464,10 @@ const CountrySelector = ({ multiTradeCountryList, selectedTradeCountry, setField
 
     // Reset the count if manually checked/unchecked
     setCheckedCountryCount(null);
-  }
-
-  
   };
 
   const handleSelectAllChange = () => {
-
-  // Check if we should show confirmation before page reload
-  if (hasSearchResults && searchId) {
-    Swal.fire({
-      title: 'Reset Search Results?',
-      text: 'Changing countries will reset all search results and form data. Do you want to continue?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, Continue',
-      cancelButtonText: 'Cancel'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // User confirmed - reload the page
-        window.location.reload();
-      }
-      // If cancelled, do nothing - selection remains unchanged
-    });
-  } else {
-
-     if (selectAll) {
+    if (selectAll) {
       // Deselect all
       setTempSelectedCountries([]);
       setSelectedTradeCountry([]);
@@ -520,11 +491,9 @@ const CountrySelector = ({ multiTradeCountryList, selectedTradeCountry, setField
     }
 
     setSelectAll(!selectAll); // Toggle "Select All" checkbox state
+
     // Reset the count if manually checked/unchecked
     setCheckedCountryCount(null);
-
-  }
-   
   };
 
   const handleOpenModal = async () => {
@@ -4782,7 +4751,7 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
                             setSelectedTradeCountry={setSelectedTradeCountry}
                             setMaxMinDate={setMaxMinDate}
                              hasSearchResults={hasSearchResults}  // ADD THIS LINE
-  searchId={searchId}                  // ADD THIS LINE
+searchResult={searchResult}                  // ADD THIS LINE
                           />
 
 
