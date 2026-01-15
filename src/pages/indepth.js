@@ -746,6 +746,8 @@ const handlePortChange = async (item, isChecked, selectedItems, setSelectedItems
         apiCalls.push(getForeignCountryList(params));
         loadingStates.push(() => setCard4Loading(true));
       }
+
+      
       
       if (updatedOptions.importer === 0) {
         apiCalls.push(getImporterList(params));
@@ -871,6 +873,14 @@ const handleCountryChange = async (item, isChecked, selectedItems, setSelectedIt
         apiCalls.push(getImporterList(params));
         loadingStates.push(() => setCard5Loading(true));
       }
+
+      // ✅ ADD: Include port API calls when port selections are empty
+      if (updatedOptions.port === 0) {
+        apiCalls.push(getIndianPortList(params), getForeignPortList(params));
+        loadingStates.push(() => setCard3Loading(true));
+      }
+
+      
       
       // Set loading states for cards that will be updated
       loadingStates.forEach(setLoading => setLoading());
@@ -894,6 +904,7 @@ const handleCountryChange = async (item, isChecked, selectedItems, setSelectedIt
         if (updatedOptions.exporter === 0) setCard1Loading(false);
         if (updatedOptions.hscode === 0) setCard2Loading(false);
         if (updatedOptions.importer === 0) setCard5Loading(false);
+          if (updatedOptions.port === 0) setCard3Loading(false);
       }, 1000);
       
     } catch (error) {
@@ -1035,8 +1046,8 @@ const handleImporterChange = async (item, isChecked, selectedItems, setSelectedI
     }
   }
   
-  console.log("Importer selections updated:", newSelected);
-  console.log("Updated mySelectedOptions:", updatedOptions);
+ // console.log("Importer selections updated:", newSelected);
+  //console.log("Updated mySelectedOptions:", updatedOptions);
 };
 
 // Also add a reset function that resets values to 0
@@ -1101,15 +1112,32 @@ const ExporterCard = () => {
   };
 
   const clearAll = () => {
+
+   // console.log("Before ExporterCard clearAll Update triggered",mySelectedOptions);
     setSelectedItems([]);
     setSelectedExporters([]);
     setSearchTerm("");
     
+   // ✅ Create updated parameters with cleared exporter data
+    const updatedParams = {
+      ...searchParams,
+      exporterList: [], // Clear exporters
+      searchId: search_id
+    };
+    
+    // ✅ Update searchParams to remove exporter data
+    setSearchParams(updatedParams);
+    
+    // ✅ Call APIs with updated params (not old searchParams)
+    getValueForParams(updatedParams, 1);
+    getTotalShipmentCount(updatedParams);
+
     // Reset mySelectedOptions for exporter
     setMySelectedOptions(prev => ({
       ...prev,
       exporter: 0
     }));
+    // console.log("After ExporterCard clearAll Update triggered",mySelectedOptions);
   };
 
   return (
@@ -1224,7 +1252,7 @@ const HsCodeCard = () => {
   const [digitMode, setDigitMode] = useState(8); // 4 or 8 digit
   const [loading, setLoading] = useState(false);
 
-  console.log("HsCodeCard render - digitMode:", digitMode, "selectedItems:", selectedItems);
+  //console.log("HsCodeCard render - digitMode:", digitMode, "selectedItems:", selectedItems);
   // Get appropriate data based on digit mode
   const currentData = digitMode === 4 ? 
     (hsCode4digitDataArray || []) : 
@@ -1241,10 +1269,32 @@ const HsCodeCard = () => {
   };
 
   const clearAll = () => {
+   // console.log("Before HSCode clearAll Update triggered",mySelectedOptions);
     setSelectedItems([]);
     setHsCode4digitList([]);
     setHsCodeList([]);
     setSearchTerm("");
+
+    // ✅ Create updated parameters with cleared HS code data
+    const updatedParams = {
+      ...searchParams,
+      hsCodeList: [],
+      hsCode4DigitList: [],
+     // searchId: search_id
+    };
+
+    // ✅ Update searchParams to remove HS code data
+    setSearchParams(updatedParams);
+    
+    // ✅ Call APIs with updated params
+    getValueForParams(updatedParams, 2);
+    getTotalShipmentCount(updatedParams);
+
+    setMySelectedOptions(prev => ({
+      ...prev,
+      hscode: 0
+    }));
+    // console.log("After ExporterCard clearAll Update triggered",mySelectedOptions);
   };
 
   const toggleDigitMode = (mode) => {
@@ -1400,10 +1450,33 @@ const PortCard = () => {
   };
 
   const clearAll = () => {
+    //console.log("Before PortCARD clearAll Update triggered",mySelectedOptions);
     setSelectedItems([]);
     setPortOriginList([]);
     setPortDestinationList([]);
     setSearchTerm("");
+
+     // Update the main search params
+    // ✅ Create updated parameters with cleared port data
+    const updatedParams = {
+      ...searchParams,
+      portOriginList: [],
+      portDestinationList: [],
+      searchId: search_id
+    };
+
+    // ✅ Update the main search params
+    setSearchParams(updatedParams);
+
+    // ✅ Call APIs with updated params
+    getValueForParams(updatedParams, 3);
+    getTotalShipmentCount(updatedParams);
+  
+     setMySelectedOptions(prev => ({
+      ...prev,
+      port: 0
+    }));
+   //  console.log("After PortCARD clearAll Update triggered",mySelectedOptions);
   };
 
   // Rest of PortCard JSX with updated loading check
@@ -1528,9 +1601,33 @@ const CountryCard = () => {
   };
 
   const clearAll = () => {
+   // console.log("Before CountryCard clearAll Update triggered",mySelectedOptions);
     setSelectedItems([]);
     setCountryOriginList([]);
     setSearchTerm("");
+
+     // ✅ Create updated parameters with cleared country data
+    const updatedParams = {
+      ...searchParams,
+      cityOriginList: [],
+      cityDestinationList: [],
+      countryList: [],
+      searchId: search_id
+    };
+
+    // ✅ Update searchParams to remove country data
+    setSearchParams(updatedParams);
+
+    // ✅ Call APIs with updated params
+    getValueForParams(updatedParams, 4);
+    getTotalShipmentCount(updatedParams);
+    
+   // Reset mySelectedOptions for port
+    setMySelectedOptions(prev => ({
+      ...prev,
+      country: 0
+    }));
+    // console.log("After CountryCard clearAll Update triggered",mySelectedOptions);
   };
 
   // Rest of CountryCard JSX with updated loading check
@@ -1656,10 +1753,32 @@ const ImportCard = () => {
   };
 
   const clearAll = () => {
+   //  console.log("Before ImporterCard clearAll Update triggered",mySelectedOptions);
     setSelectedItems([]);
     setSelectedImporters([]);
     setImporterList([]);
     setSearchTerm("");
+
+    // ✅ Create updated parameters with cleared importer data
+    const updatedParams = {
+      ...searchParams,
+      importerList: [],
+      searchId: search_id
+    };
+
+    // ✅ Update searchParams to remove importer data
+    setSearchParams(updatedParams);
+
+    // ✅ Call APIs with updated params
+    getValueForParams(updatedParams, 5);
+    getTotalShipmentCount(updatedParams);
+
+    // Reset mySelectedOptions for exporter
+    setMySelectedOptions(prev => ({
+      ...prev,
+      importer: 0
+    }));
+   //  console.log("After ImporterCard clearAll Update triggered",mySelectedOptions);
   };
 
   // Rest of ImportCard JSX with updated loading check
