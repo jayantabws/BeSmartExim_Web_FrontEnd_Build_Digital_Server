@@ -10,10 +10,10 @@ export default class Footer extends Component {
         <footer className="footer">
           <p>Copyright 2022, All right reserved.</p>
       
-
+ 
           <ChatWidget/>
         </footer>
       </>
-    );
+    );  
   }
 }

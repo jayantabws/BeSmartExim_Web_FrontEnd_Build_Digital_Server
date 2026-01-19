@@ -2,7 +2,13 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import "./ChatWidget.css";
 
+//for server
 const CHAT_ORIGIN = "http://88.198.61.70";
+const API_URL = "http://88.198.61.70/api";
+
+// for local
+// const CHAT_ORIGIN = "http://localhost:3002";
+// const API_URL = "http://localhost:3000";
 
 const ChatWidget = () => {
   const [open, setOpen] = useState(false);
@@ -31,7 +37,8 @@ const ChatWidget = () => {
   const LoginSecondary = async (userId, username, name) => {
     try {
       const res = await axios.post(
-        `${CHAT_ORIGIN}/api/auth/userloginSecondary`,
+        // `${API_URL}/api/auth/userloginSecondary`,
+         `${API_URL}/auth/userloginSecondary`,
         { dbType: "postgres", id: userId, username, name },
         { headers: { "Content-Type": "application/json" } }
       );
@@ -69,6 +76,32 @@ const ChatWidget = () => {
   }, []);
 
   // ===============================
+// AUTO SCROLL EVERY 5 SECONDS
+// ===============================
+useEffect(() => {
+  if (!open) return;
+  if (!iframeRef.current) return;
+
+  const iframe = iframeRef.current;
+
+  const scrollInterval = setInterval(() => {
+    try {
+      //alert("Auto-scrolling chat to bottom...");
+      iframe.contentWindow.postMessage(
+        { type: "SCROLL_TO_BOTTOM" },
+        CHAT_ORIGIN
+      );
+      // console.log("📜 Auto-scroll triggered");
+    } catch (err) {
+      console.warn("Auto-scroll failed:", err);
+    }
+  }, 5000); // 🔥 every 5 seconds
+
+  return () => clearInterval(scrollInterval);
+}, [open]);
+
+
+  // ===============================
   // SEND SESSION + AUTO CLOSE
   // ===============================
   useEffect(() => {
@@ -78,21 +111,25 @@ const ChatWidget = () => {
     if (sessionSentRef.current) return;
 
     const iframe = iframeRef.current;
+    
 
     const onIframeLoad = () => {
       // 1️⃣ Send session
+      //debugger;
+    //alert("Sending session to chat iframe...");
+    //console.log("ChatWidget: Sending session to iframe:", session);
       iframe.contentWindow.postMessage(
         { type: "SET_CHAT_SESSION", payload: session },
         CHAT_ORIGIN
       );
 
       // 2️⃣ Scroll AFTER render delay
-      setTimeout(() => {
-        iframe.contentWindow.postMessage(
-          { type: "SCROLL_TO_BOTTOM" },
-          CHAT_ORIGIN
-        );
-      }, 500); // 🔥 REQUIRED
+      // setTimeout(() => {
+      //   iframe.contentWindow.postMessage(
+      //     { type: "SCROLL_TO_BOTTOM" },
+      //     CHAT_ORIGIN
+      //   );
+      // }, 500); // 🔥 REQUIRED
 
       sessionSentRef.current = true;
 
