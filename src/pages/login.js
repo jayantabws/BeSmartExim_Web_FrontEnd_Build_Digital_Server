@@ -136,7 +136,7 @@ const Login = (props) => {
 
   useEffect(() => {
     getData();
-    getDateMonth();
+   // getDateMonth();
     checkMaintenance()
     
     props.loadingStop()
