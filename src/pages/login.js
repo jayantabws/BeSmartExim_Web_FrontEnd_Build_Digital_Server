@@ -26,20 +26,20 @@ const Login = (props) => {
    const [ip, setIp] = useState([]);
   const [isMaintenance, setIsMaintenance] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [monthYear, setMonthYear] = useState("");
+  //const [monthYear, setMonthYear] = useState("");
   const [siteMaintenance, setSiteMaintenance] = useState(null);
   const history = useHistory();
 
-  const getDateMonth=()=>{
-      AxiosMaster({
-          method: "GET",
-          url: `/masterdata-management/getdate`,
-        }).then(res => {
-          console.log("date",res.data);
-           setMonthYear(res.data);
-          }).catch(err => {
-      });
-  }
+  // const getDateMonth=()=>{
+  //     AxiosMaster({
+  //         method: "GET",
+  //         url: `/masterdata-management/getdate`,
+  //       }).then(res => {
+  //         console.log("date",res.data);
+  //          setMonthYear(res.data);
+  //         }).catch(err => {
+  //     });
+  // }
 
 
 
