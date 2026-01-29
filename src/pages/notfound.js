@@ -10,8 +10,8 @@ export default function notfound(props) {
         <div className="my-auto">
           <h2>Maintenance</h2>
           <p>{message}</p>
-          <Link to="/" className="btn">
-            Back to Home <i className="icon ion-md-home"></i>
+          <Link to="/login" className="btn">
+            Back to Login <i className="icon ion-md-home"></i>
           </Link>
         </div>
       </div>

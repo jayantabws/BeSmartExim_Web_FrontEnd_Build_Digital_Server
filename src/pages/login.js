@@ -27,6 +27,7 @@ const Login = (props) => {
   const [isMaintenance, setIsMaintenance] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [monthYear, setMonthYear] = useState("");
+  const [siteMaintenance, setSiteMaintenance] = useState(null);
   const history = useHistory();
 
   const getDateMonth=()=>{
@@ -120,15 +121,16 @@ const Login = (props) => {
     })
       .then(res => {
         console.log(res.data)
-        if (res.data.settingsList[0].isMaintanance == "Y") {
-          setIsMaintenance(res.data.settingsList[0].isMaintanance)
-          props.history.push({
-            pathname: "/maintenance",
-            state: {
-              data: res.data.settingsList[0].siteMessage
-            }
-          });
-        }
+        setSiteMaintenance(res.data.settingsList);
+        // if (res.data.settingsList[0].isMaintanance == "Y") {
+        //   setIsMaintenance(res.data.settingsList[0].isMaintanance)
+        //   props.history.push({
+        //     pathname: "/maintenance",
+        //     state: {
+        //       data: res.data.settingsList[0].siteMessage
+        //     }
+        //   });
+        // }
       })
   }
 
@@ -136,6 +138,7 @@ const Login = (props) => {
     getData();
     getDateMonth();
     checkMaintenance()
+    
     props.loadingStop()
     const userToken = sessionStorage.getItem("userToken") && localStorage.getItem("sessionID");
     if (userToken) {
@@ -248,7 +251,7 @@ const Login = (props) => {
 
 
 
-  // ...existing code...
+  // ...existing code... != "Y"
   return (
     <>
       {isMaintenance != "Y" || isMaintenance != "" ?
@@ -354,11 +357,20 @@ const Login = (props) => {
                   now
                 </div> */}
 
-                <div className="login-marketing-main">
+                {/* <div className="login-marketing-main">
                   Export and Import Trade Insights are updated with {monthYear ? monthYear : ""} transactions at beDATOS. <br />
                   YOUR PORTAL HAS BEEN UPDATED. <br />
                   Access the data with more features now <br />
-                </div>
+                </div> */}
+              {/* <div className="login-marketing-main">
+                {siteMaintenance?.[0]?.loginMsg}
+              </div> */}
+
+              <div className="login-marketing-main">
+              {siteMaintenance?.[0]?.loginMsg?.replace(/\.\s*/g, ".\n")}
+            </div>
+
+
 
                 {/* <div className="login-marketing-main custom-marketing-main">
                   <span className="custom-marketing-headline">
@@ -381,7 +393,15 @@ const Login = (props) => {
             <Loader />
           ) : null}
         </div>
-        : null}
+        :   <div className="error-page vh-100 d-flex justify-content-center text-center">
+                <div className="my-auto">
+                  <h1>Maintenance</h1>
+                  <h4>{siteMaintenance?.[0]?.siteMessage}</h4>
+                  {/* <Link to="/login" className="btn">
+                    Back to Login <i className="icon ion-md-home"></i>
+                  </Link> */}
+                </div>
+              </div>}
     </>
   );
   // ...existing code...
