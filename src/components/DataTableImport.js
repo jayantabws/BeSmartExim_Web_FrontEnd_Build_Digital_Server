@@ -1222,6 +1222,8 @@ export default function DataTableImport(props) {
                                     icon: 'info',
                                 })
                             }}> */}
+
+                             {props.indepthAccessCondition && props.indepthAccessCondition=='Y' ? 
                              <Dropdown.Item >
                                 <Link to={{
                                     pathname: "/indepthAnalysis",
@@ -1231,6 +1233,7 @@ export default function DataTableImport(props) {
                                     },
                                 }}> In-depth Analysis </Link>
                             </Dropdown.Item> 
+                            :''}
                         </DropdownButton></li>
                 </ul>
             </div>

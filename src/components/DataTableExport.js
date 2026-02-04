@@ -691,9 +691,26 @@ export default function DataTableExport(props) {
             if (dataShow) fetchLocalCountryRecords();
         }, [dataShow, countryPayload, setSelectedCountries]);
 
-        const getCountryLabelWithCount = (countryLabel) => {
+      /*  const getCountryLabelWithCount = (countryLabel) => {
             // localCountryRecords should be available in the scope of your modal/component
             const record = localCountryRecords.find((item) => item.column_name === countryLabel);
+            return record ? `${countryLabel} (${record.records_count})` : `${countryLabel} (0)`;
+        };  */
+
+
+          /*24/12/2025 */
+   const getCountryLabelWithCount = (countryLabel) => {
+            if (!localCountryRecords || localCountryRecords.length === 0) {
+                return `${countryLabel} (0)`;
+            }
+
+            // Find by exact match or similar spelling
+            const record = localCountryRecords.find((item) => {
+                const apiName = item.column_name.toLowerCase().replace(/[^a-z]/g, '');
+                const labelName = countryLabel.toLowerCase().replace(/[^a-z]/g, '');
+                return apiName === labelName;
+            });
+
             return record ? `${countryLabel} (${record.records_count})` : `${countryLabel} (0)`;
         };
 
@@ -935,7 +952,10 @@ export default function DataTableExport(props) {
                                 })
                             }}
                             >    */}
-                             <Dropdown.Item >
+
+                            {props.indepthAccessCondition && props.indepthAccessCondition=='Y' ? 
+                            
+                          <Dropdown.Item >
                                 <Link to={{
                                     pathname: "/indepthAnalysis",
                                     state: {
@@ -943,7 +963,8 @@ export default function DataTableExport(props) {
                                         importerForExport: props.importerForExport, exporterForImport: props.exporterForImport
                                     },
                                 }}> In-depth Analysis </Link>
-                            </Dropdown.Item> 
+                            </Dropdown.Item> : ''}
+                           
                         </DropdownButton></li>
 
                 </ul>

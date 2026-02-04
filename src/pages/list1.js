@@ -803,6 +803,9 @@ const List = (props) => {
   /* 21/11/2025 */
   const [hasSearchResults, setHasSearchResults] = useState(false);
 
+  /*04/02/2026 */
+  const [indepthAccessCondition ,setIndepthAccessCondition]=useState();
+
   /*08/09/2025 New Download Loader */
   const [showDownloadLoader, setShowDownloadLoader] = useState(false);
 
@@ -885,6 +888,35 @@ const List = (props) => {
 
   }
 
+/*04/02/2026 Indepth Condition access for who have permission start */
+  const getIndepthDisplayConditions = () => {
+    // const userId = localStorage.getItem("userToken");
+    // const user = localStorage.getItem("user");
+    // const loggedUser = user ? JSON.parse(user) : {};
+
+    let userId_new = loggedUser.uplineId > 0 ? loggedUser.uplineId : loggedUser.userid  
+
+    AxiosUser({
+      method: "GET",
+      url: `/user-management/user-subscription/activelist?userId=${userId_new}`
+    })
+      .then(res => {
+       setIndepthAccessCondition(res.data.userSubscriptionList[0].indepthAccess)
+       // setSubscriptionDetails(res.data.userSubscriptionList[0]);
+       console.log("indepthAccessCondition",indepthAccessCondition)
+      })
+      .catch(err => {
+        // console.log("Err", err);
+       // isLoading(true);
+      });
+  }
+
+  useEffect(()=>{
+    console.log("indepthAccessCondition",indepthAccessCondition);
+  getIndepthDisplayConditions();
+  },[indepthAccessCondition])
+
+/*04/02/2026 Indepth Condition access for who have permission end */
   const setWorkspace = (val) => {
     if (props.totalWorkspace > 0) {
       Swal.fire({
@@ -5608,6 +5640,7 @@ searchResult={searchResult}                  // ADD THIS LINE
                   selectedTradeCountry={selectedTradeCountry} // New prop for selectedTradeCountry
                   apiSerachpayload={apiSerachpayload}
                   setApiSearchPayload={setApiSearchPayload} // <-- pass setter
+                  indepthAccessCondition={indepthAccessCondition} //Indepth Conditions access 04/02/2026
 
                 />
               ) : (
@@ -5643,6 +5676,7 @@ searchResult={searchResult}                  // ADD THIS LINE
                   // countryRecords={countryRecords}
                   apiSerachpayload={apiSerachpayload}
                   setApiSearchPayload={setApiSearchPayload} // <-- pass setter
+                  indepthAccessCondition={indepthAccessCondition} //Indepth Conditions access 04/02/2026
                 />
               )) : noDataErrorMsg ? <div><h2>No records found</h2></div> : null}
           </div>
