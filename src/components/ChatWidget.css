@@ -41,3 +41,29 @@
   justify-content: center;
   cursor: pointer;
 } 
+
+
+/* ===== CLOSE BUTTON 05/02/2026===== */
+.chat-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10001;
+  background: #ff4d4f;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  font-size: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hover effect */
+.chat-close-btn:hover {
+  background: #d9363e;
+}

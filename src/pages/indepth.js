@@ -65,8 +65,17 @@ const Analysis = (props) => {
 const search_id = props.location.state ? props.location.state.search_id : null ;
 const importerForExport = props.location.state ? props.location.state.importerForExport : null ;
 const exporterForImport = props.location.state ? props.location.state.exporterForImport : null ;
-  const [active, setActive] = useState("indepth");
+const [active, setActive] = useState("indepth");
 
+ const isMinOneYear = (fromDate, toDate) => {
+ const start = new Date(fromDate);
+  const end = new Date(toDate);
+
+  const diffTime = end - start;
+  const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+  return diffDays >= 364;   // allow Jan1–Dec31
+};
 
 
 const fetchSearchQuery = () => {
@@ -80,7 +89,57 @@ const fetchSearchQuery = () => {
       params: { searchId: search_id }
     })
       .then(res => {
-       // console.log('fetchSearchQuery response:', res);
+
+        /* 05/02/2026 Indepth Access only allow if selected country Only 1 and min 1 Years date is selected */
+     const from = res.data.queryList[0].userSearchQuery.fromDate;
+const to = res.data.queryList[0].userSearchQuery.toDate;
+const countryLength = res.data.queryList[0].userSearchQuery.countryCode.length;
+
+// ❌ CONDITION 1: Less than 1 year → redirect
+//alert(isMinOneYear(from, to));
+if (!isMinOneYear(from, to)) {
+  alert("Not Allowed – Minimum 1 year difference required");
+
+  props.history.push({
+    pathname: "/list1",
+    state: {
+      search_id: search_id,
+      workspace_id: props.location?.state?.workspace_id || "",
+      workspace_name: props.location?.state?.workspace_name || "",
+      workspace_desc: props.location?.state?.workspace_desc || "",
+      workspaceId: props.location?.state?.workspaceId || "",
+      columnKeys: props.location?.state?.columnKeys || ""
+    }
+  });
+
+  return;
+}
+
+// ❌ CONDITION 2: More than 1 country → redirect
+if (countryLength > 1) {
+  alert("Not Allowed – Only 1 country allowed");
+
+  props.history.push({
+    pathname: "/list1",
+    state: {
+      search_id: search_id,
+      workspace_id: props.location?.state?.workspace_id || "",
+      workspace_name: props.location?.state?.workspace_name || "",
+      workspace_desc: props.location?.state?.workspace_desc || "",
+      workspaceId: props.location?.state?.workspaceId || "",
+      columnKeys: props.location?.state?.columnKeys || ""
+    }
+  });
+
+  return;
+}
+
+// ✅ CONDITION 3: year ≥1 AND country ===1 → continue here
+// ---- Your normal page flow ----
+console.log("Continue on same page");
+
+
+        /*05/02/2026 End */
         if (res.data.queryList) {
           let sParams = res.data.queryList[0].userSearchQuery;
           initialValues = {

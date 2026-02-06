@@ -136,7 +136,7 @@ useEffect(() => {
       // 3️⃣ AUTO-CLOSE after first init
       if (!autoInitDoneRef.current) {
         autoInitDoneRef.current = true;
-        setTimeout(() => setOpen(false), 700); // 🔥 CLOSE AFTER LOAD
+        setTimeout(() => setOpen(false), 100); // 🔥 CLOSE AFTER LOAD
       }
     };
 
@@ -151,6 +151,13 @@ useEffect(() => {
     <>
       {/* CHAT WINDOW (ALWAYS MOUNTED) */}
       <div className={`chat-window ${open ? "open" : "closed"}`}>
+
+          {open && (
+        <button className="chat-close-btn" onClick={() => setOpen(false)}>
+          ✖
+        </button>
+      )}
+      
         <iframe
           ref={iframeRef}
           className="chat-iframe"
