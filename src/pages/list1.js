@@ -389,7 +389,9 @@ let defaultCountry = []
 
 // --- country modal modification with count @sarbojitghosh22 3-5-2025 --- //
 const CountrySelector = ({ multiTradeCountryList, selectedTradeCountry, setFieldValue, values, setSelectedTradeCountry, setMaxMinDate,
-    searchResult
+    searchResult,
+    setIsSearchClicked // Add this prop 09/02/2026
+
  }) => {
 
   const [showModal, setShowModal] = useState(false);
@@ -410,6 +412,13 @@ const CountrySelector = ({ multiTradeCountryList, selectedTradeCountry, setField
     return acc;
   }, {});
 
+/*09/02/2026 */
+  // Add this useEffect in your List component
+useEffect(() => {
+  // Enable search button whenever selectedTradeCountry changes
+  setIsSearchClicked(false);
+}, [selectedTradeCountry]);
+
   // Synchronize tempSelectedCountries with selectedTradeCountry when it changes
   useEffect(() => {
     const selectedValues = selectedTradeCountry.map((country) => country.value);
@@ -429,7 +438,7 @@ const CountrySelector = ({ multiTradeCountryList, selectedTradeCountry, setField
     }
 
 // Check if this is a country change after first response
-  if (searchResult.length > 0) {
+ /* if (searchResult.length > 0) {
     // Show confirmation dialog before reloading
     const shouldReload = window.confirm(
       "Changing countries will reset your search results and reload the page. Do you want to continue?"
@@ -443,7 +452,7 @@ const CountrySelector = ({ multiTradeCountryList, selectedTradeCountry, setField
       // If user cancels, don't change the selection
       return;
     }
-  }
+  }  */
 
     // Update the state and form values
     setTempSelectedCountries(updatedTempSelectedCountries);
@@ -454,9 +463,9 @@ const CountrySelector = ({ multiTradeCountryList, selectedTradeCountry, setField
 
     setSelectedTradeCountry(updatedSelectedCountries);
     setFieldValue("countryCode", updatedTempSelectedCountries);
-    setFieldValue("fromDate", "");
-    setFieldValue("toDate", "");
-    setFieldValue("dateRange", "");
+    // setFieldValue("fromDate", "");
+    // setFieldValue("toDate", "");
+    // setFieldValue("dateRange", "");
     setMaxMinDate(updatedSelectedCountries, values.tradeType);
 
     // Update "Select All" checkbox state
@@ -464,6 +473,8 @@ const CountrySelector = ({ multiTradeCountryList, selectedTradeCountry, setField
 
     // Reset the count if manually checked/unchecked
     setCheckedCountryCount(null);
+
+    setIsSearchClicked(false); // Add this line 09/02/2026
   };
 
   const handleSelectAllChange = () => {
@@ -484,9 +495,9 @@ const CountrySelector = ({ multiTradeCountryList, selectedTradeCountry, setField
       const updatedSelectedCountries = multiTradeCountryList;
       setSelectedTradeCountry(updatedSelectedCountries);
       setFieldValue("countryCode", allCountryValues);
-      setFieldValue("fromDate", "");
-      setFieldValue("toDate", "");
-      setFieldValue("dateRange", "");
+      // setFieldValue("fromDate", "");
+      // setFieldValue("toDate", "");
+      // setFieldValue("dateRange", "");
       setMaxMinDate(updatedSelectedCountries, values.tradeType);
     }
 
@@ -494,6 +505,9 @@ const CountrySelector = ({ multiTradeCountryList, selectedTradeCountry, setField
 
     // Reset the count if manually checked/unchecked
     setCheckedCountryCount(null);
+
+    // ENABLE THE SEARCH BUTTON WHEN COUNTRY CHANGES
+  setIsSearchClicked(false); // Add this line 09/02/2026
   };
 
   const handleOpenModal = async () => {
@@ -2217,6 +2231,8 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
   useEffect(() => {
     if (apiSerachpayload && Object.keys(apiSerachpayload).length > 0) {
       // getSearchData(apiSerachpayload);
+
+      console.log("apiSerachpayload after any modfication",apiSerachpayload);
       getHSCodeList({ ...apiSerachpayload });
       getTotalCount({ ...apiSerachpayload }, searchId);
       getForeignCountryList({ ...apiSerachpayload });
@@ -2224,6 +2240,13 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
       getImporterList({ ...apiSerachpayload });
     }
   }, [apiSerachpayload]);
+
+    /*12/02/2026 Start this is use because after country change second time then country not updated*/
+    const payloadRef = useRef(apiSerachpayload);
+    useEffect(() => {
+      payloadRef.current = apiSerachpayload;
+    }, [apiSerachpayload]);
+  /*12/02/2026 End */
 
   // --- box counts update for all country filter in table @sarbojitghosh22 9/7/2025 --- //
 
@@ -2634,8 +2657,8 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
 
 
   const getTotalCount = (params, searchID) => {
-    params.countryCode = apiSerachpayload.countryCode;
-
+  // params.countryCode = apiSerachpayload.countryCode;
+     const latestCountry = payloadRef.current.countryCode; // 🔥 REAL LATEST 12/02/2026+
     isTotalRecordLoading(true)
     const postData = {
       "searchType": "TRADE",
@@ -2644,7 +2667,8 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
       "toDate": params.toDate,
       "searchBy": params.searchBy,
       "searchValue": params.searchValue,
-      "countryCode": params.countryCode,
+     // "countryCode": params.countryCode,
+     "countryCode": latestCountry,
       "pageNumber": page - 1,
       "numberOfRecords": limit,
       "searchId": searchID,
@@ -2756,8 +2780,8 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
   const getImporterList = (params) => {
 
    // console.log("getImporterList -> params", params);
-    params.countryCode = apiSerachpayload.countryCode;
-
+    //params.countryCode = apiSerachpayload.countryCode;
+const latestCountry = payloadRef.current.countryCode; // 🔥 REAL LATEST 12/02/2026
     isImporterLoading(true);
     const postData = {
       "searchType": "TRADE",
@@ -2766,7 +2790,8 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
       "toDate": params.toDate,
       "searchBy": params.searchBy,
       "searchValue": params.searchValue,
-      "countryCode": params.countryCode,
+      //"countryCode": params.countryCode,
+      "countryCode": latestCountry,
       "pageNumber": page - 1,
       "numberOfRecords": limit,
       "matchType": params.matchType,
@@ -2821,8 +2846,8 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
   }
 
   const getExporterList = (params) => {
-    params.countryCode = apiSerachpayload.countryCode;
-
+   // params.countryCode = apiSerachpayload.countryCode;
+ const latestCountry = payloadRef.current.countryCode; // 🔥 REAL LATEST 12/02/2026
     isExporterLoading(true);
     const postData = {
       "searchType": "TRADE",
@@ -2831,7 +2856,8 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
       "toDate": params.toDate,
       "searchBy": params.searchBy,
       "searchValue": params.searchValue,
-      "countryCode": params.countryCode,
+     // "countryCode": params.countryCode,
+     "countryCode": latestCountry,
       "pageNumber": page - 1,
       "numberOfRecords": limit,
       "matchType": params.matchType,
@@ -3016,8 +3042,11 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
   }
 
   const getHSCodeList = (params) => {
-    params.countryCode = apiSerachpayload.countryCode; // <-- Always use latest
 
+    console.log("params inside ",params.countryCode)
+   // params.countryCode = apiSerachpayload.countryCode; // <-- Always use latest
+   /*12/02/2026 */
+    const latestCountry = payloadRef.current.countryCode; // 🔥 REAL LATEST
     isHscodeLoading(true);
     const postData = {
       "searchType": "TRADE",
@@ -3026,7 +3055,8 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
       "toDate": moment(params.toDate).format("YYYY-MM-DD"),
       "searchBy": params.searchBy ? params.searchBy : "HS_CODE",
       "searchValue": params.searchValue ? params.searchValue : ["2"],
-      "countryCode": params.countryCode,
+     // "countryCode": params.countryCode,
+     "countryCode":latestCountry,
       "pageNumber": page - 1,
       "numberOfRecords": limit,
       "matchType": params.matchType ? params.matchType : "L",
@@ -3054,6 +3084,8 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
       "productDesc": params.productDesc,
       "conditionProductDesc": params.conditionProductDesc
     }
+
+    console.log("HS Code Paylload",postData , params.countryCode , apiSerachpayload.countryCode);
     Axios({
       method: "POST",
       url: `/search-management/listhscodes`,
@@ -3070,7 +3102,7 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
             hsList.push(specificItem);
           })
         }
-        console.log("HS CODE LIST", hsList);
+       // console.log("HS CODE LIST", hsList);
         setHsCodeDataList(hsList);
         isHscodeLoading(false);
       })
@@ -3149,8 +3181,8 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
 
 
   const getForeignCountryList = (params) => {
-    params.countryCode = apiSerachpayload.countryCode;
-
+  //  params.countryCode = apiSerachpayload.countryCode;
+const latestCountry = payloadRef.current.countryCode; // 🔥 REAL LATEST 12/02/2026
     isCoLoading(true);
     const postData = {
       "searchType": "TRADE",
@@ -3159,7 +3191,8 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
       "toDate": params.toDate,
       "searchBy": params.searchBy,
       "searchValue": params.searchValue,
-      "countryCode": params.countryCode,
+     // "countryCode": params.countryCode,
+     "countryCode": latestCountry,
       "pageNumber": page - 1,
       "numberOfRecords": limit,
       "matchType": params.matchType,
@@ -3250,6 +3283,8 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
       "productDesc": params.productDesc,
       "conditionProductDesc": params.conditionProductDesc
     }
+
+    console.log("API payload", postData)
     Axios({
       method: "POST",
       url: `/search-management/listindiancities`,
@@ -3386,7 +3421,7 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
             icList.push(specificItem);
           })
         }
-        console.log("STD UNIT LIST", icList);
+       // console.log("STD UNIT LIST", icList);
         setStdUnitDataList(icList);
       })
       .catch(err => {
@@ -4784,6 +4819,7 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
                             setMaxMinDate={setMaxMinDate}
                              hasSearchResults={hasSearchResults}  // ADD THIS LINE
 searchResult={searchResult}                  // ADD THIS LINE
+setIsSearchClicked={setIsSearchClicked} // Add this line  09/02/2026
                           />
 
 
