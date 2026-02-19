@@ -132,7 +132,6 @@ export default function DataTableExport(props) {
     const tableRef = useRef();
 
 
-
    
 
     const handleTableKeyDown = (e) => {
@@ -588,6 +587,36 @@ export default function DataTableExport(props) {
 
 
     // --- api search data for countries change  @sarbojitghosh22 30/6/2025 --- //
+
+/*START 19/02/2026 Scroll Reset after custome table column add  */
+    useEffect(() => {
+    requestAnimationFrame(() => {
+        if (!tableRef.current) return;
+
+        const root = tableRef.current.root;
+
+        const wheel = root.querySelector('.rs-table-body-wheel-area');
+        const header = root.querySelector('.rs-table-header-row-wrapper');
+
+        if (wheel) {
+            const scrollWidth = wheel.scrollWidth;
+            const clientWidth = wheel.clientWidth;
+            const maxScrollX = scrollWidth - clientWidth;
+
+            wheel.style.transform = `translate3d(-${maxScrollX}px, 0px, 0px)`;
+        }
+
+        if (header) {
+            const scrollWidth = header.scrollWidth;
+            const clientWidth = header.clientWidth;
+            const maxScrollX = scrollWidth - clientWidth;
+
+            header.style.transform = `translate3d(-${maxScrollX}px, 0px, 0px)`;
+        }
+    });
+
+}, [props.searchResult, columnKeys]);
+/*END 19/02/2026 Scroll Reset after custome table column add  */
 
 
     const [isCountrySelectorModalOpen, setIsCountrySelectorModalOpen] = useState(false);
