@@ -3,8 +3,12 @@ import axios from "axios";
 import "./ChatWidget.css";
 
 //for server
-const CHAT_ORIGIN = "http://88.198.61.70";
-const API_URL = "http://88.198.61.70/api";
+// const CHAT_ORIGIN = "http://88.198.61.70";
+// const API_URL = "http://88.198.61.70/api";
+
+const CHAT_ORIGIN = "https://chat.eximwatch.com";
+const API_URL = "https://chat.eximwatch.com/api";
+
 
 // for local
 // const CHAT_ORIGIN = "http://localhost:3002";
@@ -136,7 +140,7 @@ useEffect(() => {
       // 3️⃣ AUTO-CLOSE after first init
       if (!autoInitDoneRef.current) {
         autoInitDoneRef.current = true;
-        setTimeout(() => setOpen(false), 100); // 🔥 CLOSE AFTER LOAD
+        setTimeout(() => setOpen(false), 700); // 🔥 CLOSE AFTER LOAD
       }
     };
 
@@ -163,6 +167,22 @@ useEffect(() => {
           className="chat-iframe"
           src={`${CHAT_ORIGIN}/`}
           title="Chat"
+        
+
+           sandbox="
+    allow-scripts
+    allow-same-origin
+    allow-forms
+    allow-popups
+    allow-modals
+    allow-storage-access-by-user-activation
+    allow-top-navigation-by-user-activation
+  "
+  allow="
+    clipboard-write;
+    clipboard-read;
+    storage-access
+  "
         />
       </div>
 

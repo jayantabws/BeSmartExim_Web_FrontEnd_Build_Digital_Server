@@ -7,6 +7,20 @@ const searchBYList = { "HS_CODE": "HS Code", "PRODUCT": "Product", "IMPORTER": "
 
 const HistoryOrder = (props) => {
   const history = useHistory();
+
+  const safeValue = (value) => {
+    if (!value) return "-";
+    if (Array.isArray(value)) return value.join(", ");
+    if (typeof value === "object") return "-";
+    return value;
+  };
+
+  const formatDate = (date) => {
+    return moment(date, "YYYY-MM-DD", true).isValid()
+      ? moment(date).format("MMM. DD, YYYY")
+      : "-";
+  };
+
   return (
     <>
       <div className="market-order mt15">
@@ -25,31 +39,41 @@ const HistoryOrder = (props) => {
           </thead>
           <tbody>
           {console.log("search.userSearchQuery.searchBy === ", "test")}
-            {props.recentSearchList.map((search, index) => {
-              {console.log("search.userSearchQuery.searchBy === ", search.userSearchQuery.searchValue)}
-              return (
-                <tr key={index}>
-                  <td width="8%">{search.userSearchQuery.searchType}</td>
-                  {search.userSearchQuery.searchValue ? <td width={"10%"}>Search By: {searchBYList[search.userSearchQuery.searchBy]} <br />
-                    Search Value: {Object.values(search.userSearchQuery.searchValue).join(', ')}</td> : <td  width={"10%"}>&nbsp;</td>}
-                  <td width="8%">{search.userSearchQuery.tradeType}</td>
-                  <td width="8%">{search.userSearchQuery.countryCode}</td>
-                  <td width="15%">{moment(search.userSearchQuery.fromDate).format("MMM. DD, YYYY")} -
-                    {moment(search.userSearchQuery.toDate).format("MMM. DD, YYYY")}</td>
-                  <td width="10%">
-                    <button onClick={() => {
-                      history.push({
-                        pathname: '/list1',
-                        state: {
-                          search_id: search.searchId, search_type: "HISTORY"
-                        }
-                      })
-                    }} className="effect-btn btn btn-primary mt-2 mr-2 icon-lg"><i className="icon ion-md-search"></i></button>
-                  </td>
-                </tr>
-              )
-            })
-            }
+            {props.recentSearchList.map((search, index) => (
+            <tr key={index}>
+              <td width="8%">{safeValue(search?.userSearchQuery?.searchType)}</td>
+
+              <td width="10%">
+                Search By: {safeValue(searchBYList[search?.userSearchQuery?.searchBy])}
+                <br />
+                Search Value: {safeValue(search?.userSearchQuery?.searchValue)}
+              </td>
+
+              <td width="8%">{safeValue(search?.userSearchQuery?.tradeType)}</td>
+              <td width="8%">{safeValue(search?.userSearchQuery?.countryCode)}</td>
+
+              <td width="15%">
+                {formatDate(search?.userSearchQuery?.fromDate)} - {formatDate(search?.userSearchQuery?.toDate)}
+              </td>
+
+              <td width="10%">
+                <button
+                  onClick={() => {
+                    history.push({
+                      pathname: "/list1",
+                      state: {
+                        search_id: search.searchId,
+                        search_type: "HISTORY",
+                      },
+                    });
+                  }}
+                  className="effect-btn btn btn-primary mt-2 mr-2 icon-lg"
+                >
+                  <i className="icon ion-md-search"></i>
+                </button>
+              </td>
+            </tr>
+          ))}
 
           </tbody>
         </table>

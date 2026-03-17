@@ -40,6 +40,9 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+
+  font-size: 26px;
+    padding-top: 8px;
 } 
 
 
@@ -49,21 +52,25 @@
   top: 8px;
   right: 8px;
   z-index: 10001;
-  background: #ff4d4f;
-  color: white;
+  background: white;
+  color: rgb(13, 0, 0);
   border: none;
   border-radius: 50%;
   width: 26px;
   height: 26px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 17px;
 
   display: flex;
   align-items: center;
   justify-content: center;
-}
 
+  padding-top: 5px;
+}
 /* Hover effect */
 .chat-close-btn:hover {
   background: #d9363e;
 }
+
+
+
