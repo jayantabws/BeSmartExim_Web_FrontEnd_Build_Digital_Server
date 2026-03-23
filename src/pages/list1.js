@@ -2113,16 +2113,22 @@ const downloadXLS = (searchParams, dloadType, filteredArray) => {
     if ((loggedUser.uplineId > 0 && remainingDload_subUser > 0) || (loggedUser.uplineId == 0) || newValueArray.length === 0) {
       setShowDownloadLoader(false);
       // ${loggedUser.uplineId > 0 ? totalFilteredWeightage : totalNewWeightage}
+      // ${loggedUser.uplineId > 0 ? remainingDload_subUser : remainingDload}
       const pointsToDeduct = newValueArray.length === 0
   ? 0
   : (loggedUser.uplineId > 0 ? totalFilteredWeightage : totalNewWeightage);
+
+  const remainingDownloadDisplay = newValueArray.length === 0
+  ? (loggedUser.uplineId > 0 ? props.download_count_subUser : props.download_count)
+  : (loggedUser.uplineId > 0 ? remainingDload_subUser : remainingDload);
+
       Swal.fire({
         title: 'Download!',
         html: `
           Available Download <b>${loggedUser.uplineId > 0 ? props.download_count_subUser : props.download_count}</b>.<br>
           Total Records to Download <b>${filteredArray.length}</b>.<br>
           Total Points to deduct <b>${pointsToDeduct}</b>.<br>
-          Remaining Download <b>${loggedUser.uplineId > 0 ? remainingDload_subUser : remainingDload}</b>.<br>
+          Remaining Download <b>${remainingDownloadDisplay}</b>.<br>
           ${infoMsg ? `<span style='color:red;'>${infoMsg}</span>` : "Are you sure you want to Download?"}
         `,
         icon: newValueArray.length === 0 ? 'info' : 'warning',
