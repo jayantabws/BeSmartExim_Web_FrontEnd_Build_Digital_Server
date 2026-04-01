@@ -1409,7 +1409,10 @@ const exportToCSV = async () => {
           "hsCode4DigitList": hsCode4DigitList,
           "queryBuilder": searchParams.queryBuilder,
           "shipModeList": shipmentModeList,
-          "stdUnitList": stdUnitList
+          "stdUnitList": stdUnitList,
+            "productDesc": searchParams.productDesc ? searchParams.productDesc : [], /* 31/03/2026 */
+         "conditionProductDesc": searchParams.conditionProductDesc, /* 31/03/2026 */
+          
         };
 
         console.log("API Request payload:", postData);
