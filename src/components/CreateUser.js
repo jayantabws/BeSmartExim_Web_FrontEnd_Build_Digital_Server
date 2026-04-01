@@ -219,6 +219,7 @@ const CreateUsers = (props) => {
                             onChange={event => {
                               setFieldValue("company_name", event.target.value);
                             }}
+                              disabled={true} 
                           />
                           {touched.company_name && errors.company_name && (<p className="error">{errors.company_name}</p>)}
                         </div>

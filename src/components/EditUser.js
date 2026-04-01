@@ -183,6 +183,7 @@ console.log("Props ==== ", props)
                       onChange={event => {
                         setFieldValue("companyName", event.target.value);
                       }}
+                        disabled={true} 
                     />
                     {touched.companyName && errors.companyName && (<p className="error">{errors.companyName}</p>)}
                   </div> 
