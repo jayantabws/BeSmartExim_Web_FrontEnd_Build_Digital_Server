@@ -78,81 +78,93 @@ function Users(props) {
   };
 
   // 2) Paginated list API
-  const getPaginatedUserList = async (page = 0) => {
-    props.loadingStart();
+const getPaginatedUserList = async (page = 0) => {
+  props.loadingStart();
 
-    try {
-      const res = await AxiosUser({
-        method: "GET",
-        url: "user-management/user/listbyuplineid",
-        params: {
-          uplineId: userId,
-          pageNumber: page,
-          isDelete: "N",
-        },
-        headers: {
-          accessedBy: userId,
-        },
-      });
+  try {
+    const res = await AxiosUser({
+      method: "GET",
+      url: "user-management/user/listbyuplineid",
+      params: {
+        uplineId: userId,
+        pageNumber: page,
+        isDelete: "N",
+      },
+      headers: {
+        accessedBy: userId,
+      },
+    });
 
-      // adjust key if API returns another field name
-      const apiUsers =
-        res?.data?.userList ||
-        res?.data?.data ||
-        res?.data?.content ||
-        res?.data ||
-        [];
+    const apiUsers =
+      res?.data?.userList ||
+      res?.data?.data ||
+      res?.data?.content ||
+      res?.data ||
+      [];
 
-      let tempUserList = [];
+    let tempUserList = [];
 
-      // add logged-in user at first page only
-      if (page === 0 && loginUser) {
-        tempUserList.push(formatUser(loginUser, true));
-      }
-
-      apiUsers.forEach((user) => {
-        tempUserList.push(formatUser(user));
-      });
-
-      setUserListData(tempUserList);
-      setCurrentPage(page);
-    } catch (err) {
-      console.log("List API error:", err);
-      setUserListData([]);
-    } finally {
-      props.loadingStop();
+    if (page === 0 && loginUser) {
+      tempUserList.push(formatUser(loginUser, true));
     }
-  };
+
+    const loginId = loginUser?.userid || loginUser?.id;
+    const loginEmail = loginUser?.email;
+
+    const filteredUsers = apiUsers.filter((user) => {
+      return user.id !== loginId && user.email !== loginEmail;
+    });
+
+    filteredUsers.forEach((user) => {
+      tempUserList.push(formatUser(user));
+    });
+
+    setUserListData(tempUserList);
+    setCurrentPage(page);
+  } catch (err) {
+    console.log("List API error:", err);
+    setUserListData([]);
+  } finally {
+    props.loadingStop();
+  }
+};
 
   // 3) Full list for search
-  const getAllUsersForSearch = async () => {
-    try {
-      let tempUsers = [];
+const getAllUsersForSearch = async () => {
+  try {
+    let tempUsers = [];
 
-      if (loginUser) {
-        tempUsers.push(formatUser(loginUser, true));
-      }
-
-      const res = await AxiosUser({
-        method: "GET",
-        url: "user-management/user/list",
-        params: {
-          uplineId: userId,
-        },
-      });
-
-      const apiUsers = res?.data?.userList || [];
-
-      apiUsers.forEach((user) => {
-        tempUsers.push(formatUser(user));
-      });
-
-      setAllUsers(tempUsers);
-    } catch (err) {
-      console.log("Full list API error:", err);
-      setAllUsers([]);
+    if (loginUser) {
+      tempUsers.push(formatUser(loginUser, true));
     }
-  };
+
+    const res = await AxiosUser({
+      method: "GET",
+      url: "user-management/user/list",
+      params: {
+        uplineId: userId,
+      },
+    });
+
+    const apiUsers = res?.data?.userList || [];
+
+    const loginId = loginUser?.userid || loginUser?.id;
+    const loginEmail = loginUser?.email;
+
+    const filteredUsers = apiUsers.filter((user) => {
+      return user.id !== loginId && user.email !== loginEmail;
+    });
+
+    filteredUsers.forEach((user) => {
+      tempUsers.push(formatUser(user));
+    });
+
+    setAllUsers(tempUsers);
+  } catch (err) {
+    console.log("Full list API error:", err);
+    setAllUsers([]);
+  }
+};
 
   const loadInitialData = async () => {
     props.loadingStart();
