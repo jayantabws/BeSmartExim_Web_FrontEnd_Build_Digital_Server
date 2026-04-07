@@ -13,6 +13,8 @@ import { Modal } from 'react-bootstrap';
 import Loader from "../components/Loader"
 import axios from 'axios';
 
+import TermsModal from '../pages/TermsModal';
+
 const Header = (props) => {
 
   const history = useHistory();
@@ -25,11 +27,73 @@ const Header = (props) => {
   const userEmail = loggedUser.email;
   const userId_new = loggedUser.uplineId > 0 ? loggedUser.uplineId : loggedUser.userid
 
-const [session, setSession] = useState({
-        accessToken: null,
-        refreshToken: null,
-        userInfo: null,
-      });
+  const [session, setSession] = useState({
+          accessToken: null,
+          refreshToken: null,
+          userInfo: null,
+        });
+
+/* POP up Terms Start */
+
+// 1. Initialize userInfo directly from localStorage
+  const [userInfo, setUserInfo] = useState(() => {
+    const userData = localStorage.getItem("user");
+    return userData ? JSON.parse(userData) : null;
+  });
+
+  // 2. Initialize showTerms based on the userInfo status immediately
+  const [showTerms, setShowTerms] = useState(() => {
+    return userInfo?.termsAndConditions === 0;
+  });
+
+    /*If User is not agreed to terms and conditions */
+useEffect(() => {
+  const userData = localStorage.getItem("user");
+  const parsedUser = userData ? JSON.parse(userData) : null;
+
+  if (parsedUser?.termsAndConditions === 0) {
+    setShowTerms(true);
+  }
+}, [userInfo]); // Keep watching userInfo for changes when handleAgree fires
+
+const handleAgree = (isChecked) => {
+//console.log("User agreed:", isChecked);
+
+  if (isChecked) {
+        const userData = localStorage.getItem("user");
+        const user = userData ? JSON.parse(userData) : null;
+        const payloadData={"termsAndConditions":1}
+
+            AxiosUser({
+                  method: "PUT",
+                  url: `user-management/user/${userId}`,
+                  data: JSON.stringify(payloadData),
+                  headers: {
+                    "Content-Type": "application/json"
+                  }
+                })
+                .then(res => {
+                    // console.log("user", res.data);
+                    user.termsAndConditions = 1; // 👈 update here
+                    localStorage.setItem("user", JSON.stringify(user));
+
+                    setShowTerms(false);
+                    Swal.fire({
+                      title: 'Thank You',
+                      text: "Terms and Conditions updated is successful",
+                      icon: 'success',
+                    });
+                    
+            });
+           
+  }
+};
+
+const handleDisagree = () => {
+  logoutUser();
+};
+  /* POP up Terms end */
+
   useEffect(() => {
 
     let el = document.querySelector('#darkTheme');
@@ -216,8 +280,20 @@ const [session, setSession] = useState({
   }
 
 
+
+
+
+
   return (
     <>
+
+    <TermsModal
+  show={showTerms}
+  onAgree={handleAgree}
+  onDisagree={handleDisagree}
+/>
+
+
       <header className="light-bb">
         <Navbar expand="lg">
           <Link className="navbar-brand" to="/">

@@ -1,0 +1,11 @@
+/* If showTerms is true, we force the modal to be visible and functional */
+body.modal-open {
+    overflow: hidden !important;
+    padding-right: 0 !important;
+}
+
+/* Prevent the background from being interactive if the user hasn't agreed */
+.modal-backdrop.show {
+    opacity: 0.5 !important;
+    backdrop-filter: blur(4px); /* This is where the blur comes from */
+}
