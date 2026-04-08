@@ -263,6 +263,7 @@ const handleDisagree = () => {
       localStorage.removeItem("user");
       localStorage.removeItem("sessionID");
       sessionStorage.removeItem("userToken");
+      localStorage.removeItem("ipAddress");
       props.logoutUser();
       let user_Session = localStorage.getItem("user_Session") ? JSON.parse(localStorage.getItem("user_Session")) : {}
       LogoutSecondary(user_Session.refreshToken, user_Session.accessToken );

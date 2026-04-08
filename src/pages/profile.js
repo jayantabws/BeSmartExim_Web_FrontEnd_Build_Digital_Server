@@ -114,6 +114,8 @@ const Profile = (props) => {
       localStorage.removeItem("user");
       localStorage.removeItem("sessionID");
       sessionStorage.removeItem("userToken");
+
+      localStorage.removeItem("ipAddress");
       history.push("/login");
       })
       .catch(err => {

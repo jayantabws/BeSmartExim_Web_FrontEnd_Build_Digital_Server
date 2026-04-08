@@ -46,6 +46,8 @@ const LogoutUser = (props) => {
       localStorage.removeItem("user");
       localStorage.removeItem("sessionID");
       sessionStorage.removeItem("userToken");
+
+      localStorage.removeItem("ipAddress");
       props.push("/login");
       })
       .catch(err => {

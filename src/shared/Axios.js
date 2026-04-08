@@ -11,6 +11,7 @@ instance.interceptors.request.use(config => {
     config.headers['Access-Control-Allow-Origin'] = "*";
     config.headers['Access-Control-Allow-Headers'] = "Content-Type";
     config.headers['Authorization'] = 'Basic YXBpLWV4aW13YXRjaDp1ZTg0Q1JSZnRAWGhBMyRG';
+    config.headers['ipAddress'] = localStorage.getItem("ipAddress");
     return config;
 }, error => {
     return Promise.reject(error);

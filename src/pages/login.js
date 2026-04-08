@@ -74,7 +74,7 @@ const Login = (props) => {
           //   yourusername: res.data.email, 
           //   yourname: res.data.firstname + " " + res.data.lastname ,
           // });  
-
+         localStorage.setItem("ipAddress", ip);
          history.push("/dashboard");
 
         
@@ -105,6 +105,7 @@ const Login = (props) => {
   const getData = () => {
     const res = axios.get("https://api.ipify.org/?format=json").then(res => {
       setIp(res.data.ip);
+     
     });
 
   };
